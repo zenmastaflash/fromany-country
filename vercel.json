@@ -1,0 +1,16 @@
+{
+  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "env": {
+    "NEXTAUTH_URL": "https://fromany.country",
+    "POSTGRES_PRISMA_URL": "DATABASE_URL"
+  },
+  "build": {
+    "env": {
+      "NEXTAUTH_URL": "https://fromany.country"
+    }
+  }
+}

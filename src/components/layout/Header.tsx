@@ -1,10 +1,9 @@
 'use client';
-
-import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 export default function Header() {
-  const { data: session } = useSession();
+  const session = useSession();
 
   return (
     <header className="bg-white shadow-sm">
@@ -16,29 +15,12 @@ export default function Header() {
             </Link>
           </div>
           <div className="ml-10 space-x-4">
-            {session ? (
-              <>
-                <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">
-                  Dashboard
-                </Link>
-                <Link href="/travel" className="text-gray-500 hover:text-gray-900">
-                  Travel
-                </Link>
-                <button
-                  onClick={() => signOut()}
-                  className="inline-block rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white hover:bg-opacity-75"
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => signIn('google')}
-                className="inline-block rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white hover:bg-opacity-75"
-              >
-                Sign In
-              </button>
-            )}
+            <button
+              onClick={() => signIn('google')}
+              className="inline-block rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white hover:bg-opacity-75"
+            >
+              Sign In
+            </button>
           </div>
         </div>
       </nav>

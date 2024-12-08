@@ -1,9 +1,10 @@
+import NextAuth, { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { prisma } from '@/lib/prisma';
-import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
+import { prisma } from "@/lib/prisma";
 
-const handler = NextAuth({
+// Define NextAuth options
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -12,11 +13,14 @@ const handler = NextAuth({
     }),
   ],
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   pages: {
-    signIn: '/auth/signin',
+    signIn: "/auth/signin",
   },
-});
+};
+
+// Export NextAuth handler
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

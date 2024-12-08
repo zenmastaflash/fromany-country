@@ -1,12 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export default async function DashboardPage() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect('/api/auth/signin');
+    return null; // Prevent rendering if redirecting
   }
 
   return (
@@ -20,9 +22,15 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <p>Countries visited: <span className="font-semibold">0</span></p>
-              <p>Current location: <span className="font-semibold">Not set</span></p>
-              <p>Next destination: <span className="font-semibold">None planned</span></p>
+              <p>
+                Countries visited: <span className="font-semibold">0</span>
+              </p>
+              <p>
+                Current location: <span className="font-semibold">Not set</span>
+              </p>
+              <p>
+                Next destination: <span className="font-semibold">None planned</span>
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -33,9 +41,15 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <p>Tax residence: <span className="font-semibold">Not set</span></p>
-              <p>Days in current country: <span className="font-semibold">0</span></p>
-              <p>Tax year progress: <span className="font-semibold">0%</span></p>
+              <p>
+                Tax residence: <span className="font-semibold">Not set</span>
+              </p>
+              <p>
+                Days in current country: <span className="font-semibold">0</span>
+              </p>
+              <p>
+                Tax year progress: <span className="font-semibold">0%</span>
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -46,9 +60,15 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <p>Passport expiry: <span className="font-semibold">Not set</span></p>
-              <p>Active visas: <span className="font-semibold">0</span></p>
-              <p>Pending applications: <span className="font-semibold">0</span></p>
+              <p>
+                Passport expiry: <span className="font-semibold">Not set</span>
+              </p>
+              <p>
+                Active visas: <span className="font-semibold">0</span>
+              </p>
+              <p>
+                Pending applications: <span className="font-semibold">0</span>
+              </p>
             </div>
           </CardContent>
         </Card>

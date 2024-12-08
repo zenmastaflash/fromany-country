@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function Header() {
   const { data: session, status } = useSession();
 
-  // Handle the loading state
+  // Handle loading state to prevent pre-render errors
   if (status === 'loading') {
     return (
       <header className="bg-white shadow-sm">

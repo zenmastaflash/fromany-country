@@ -5,9 +5,8 @@ import Link from 'next/link';
 export default function Header() {
   const { data: session, status } = useSession();
 
-  // Handle loading state
   if (status === 'loading') {
-    return <div>Loading...</div>;
+    return null; // Avoid rendering during loading
   }
 
   return (

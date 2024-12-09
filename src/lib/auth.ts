@@ -1,7 +1,18 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter"; // Corrected import path
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -12,27 +23,25 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   session: {
-    strategy: "jwt", // JWT strategy is commonly used for serverless environments
+    strategy: "jwt",
   },
   pages: {
-    signIn: "/auth/signin", // Custom sign-in page
+    signIn: "/auth/signin",
   },
   callbacks: {
     async session({ session, token }) {
-      // Attach user ID to the session for easier access
       if (session.user) {
         session.user.id = token.sub!;
       }
       return session;
     },
     async jwt({ token, user }) {
-      // Include user ID in the token
       if (user) {
         token.sub = user.id;
       }
       return token;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET, // Ensure this is securely set
-  debug: process.env.NODE_ENV === "development", // Enable debug logs in development
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
 };

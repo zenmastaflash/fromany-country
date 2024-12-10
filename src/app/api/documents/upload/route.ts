@@ -22,9 +22,15 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const category = formData.get('category') as string;
+    const type = formData.get('type') as string;
+    const number = formData.get('number') as string;
+    const issueDate = formData.get('issueDate') as string;
+    const expiryDate = formData.get('expiryDate') as string;
+    const issuingCountry = formData.get('issuingCountry') as string;
+    const tagsString = formData.get('tags') as string;
+    const tags = JSON.parse(tagsString || '[]');
 
-    if (!file || !category) {
+    if (!file || !type || !number || !issueDate || !expiryDate || !issuingCountry) {
       return new NextResponse('Missing required fields', { status: 400 });
     }
 
@@ -33,7 +39,7 @@ export async function POST(request: Request) {
 
     // Upload to S3
     const key = `documents/${session.user.id}/${Date.now()}-${file.name}`;
-    console.log('Uploading to:', key); // Debug log
+    console.log('Uploading to:', key);
 
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
@@ -49,13 +55,23 @@ export async function POST(request: Request) {
     const document = await prisma.document.create({
       data: {
         userId: session.user.id,
-        type: category,
+        type: type as any, // Cast to DocumentType enum
+        number,
+        issueDate: new Date(issueDate),
+        expiryDate: new Date(expiryDate),
+        issuingCountry,
         fileName: file.name,
         fileUrl,
-        number: 'TBD',
-        issueDate: new Date(),
-        expiryDate: new Date(),
-        issuingCountry: 'TBD',
+        tags,
+        status: 'active',
+        version: 1,
+        sharedWith: [],
+        metadata: {
+          uploadedAt: new Date().toISOString(),
+          originalFileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+        },
       },
     });
 

@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { prisma } from '@/lib/prisma';
+import { authOptions } from '@/lib/auth';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'us-east-1',
@@ -12,7 +13,7 @@ const s3Client = new S3Client({
 });
 
 export async function POST(request: Request) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     return new NextResponse('Unauthorized', { status: 401 });
@@ -32,6 +33,8 @@ export async function POST(request: Request) {
 
     // Upload to S3
     const key = `documents/${session.user.id}/${Date.now()}-${file.name}`;
+    console.log('Uploading to:', key); // Debug log
+
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,

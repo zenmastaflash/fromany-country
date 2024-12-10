@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/Button';
 
 interface DocumentUploadProps {
   category: 'travel' | 'tax';
+  onSuccess?: () => void;
 }
 
-export default function DocumentUpload({ category }: DocumentUploadProps) {
+export default function DocumentUpload({ category, onSuccess }: DocumentUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [files, setFiles] = useState<FileList | null>(null);
 
@@ -34,6 +35,9 @@ export default function DocumentUpload({ category }: DocumentUploadProps) {
       setFiles(null);
       const form = e.target as HTMLFormElement;
       form.reset();
+      
+      // Call success callback if provided
+      onSuccess?.();
     } catch (error) {
       console.error('Upload error:', error);
     } finally {

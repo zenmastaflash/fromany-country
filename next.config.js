@@ -1,12 +1,62 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  // Reduce build size and improve performance
   swcMinify: true,
-  experimental: {
-    optimizeCss: true,
-    legacyBrowsers: false,
+  
+  // Optimize production builds
+  compiler: {
+    // Remove console logs in production
+    removeConsole: process.env.NODE_ENV === 'production',
   },
-  poweredByHeader: false,
+  
+  // Optimize image handling
+  images: {
+    domains: ['fromany-country-docs.s3.eu-north-1.amazonaws.com'],
+    formats: ['image/webp'],
+  },
+  
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Optimize CSS
+    if (!dev && !isServer) {
+      config.optimization.splitChunks.cacheGroups = {
+        ...config.optimization.splitChunks.cacheGroups,
+        styles: {
+          name: 'styles',
+          test: /\.(css|scss)$/,
+          chunks: 'all',
+          enforce: true,
+        },
+      };
+    }
+    
+    // Optimize module resolution
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+    };
+
+    return config;
+  },
+
+  // Enable static exports for specific pages
+  output: 'standalone',
+  
+  // Experimental features for performance
+  experimental: {
+    // Enable server actions
+    serverActions: true,
+    // Optimize page loading
+    optimizeCss: true,
+    // Enable modern JavaScript features
+    modern: true,
+  },
+  
+  // Environment variable configuration
+  env: {
+    NEXT_PUBLIC_AWS_REGION: process.env.AWS_REGION,
+  },
 }
 
 module.exports = nextConfig

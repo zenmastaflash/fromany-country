@@ -7,6 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum DocumentType {
+  PASSPORT
+  VISA
+  TAX_RETURN
+  DRIVERS_LICENSE
+  RESIDENCY_PERMIT
+  BANK_STATEMENT
+  INSURANCE
+  OTHER
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -61,16 +72,21 @@ model Travel {
 }
 
 model Document {
-  id          String   @id @default(cuid())
-  userId      String
-  type        String
-  number      String
-  issueDate   DateTime
-  expiryDate  DateTime
+  id             String       @id @default(cuid())
+  userId         String
+  type           DocumentType @default(OTHER)
+  status         String?      @default("active")
+  number         String
+  issueDate      DateTime
+  expiryDate     DateTime
   issuingCountry String
-  fileName    String?
-  fileUrl     String?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  fileName       String?
+  fileUrl        String?
+  metadata       Json?        // For flexible additional fields
+  tags           String[]     // For custom categorization
+  sharedWith     String[]     // User IDs for sharing
+  version        Int          @default(1)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }

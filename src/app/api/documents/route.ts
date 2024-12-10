@@ -1,75 +1,28 @@
-import { getServerSession } from 'next-auth/next';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
-  if (!session?.user?.email) {
+  if (!session?.user) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: { documents: true },
-  });
+  try {
+    const documents = await prisma.document.findMany({
+      where: {
+        userId: session.user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
 
-  return NextResponse.json(user?.documents || []);
-}
-
-export async function POST(request: NextRequest) {
-  const session = await getServerSession();
-
-  if (!session?.user?.email) {
-    return new NextResponse('Unauthorized', { status: 401 });
+    return NextResponse.json(documents);
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    return new NextResponse('Internal error', { status: 500 });
   }
-
-  const data = await request.json();
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
-
-  if (!user) {
-    return new NextResponse('User not found', { status: 404 });
-  }
-
-  const document = await prisma.document.create({
-    data: {
-      ...data,
-      userId: user.id,
-    },
-  });
-
-  return NextResponse.json(document);
-}
-
-export async function DELETE(request: NextRequest) {
-  const session = await getServerSession();
-
-  if (!session?.user?.email) {
-    return new NextResponse('Unauthorized', { status: 401 });
-  }
-
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
-
-  if (!id) {
-    return new NextResponse('Document ID required', { status: 400 });
-  }
-
-  const document = await prisma.document.findUnique({
-    where: { id },
-    include: { user: true },
-  });
-
-  if (!document || document.user.email !== session.user.email) {
-    return new NextResponse('Document not found', { status: 404 });
-  }
-
-  await prisma.document.delete({
-    where: { id },
-  });
-
-  return new NextResponse(null, { status: 204 });
 }

@@ -1,0 +1,12 @@
+-- CreateEnum
+CREATE TYPE "DocumentType" AS ENUM ('PASSPORT', 'VISA', 'TAX_RETURN', 'DRIVERS_LICENSE', 'RESIDENCY_PERMIT', 'BANK_STATEMENT', 'INSURANCE', 'OTHER');
+
+-- AlterTable
+ALTER TABLE "Document" 
+  DROP COLUMN "type",
+  ADD COLUMN "type" "DocumentType" NOT NULL DEFAULT 'OTHER',
+  ADD COLUMN "status" TEXT DEFAULT 'active',
+  ADD COLUMN "metadata" JSONB,
+  ADD COLUMN "tags" TEXT[],
+  ADD COLUMN "sharedWith" TEXT[],
+  ADD COLUMN "version" INTEGER NOT NULL DEFAULT 1;

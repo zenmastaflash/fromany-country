@@ -7,6 +7,6 @@ ALTER TABLE "Document"
   ADD COLUMN "type" "DocumentType" NOT NULL DEFAULT 'OTHER',
   ADD COLUMN "status" TEXT DEFAULT 'active',
   ADD COLUMN "metadata" JSONB,
-  ADD COLUMN "tags" TEXT[],
-  ADD COLUMN "sharedWith" TEXT[],
+  ADD COLUMN "tags" TEXT[] DEFAULT '{}',
+  ADD COLUMN "sharedWith" TEXT[] DEFAULT '{}',
   ADD COLUMN "version" INTEGER NOT NULL DEFAULT 1;

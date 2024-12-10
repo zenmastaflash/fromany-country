@@ -43,9 +43,7 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@unique([provider, providerAccountId])
 }
 
@@ -82,9 +80,9 @@ model Document {
   issuingCountry String
   fileName       String?
   fileUrl        String?
-  metadata       Json?        // For flexible additional fields
-  tags           String[]     // For custom categorization
-  sharedWith     String[]     // User IDs for sharing
+  metadata       Json?
+  tags           String[]
+  sharedWith     String[]
   version        Int          @default(1)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())

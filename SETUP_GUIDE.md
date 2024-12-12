@@ -79,6 +79,7 @@ This guide will walk you through setting up the fromany.country application from
    - Try removing node_modules and package-lock.json
    - Run `npm install` again
    - Clear Next.js cache with `rm -rf .next`
+   - Ensure build script has proper memory allocation
 
 ## Development Tools Recommendations
 
@@ -109,6 +110,11 @@ This guide will walk you through setting up the fromany.country application from
    - Go to your project in Vercel
    - Settings > Environment Variables
    - Add all variables from .env.local
+
+4. **Optimize Build Settings**
+   - In Vercel project settings under Build & Development:
+   - Set Build Command to: `node scripts/optimize-build.js`
+   - This ensures proper memory allocation and build optimization
 
 ## Need Help?
 

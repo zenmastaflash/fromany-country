@@ -40,13 +40,13 @@ const nextConfig = {
     return config;
   },
 
-  // Enable static exports for specific pages
-  output: 'standalone',
+  // Output configuration
+  output: process.env.VERCEL ? undefined : 'standalone',
   
   // Experimental features for performance
   experimental: {
     // Optimize page loading
-    optimizeCss: true
+    optimizeCss: true,
   },
   
   // Environment variable configuration

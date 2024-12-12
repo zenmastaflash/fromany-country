@@ -14,6 +14,9 @@ declare module "next-auth" {
   }
 }
 
+const productionUrl = process.env.NEXTAUTH_URL || 'https://fromany-country.vercel.app';
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -43,5 +46,6 @@ export const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: isDevelopment,
+  trustHost: true
 };

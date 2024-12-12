@@ -4,13 +4,14 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return new NextResponse('Unauthorized', { status: 401 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      console.error('Authentication error: No user ID in session', { session });
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const documents = await prisma.document.findMany({
       where: {
         userId: session.user.id
@@ -22,7 +23,10 @@ export async function GET() {
 
     return NextResponse.json(documents);
   } catch (error) {
-    console.error('Error fetching documents:', error);
-    return new NextResponse('Internal error', { status: 500 });
+    console.error('Error in documents route:', error);
+    return new NextResponse(
+      JSON.stringify({ error: 'Internal server error', details: error?.message }), 
+      { status: 500 }
+    );
   }
 }

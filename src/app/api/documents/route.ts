@@ -33,18 +33,18 @@ export async function GET() {
 
     return NextResponse.json(documents);
   } catch (error) {
-    console.error('Documents API Error:', {
-      name: error?.name,
-      message: error?.message,
-      stack: error?.stack,
-      error
-    });
+    const errorMessage = error instanceof Error ? {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    } : 'Unknown error';
+
+    console.error('Documents API Error:', errorMessage);
 
     return new NextResponse(
       JSON.stringify({
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        name: error?.name
+        details: errorMessage
       }),
       { status: 500 }
     );

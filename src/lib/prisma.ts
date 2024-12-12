@@ -9,14 +9,3 @@ export const prisma =
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-// Only register event listeners in development
-if (process.env.NODE_ENV !== 'production') {
-  prisma.$on('error' as any, (e: any) => {
-    console.error('Prisma Error:', e);
-  });
-
-  prisma.$on('warn' as any, (e: any) => {
-    console.warn('Prisma Warning:', e);
-  });
-}

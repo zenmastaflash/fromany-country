@@ -39,9 +39,6 @@ const nextConfig = {
 
     return config;
   },
-
-  // Output configuration
-  output: process.env.VERCEL ? undefined : 'standalone',
   
   // Experimental features for performance
   experimental: {

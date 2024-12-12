@@ -18,7 +18,11 @@ interface Document {
   createdAt: string;
 }
 
-function DocumentList({ onRefresh }: { onRefresh?: () => void }) {
+type DocumentListProps = {
+  refreshKey?: number;
+};
+
+function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,14 +50,7 @@ function DocumentList({ onRefresh }: { onRefresh?: () => void }) {
 
   useEffect(() => {
     fetchDocuments();
-  }, []);
-
-  // Allow parent components to trigger refresh
-  useEffect(() => {
-    if (onRefresh) {
-      fetchDocuments();
-    }
-  }, [onRefresh]);
+  }, [refreshKey]);
 
   const filteredDocuments = documents.filter(doc => {
     const matchesType = selectedType ? doc.type === selectedType : true;
@@ -184,10 +181,10 @@ function DocumentList({ onRefresh }: { onRefresh?: () => void }) {
 
 export default function DocumentsPage() {
   const [activeTab, setActiveTab] = useState<'library' | 'expiring'>('library');
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   
   const handleUploadSuccess = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -237,7 +234,7 @@ export default function DocumentsPage() {
                 <CardTitle>Document Library</CardTitle>
               </CardHeader>
               <CardContent>
-                <DocumentList onRefresh={refreshTrigger} />
+                <DocumentList refreshKey={refreshKey} />
               </CardContent>
             </Card>
           </div>

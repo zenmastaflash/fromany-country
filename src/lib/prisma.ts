@@ -5,24 +5,18 @@ const globalForPrisma = global as unknown as { prisma: PrismaClient };
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    log: ['query', 'info', 'warn', 'error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL?.replace(/\\@/g, '@')
-      }
-    }
+    log: ['error', 'warn'],
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
-prisma.$on('error', (e) => {
-  console.error('Prisma Error:', e);
-});
+// Only register event listeners in development
+if (process.env.NODE_ENV !== 'production') {
+  prisma.$on('error' as any, (e: any) => {
+    console.error('Prisma Error:', e);
+  });
 
-prisma.$on('warn', (e) => {
-  console.warn('Prisma Warning:', e);
-});
-
-prisma.$on('info', (e) => {
-  console.info('Prisma Info:', e);
-});
+  prisma.$on('warn' as any, (e: any) => {
+    console.warn('Prisma Warning:', e);
+  });
+}

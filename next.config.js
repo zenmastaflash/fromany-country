@@ -43,12 +43,10 @@ const nextConfig = {
   // Enable static exports for specific pages
   output: 'standalone',
   
-  // Environmental features for performance
+  // Experimental features for performance
   experimental: {
     // Optimize page loading
-    optimizeCss: true,
-    // Enable modern JavaScript features
-    modern: true,
+    optimizeCss: true
   },
   
   // Environment variable configuration

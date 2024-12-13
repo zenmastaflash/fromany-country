@@ -7,10 +7,13 @@ export async function GET() {
   try {
     console.log('Documents API: Starting request');
     const session = await getServerSession(authOptions);
-    console.log('Documents API: Session:', JSON.stringify({ 
+    
+    console.log('Documents API: Session:', {
+      hasSession: !!session,
+      hasUser: !!session?.user,
       userId: session?.user?.id,
-      email: session?.user?.email 
-    }));
+      email: session?.user?.email
+    });
 
     if (!session?.user?.id) {
       console.error('Documents API: No user ID in session');
@@ -19,6 +22,13 @@ export async function GET() {
         { status: 401 }
       );
     }
+
+    // Test database connection
+    await prisma.$connect();
+    console.log('Documents API: Database connected');
+
+    // Log the query we're about to make
+    console.log('Documents API: Querying documents for user:', session.user.id);
 
     const documents = await prisma.document.findMany({
       where: {
@@ -38,9 +48,20 @@ export async function GET() {
       stack: error instanceof Error ? error.stack : undefined
     });
 
+    // If it's a Prisma error, log additional details
+    if (error instanceof Error && error.constructor.name === 'PrismaClientKnownRequestError') {
+      console.error('Prisma Error Details:', error);
+    }
+
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Internal server error', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        type: error instanceof Error ? error.constructor.name : 'Unknown'
+      },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

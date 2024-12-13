@@ -1,12 +1,15 @@
 'use client';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import DocumentUpload from '@/components/documents/DocumentUpload';
 import DocumentList from '@/components/documents/DocumentList';
 import ExpirationDashboard from '@/components/documents/ExpirationDashboard';
 
 export default function DocumentsPage() {
-  const [activeTab, setActiveTab] = useState<'library' | 'expiring'>('library');
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get('tab') === 'expiring' ? 'expiring' : 'library';
+  const [activeTab, setActiveTab] = useState<'library' | 'expiring'>(defaultTab);
   const [refreshKey, setRefreshKey] = useState(0);
   
   const handleUploadSuccess = () => {

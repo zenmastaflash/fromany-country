@@ -9,8 +9,18 @@ export default function Header() {
   const pathname = usePathname();
 
   const navigation = [
-    { name: 'Documents', href: '/documents' },
-    { name: 'Expiring Soon', href: '/documents?tab=expiring' },
+    { name: 'Dashboard', href: '/dashboard' },
+    { 
+      name: 'Documents',
+      href: '/documents',
+      children: [
+        { name: 'Library', href: '/documents' },
+        { name: 'Expiring', href: '/documents?tab=expiring' },
+      ]
+    },
+    { name: 'Travel', href: '/travel' },
+    { name: 'Tax', href: '/tax' },
+    { name: 'Compliance', href: '/compliance' },
   ];
 
   return (
@@ -27,18 +37,48 @@ export default function Header() {
 
             {session && (
               <div className="flex space-x-4">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${pathname === item.href
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
+                {navigation.map((item) => {
+                  const isActive = 
+                    pathname === item.href ||
+                    (item.children?.some(child => {
+                      if (child.href.includes('?')) {
+                        const [basePath] = child.href.split('?');
+                        return pathname === basePath;
+                      }
+                      return pathname === child.href;
+                    }));
+
+                  return (
+                    <div key={item.name} className="relative group">
+                      <Link
+                        href={item.href}
+                        className={`px-3 py-2 rounded-md text-sm font-medium ${isActive
+                          ? 'bg-indigo-100 text-indigo-700'
+                          : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                      
+                      {item.children && (
+                        <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                          <div className="py-1" role="menu">
+                            {item.children.map((child) => (
+                              <Link
+                                key={child.name}
+                                href={child.href}
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                role="menuitem"
+                              >
+                                {child.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

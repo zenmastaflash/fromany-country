@@ -1,83 +1,71 @@
-import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
   },
 });
 
-export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user) {
-    return new NextResponse('Unauthorized', { status: 401 });
-  }
-
+export async function POST(req: Request) {
   try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const type = formData.get('type') as string;
-    const number = formData.get('number') as string;
-    const issueDate = formData.get('issueDate') as string;
-    const expiryDate = formData.get('expiryDate') as string;
-    const issuingCountry = formData.get('issuingCountry') as string;
-    const tagsString = formData.get('tags') as string;
-    const tags = JSON.parse(tagsString || '[]');
+    const session = await getServerSession(authOptions);
 
-    if (!file || !type || !number || !issueDate || !expiryDate || !issuingCountry) {
-      return new NextResponse('Missing required fields', { status: 400 });
+    if (!session?.user?.id) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401 }
+      );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const formData = await req.formData();
+    const file = formData.get('file') as File;
+
+    if (!file) {
+      return new NextResponse(
+        JSON.stringify({ error: 'No file provided' }),
+        { status: 400 }
+      );
+    }
+
+    // Generate a unique filename
+    const uniqueFilename = `${Date.now()}-${file.name}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
 
     // Upload to S3
-    const key = `documents/${session.user.id}/${Date.now()}-${file.name}`;
-    console.log('Uploading to:', key);
-
-    const command = new PutObjectCommand({
+    await s3.send(new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: key,
+      Key: uniqueFilename,
       Body: buffer,
       ContentType: file.type,
-    });
-
-    await s3Client.send(command);
-    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`;
+    }));
 
     // Create document record
     const document = await prisma.document.create({
       data: {
         userId: session.user.id,
-        type: type as any, // Cast to DocumentType enum
-        number,
-        issueDate: new Date(issueDate),
-        expiryDate: new Date(expiryDate),
-        issuingCountry,
         fileName: file.name,
-        fileUrl,
-        tags,
+        fileUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${uniqueFilename}`,
+        type: 'OTHER',
+        number: '',
+        issueDate: new Date(),
+        expiryDate: new Date(),
+        issuingCountry: '',
         status: 'active',
-        version: 1,
-        sharedWith: [],
-        metadata: {
-          uploadedAt: new Date().toISOString(),
-          originalFileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
-        },
       },
     });
 
-    return NextResponse.json({ success: true, document });
+    return NextResponse.json(document);
   } catch (error) {
-    console.error('Upload error:', error);
-    return new NextResponse('Internal error', { status: 500 });
+    console.error('Error uploading document:', error);
+    return new NextResponse(
+      JSON.stringify({ error: 'Failed to upload document' }),
+      { status: 500 }
+    );
   }
 }

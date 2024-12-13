@@ -22,15 +22,11 @@ async function optimizeBuild() {
     console.log('No previous build files to clean');
   }
 
-  // Run database migrations
-  console.log('🔄 Running database migrations...');
-  runCommand('npx prisma migrate deploy');
-
   // Generate Prisma client
   console.log('🔄 Generating Prisma client...');
   runCommand('npx prisma generate');
 
-  // Build the application with optimized settings
+  // Build the application
   console.log('🏗️ Building application...');
   process.env.NODE_OPTIONS = '--max_old_space_size=4096';
   runCommand('next build');

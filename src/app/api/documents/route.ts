@@ -8,50 +8,60 @@ export async function GET() {
     console.log('Documents API: Starting request');
     const session = await getServerSession(authOptions);
     
-    console.log('Documents API: Session:', {
+    // Log session info without sensitive data
+    console.log('Documents API: Session info:', {
       hasSession: !!session,
       hasUser: !!session?.user,
-      userId: session?.user?.id,
+      hasId: !!session?.user?.id,
       email: session?.user?.email
     });
 
     if (!session?.user?.id) {
-      console.error('Documents API: No user ID in session');
+      console.error('Documents API: Authentication failed - no user ID');
       return NextResponse.json(
         { error: 'Unauthorized', details: 'No valid session found' },
         { status: 401 }
       );
     }
 
-    // Test database connection
-    await prisma.$connect();
-    console.log('Documents API: Database connected');
+    // Verify database connection
+    try {
+      await prisma.$connect();
+      console.log('Documents API: Database connected successfully');
+    } catch (dbError) {
+      console.error('Documents API: Database connection failed:', {
+        error: dbError instanceof Error ? dbError.message : 'Unknown error',
+        type: dbError instanceof Error ? dbError.constructor.name : 'Unknown'
+      });
+      throw dbError;
+    }
 
-    // Log the query we're about to make
-    console.log('Documents API: Querying documents for user:', session.user.id);
+    // Query documents
+    try {
+      const documents = await prisma.document.findMany({
+        where: {
+          userId: session.user.id
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
 
-    const documents = await prisma.document.findMany({
-      where: {
-        userId: session.user.id
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    console.log(`Documents API: Found ${documents.length} documents`);
-    return NextResponse.json(documents);
+      console.log(`Documents API: Found ${documents.length} documents`);
+      return NextResponse.json(documents);
+    } catch (queryError) {
+      console.error('Documents API: Query failed:', {
+        error: queryError instanceof Error ? queryError.message : 'Unknown error',
+        type: queryError instanceof Error ? queryError.constructor.name : 'Unknown'
+      });
+      throw queryError;
+    }
   } catch (error) {
-    console.error('Documents API Error:', {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : 'Unknown error',
+    console.error('Documents API: Error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      type: error instanceof Error ? error.constructor.name : 'Unknown',
       stack: error instanceof Error ? error.stack : undefined
     });
-
-    // If it's a Prisma error, log additional details
-    if (error instanceof Error && error.constructor.name === 'PrismaClientKnownRequestError') {
-      console.error('Prisma Error Details:', error);
-    }
 
     return NextResponse.json(
       { 
@@ -62,6 +72,8 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
+    await prisma.$disconnect().catch(() => {
+      console.log('Documents API: Failed to disconnect from database');
+    });
   }
 }

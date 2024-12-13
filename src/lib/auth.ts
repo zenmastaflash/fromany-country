@@ -14,14 +14,13 @@ declare module "next-auth" {
   }
 }
 
-const productionUrl = process.env.NEXTAUTH_URL || 'https://fromany-country.vercel.app';
-const isDevelopment = process.env.NODE_ENV === 'development';
+const GOOGLE_CLIENT_ID = '126383503273-94i0fbb66oi80a4qavtjp6v3eo5jtsq9.apps.googleusercontent.com';
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientId: GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
   ],
@@ -47,5 +46,5 @@ export const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: isDevelopment
+  debug: process.env.NODE_ENV === 'development'
 };

@@ -1,9 +1,20 @@
 'use client';
 
-import { getProviders, signIn } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
 export default function SignIn() {
+  const handleSignIn = async () => {
+    try {
+      await signIn('google', { 
+        callbackUrl: '/documents',
+        redirect: true
+      });
+    } catch (error) {
+      console.error('Sign in error:', error);
+    }
+  };
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
@@ -14,7 +25,7 @@ export default function SignIn() {
           <CardContent>
             <div className="mt-2 grid gap-3">
               <button
-                onClick={() => signIn('google', { callbackUrl: '/documents' })}
+                onClick={handleSignIn}
                 className="group relative flex w-full justify-center items-center gap-3 rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 <svg

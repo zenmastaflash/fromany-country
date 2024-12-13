@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const s3 = new S3Client({
-  region: process.env.AWS_REGION || '',
+  region: process.env.AWS_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
@@ -13,29 +13,22 @@ const s3 = new S3Client({
 });
 
 export async function POST(req: Request) {
+  let session;
   try {
-    console.log('Upload API: Starting request');
-    const session = await getServerSession(authOptions);
-    
-    console.log('Upload API: Session:', JSON.stringify({
-      userId: session?.user?.id,
-      email: session?.user?.email
-    }));
+    session = await getServerSession(authOptions);
+    console.log('Upload session:', {
+      exists: !!session,
+      user: session?.user ? {
+        id: session.user.id,
+        email: session.user.email
+      } : null
+    });
 
     if (!session?.user?.id) {
-      console.error('Upload API: No user ID in session');
-      return NextResponse.json(
-        { error: 'Unauthorized', details: 'No valid session found' },
+      console.error('No user ID in session');
+      return new NextResponse(
+        JSON.stringify({ error: 'Unauthorized', details: 'Please sign in again' }),
         { status: 401 }
-      );
-    }
-
-    // Verify AWS configuration
-    if (!process.env.AWS_REGION || !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_BUCKET_NAME) {
-      console.error('Upload API: Missing AWS configuration');
-      return NextResponse.json(
-        { error: 'Server configuration error', details: 'AWS configuration missing' },
-        { status: 500 }
       );
     }
 
@@ -43,25 +36,25 @@ export async function POST(req: Request) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      console.error('Upload API: No file provided');
-      return NextResponse.json(
-        { error: 'Bad Request', details: 'No file provided' },
+      console.error('No file provided');
+      return new NextResponse(
+        JSON.stringify({ error: 'No file provided' }),
         { status: 400 }
       );
     }
 
-    console.log('Upload API: File details:', {
-      name: file.name,
-      type: file.type,
-      size: file.size
-    });
-
-    // Generate a unique filename
-    const uniqueFilename = `${Date.now()}-${file.name}`;
+    // Create user-specific folder path
+    const userFolder = `users/${session.user.id}`;
+    const uniqueFilename = `${userFolder}/${Date.now()}-${file.name}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Upload to S3
-    console.log('Upload API: Uploading to S3...');
+    // Upload to S3 in user's folder
+    console.log('Uploading to S3:', {
+      bucket: process.env.AWS_BUCKET_NAME,
+      key: uniqueFilename,
+      type: file.type
+    });
+
     await s3.send(new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: uniqueFilename,
@@ -69,10 +62,7 @@ export async function POST(req: Request) {
       ContentType: file.type,
     }));
 
-    console.log('Upload API: File uploaded to S3');
-
     // Create document record
-    console.log('Upload API: Creating database record');
     const document = await prisma.document.create({
       data: {
         userId: session.user.id,
@@ -87,17 +77,19 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log('Upload API: Document created:', document.id);
+    console.log('Document created:', document.id);
     return NextResponse.json(document);
   } catch (error) {
-    console.error('Upload API Error:', {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+    console.error('Error in upload route:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      session: session ? { id: session.user?.id, email: session.user?.email } : null
     });
 
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+    return new NextResponse(
+      JSON.stringify({ 
+        error: 'Upload failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
       { status: 500 }
     );
   }

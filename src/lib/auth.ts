@@ -14,13 +14,11 @@ declare module "next-auth" {
   }
 }
 
-const GOOGLE_CLIENT_ID = '126383503273-94i0fbb66oi80a4qavtjp6v3eo5jtsq9.apps.googleusercontent.com';
-
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
-      clientId: GOOGLE_CLIENT_ID,
+      clientId: process.env.GOOGLE_CLIENT_ID || '126383503273-94i0fbb66oi80a4qavtjp6v3eo5jtsq9.apps.googleusercontent.com',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
   ],
@@ -45,6 +43,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'HDq7Fb3uP9x4mK2vL8yN5wR1jT4kX9pZ',
   debug: process.env.NODE_ENV === 'development'
 };

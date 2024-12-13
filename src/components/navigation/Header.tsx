@@ -19,8 +19,7 @@ export default function Header() {
       ]
     },
     { name: 'Travel', href: '/travel' },
-    { name: 'Tax', href: '/tax' },
-    { name: 'Compliance', href: '/compliance' },
+    { name: 'Resources', href: '/resources' },
   ];
 
   return (

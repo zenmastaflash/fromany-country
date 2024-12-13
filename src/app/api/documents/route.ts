@@ -7,20 +7,19 @@ export async function GET() {
   try {
     console.log('Documents API: Starting request');
     const session = await getServerSession(authOptions);
-    console.log('Documents API: Session:', JSON.stringify(session, null, 2));
+    console.log('Documents API: Session:', JSON.stringify({ 
+      userId: session?.user?.id,
+      email: session?.user?.email 
+    }));
 
     if (!session?.user?.id) {
-      console.error('Documents API: Authentication error - No user ID in session');
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Unauthorized',
-          details: 'No valid session found'
-        }),
+      console.error('Documents API: No user ID in session');
+      return NextResponse.json(
+        { error: 'Unauthorized', details: 'No valid session found' },
         { status: 401 }
       );
     }
 
-    console.log('Documents API: Fetching documents for user:', session.user.id);
     const documents = await prisma.document.findMany({
       where: {
         userId: session.user.id
@@ -29,23 +28,18 @@ export async function GET() {
         createdAt: 'desc'
       }
     });
-    console.log('Documents API: Found documents:', documents.length);
 
+    console.log(`Documents API: Found ${documents.length} documents`);
     return NextResponse.json(documents);
   } catch (error) {
-    const errorMessage = error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    } : 'Unknown error';
+    console.error('Documents API Error:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
 
-    console.error('Documents API Error:', errorMessage);
-
-    return new NextResponse(
-      JSON.stringify({
-        error: 'Internal server error',
-        details: errorMessage
-      }),
+    return NextResponse.json(
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

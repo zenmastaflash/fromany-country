@@ -22,7 +22,11 @@ async function optimizeBuild() {
     console.log('No previous build files to clean');
   }
 
-  // Generate Prisma client only once
+  // Run database migrations
+  console.log('🔄 Running database migrations...');
+  runCommand('npx prisma migrate deploy');
+
+  // Generate Prisma client
   console.log('🔄 Generating Prisma client...');
   runCommand('npx prisma generate');
 

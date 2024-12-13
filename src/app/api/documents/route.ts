@@ -4,76 +4,49 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
+  let session;
   try {
-    console.log('Documents API: Starting request');
-    const session = await getServerSession(authOptions);
-    
-    // Log session info without sensitive data
-    console.log('Documents API: Session info:', {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      hasId: !!session?.user?.id,
-      email: session?.user?.email
+    session = await getServerSession(authOptions);
+    console.log('Session data:', {
+      exists: !!session,
+      user: session?.user ? {
+        id: session.user.id,
+        email: session.user.email
+      } : null
     });
 
     if (!session?.user?.id) {
-      console.error('Documents API: Authentication failed - no user ID');
-      return NextResponse.json(
-        { error: 'Unauthorized', details: 'No valid session found' },
+      console.error('No user ID in session');
+      return new NextResponse(
+        JSON.stringify({ error: 'Unauthorized', details: 'Please sign in again' }),
         { status: 401 }
       );
     }
 
-    // Verify database connection
-    try {
-      await prisma.$connect();
-      console.log('Documents API: Database connected successfully');
-    } catch (dbError) {
-      console.error('Documents API: Database connection failed:', {
-        error: dbError instanceof Error ? dbError.message : 'Unknown error',
-        type: dbError instanceof Error ? dbError.constructor.name : 'Unknown'
-      });
-      throw dbError;
-    }
-
-    // Query documents
-    try {
-      const documents = await prisma.document.findMany({
-        where: {
-          userId: session.user.id
-        },
-        orderBy: {
-          createdAt: 'desc'
-        }
-      });
-
-      console.log(`Documents API: Found ${documents.length} documents`);
-      return NextResponse.json(documents);
-    } catch (queryError) {
-      console.error('Documents API: Query failed:', {
-        error: queryError instanceof Error ? queryError.message : 'Unknown error',
-        type: queryError instanceof Error ? queryError.constructor.name : 'Unknown'
-      });
-      throw queryError;
-    }
-  } catch (error) {
-    console.error('Documents API: Error:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      type: error instanceof Error ? error.constructor.name : 'Unknown',
-      stack: error instanceof Error ? error.stack : undefined
+    const documents = await prisma.document.findMany({
+      where: {
+        userId: session.user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
-    return NextResponse.json(
-      { 
-        error: 'Internal server error', 
-        details: error instanceof Error ? error.message : 'Unknown error',
-        type: error instanceof Error ? error.constructor.name : 'Unknown'
-      },
+    console.log(`Found ${documents.length} documents for user ${session.user.id}`);
+    return NextResponse.json(documents);
+
+  } catch (error) {
+    console.error('Error in documents route:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      session: session ? { id: session.user?.id, email: session.user?.email } : null
+    });
+
+    return new NextResponse(
+      JSON.stringify({ 
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }),
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect().catch(() => {
-      console.log('Documents API: Failed to disconnect from database');
-    });
   }
 }

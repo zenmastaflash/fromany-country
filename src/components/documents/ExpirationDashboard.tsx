@@ -1,120 +1,107 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
-interface ExpiringDocument {
+type Document = {
   id: string;
   fileName: string;
   type: string;
   expiryDate: string;
-  expiryStatus: 'expired' | 'critical' | 'warning' | 'notice' | 'good';
-  daysUntilExpiry: number;
-}
-
-interface ExpirationSummary {
-  expired: number;
-  critical: number;
-  warning: number;
-  notice: number;
-}
+  status: string;
+};
 
 export default function ExpirationDashboard() {
-  const [documents, setDocuments] = useState<ExpiringDocument[]>([]);
-  const [summary, setSummary] = useState<ExpirationSummary>({
-    expired: 0,
-    critical: 0,
-    warning: 0,
-    notice: 0
-  });
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchExpiringDocuments = async () => {
+    const fetchDocuments = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
         const response = await fetch('/api/documents/expiring');
+        if (!response.ok) {
+          throw new Error('Failed to fetch expiring documents');
+        }
         const data = await response.json();
-        setDocuments(data.documents);
-        setSummary(data.summary);
+        setDocuments(data);
       } catch (error) {
         console.error('Error fetching expiring documents:', error);
+        setError('Failed to load expiring documents');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchExpiringDocuments();
+    fetchDocuments();
   }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'expired': return 'bg-red-100 text-red-800';
-      case 'critical': return 'bg-orange-100 text-orange-800';
-      case 'warning': return 'bg-yellow-100 text-yellow-800';
-      case 'notice': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-green-100 text-green-800';
-    }
+  const getExpirationStatus = (expiryDate: string) => {
+    const days = Math.ceil((new Date(expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    if (days < 0) return 'expired';
+    if (days <= 30) return 'expiring-soon';
+    return 'valid';
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-red-600">{summary.expired}</div>
-            <div className="text-sm text-gray-600">Expired Documents</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-orange-600">{summary.critical}</div>
-            <div className="text-sm text-gray-600">Expiring Soon (&lt;30 days)</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-yellow-600">{summary.warning}</div>
-            <div className="text-sm text-gray-600">Expiring (&lt;90 days)</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-blue-600">{summary.notice}</div>
-            <div className="text-sm text-gray-600">Expiring (&lt;180 days)</div>
-          </CardContent>
-        </Card>
-      </div>
+  const getStatusDetails = (expiryDate: string) => {
+    const days = Math.ceil((new Date(expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    if (days < 0) return { text: 'Expired', class: 'bg-red-100 text-red-800' };
+    if (days <= 30) return { text: `Expires in ${days} days`, class: 'bg-yellow-100 text-yellow-800' };
+    return { text: 'Valid', class: 'bg-green-100 text-green-800' };
+  };
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Expiring Documents</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <p>Loading expiring documents...</p>
-          ) : documents.length === 0 ? (
-            <p>No documents expiring soon.</p>
-          ) : (
-            <div className="space-y-4">
-              {documents.map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between border-b pb-2">
-                  <div>
-                    <h3 className="font-medium">{doc.fileName}</h3>
-                    <p className="text-sm text-gray-500">
-                      {doc.type} | Expires: {new Date(doc.expiryDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(doc.expiryStatus)}`}>
-                    {doc.daysUntilExpiry < 0 
-                      ? 'Expired'
-                      : `${doc.daysUntilExpiry} days left`}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-600 text-center py-8">
+        {error}
+      </div>
+    );
+  }
+
+  if (documents.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No documents are expiring soon.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {documents.map((doc) => {
+        const status = getStatusDetails(doc.expiryDate);
+        return (
+          <Card key={doc.id}>
+            <CardHeader>
+              <CardTitle className="text-lg">{doc.fileName}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500">
+                  Type: {doc.type.replace('_', ' ')}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Expires: {new Date(doc.expiryDate).toLocaleDateString()}
+                </p>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status.class}`}
+                >
+                  {status.text}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

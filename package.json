@@ -7,7 +7,7 @@
     "build": "node scripts/optimize-build.js",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate && prisma migrate deploy"
+    "postinstall": "node scripts/prepare-db.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",

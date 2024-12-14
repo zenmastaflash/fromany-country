@@ -8,30 +8,14 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
       authorization: {
         params: {
-          prompt: "select_account",
+          access_type: 'offline',
+          prompt: 'consent'
         }
       }
     })
   ],
-  session: {
-    strategy: 'jwt'
-  },
-  callbacks: {
-    async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith('/')) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
-    },
-    async session({ session, user }) {
-      return session
-    },
-    async signIn({ user, account, profile }) {
-      return true
-    }
-  },
-  debug: true
+  session: { strategy: 'jwt' },
+  secret: process.env.NEXTAUTH_SECRET
 })
 
 export const GET = handler

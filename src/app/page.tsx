@@ -1,17 +1,12 @@
 'use client'
 
-import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
-  const handleSignIn = async () => {
-    try {
-      await signIn('google', {
-        callbackUrl: '/documents',
-        redirect: true
-      })
-    } catch (error) {
-      console.error('Sign in error:', error)
-    }
+  const router = useRouter()
+
+  const handleSignIn = () => {
+    router.push('/api/auth/signin')
   }
 
   return (

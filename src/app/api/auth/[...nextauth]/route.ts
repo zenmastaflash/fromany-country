@@ -1,6 +1,8 @@
 import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 
+export const runtime = 'nodejs'
+
 const handler = NextAuth({
   providers: [
     GoogleProvider({
@@ -8,15 +10,14 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
       authorization: {
         params: {
-          access_type: 'offline',
-          prompt: 'consent'
+          prompt: "select_account"
         }
       }
     })
   ],
-  session: { strategy: 'jwt' },
-  secret: process.env.NEXTAUTH_SECRET
+  pages: {
+    signIn: '/auth/signin'
+  }
 })
 
-export const GET = handler
-export const POST = handler
+export { handler as GET, handler as POST }

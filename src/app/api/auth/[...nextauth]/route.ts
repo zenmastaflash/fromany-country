@@ -1,14 +1,11 @@
 import NextAuth from 'next-auth';
-import Google from 'next-auth/providers/google';
-
-export const runtime = 'nodejs';
+import GoogleProvider from 'next-auth/providers/google';
 
 const handler = NextAuth({
-  providers: [Google({
+  providers: [GoogleProvider({
     clientId: process.env.GOOGLE_CLIENT_ID ?? '',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? ''
-  })],
-  secret: process.env.NEXTAUTH_SECRET
+  })]
 });
 
 export const { GET, POST } = handler;

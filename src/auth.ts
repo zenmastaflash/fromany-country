@@ -1,8 +1,8 @@
 import NextAuth from 'next-auth';
-import Google from 'next-auth/providers/google';
 import type { NextAuthConfig } from 'next-auth';
+import Google from 'next-auth/providers/google';
 
-export const config = {
+const config = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -10,23 +10,20 @@ export const config = {
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+      if (isOnDashboard) {
+        if (isLoggedIn) return true;
+        return false; // Redirect unauthenticated users to login page
+      } else if (isLoggedIn) {
+        return Response.redirect(new URL('/dashboard', nextUrl));
       }
-      return token;
-    },
-    session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id;
-      }
-      return session;
+      return true;
     },
   },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error'
-  }
 } satisfies NextAuthConfig;
 
-export const { handlers, auth, signIn, signOut } = NextAuth(config);
+export const { auth, signIn, signOut, handlers } = NextAuth(config);
+
+export type AuthClient = typeof auth;

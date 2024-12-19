@@ -1,21 +1,21 @@
 import './globals.css';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({ subsets: ['latin'] });
+import { Providers } from '@/components/providers';
 
 export const metadata = {
-  title: 'fromany.country',
-  description: 'Document management for digital nomads',
+  title: 'fromany.country - Your Global Life, Simplified',
+  description: 'Manage your digital nomad lifestyle with ease'
 };
 
 export default function RootLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

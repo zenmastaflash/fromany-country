@@ -1,22 +1,44 @@
-import type { NextAuthConfig } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import prisma from './prisma';
 
-export const authConfig = {
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? ''
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: 'select_account',
+          access_type: 'offline',
+          response_type: 'code'
+        }
+      }
     })
   ],
-  session: { strategy: 'jwt' },
+  callbacks: {
+    async session({ session, token, user }) {
+      if (session?.user) {
+        session.user.id = token.sub || user.id;
+      }
+      return session;
+    },
+    async signIn({ account, profile }) {
+      if (!profile?.email) {
+        throw new Error('No email found in profile');
+      }
+      return true;
+    }
+  },
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/error'
+    error: '/auth/error',
+    signOut: '/auth/signout'
   },
-  callbacks: {
-    async session({ session, token }) {
-      session.user.id = token.sub;
-      return session;
-    }
-  }
-} satisfies NextAuthConfig;
+  session: {
+    strategy: 'jwt'
+  },
+  debug: process.env.NODE_ENV === 'development'
+};

@@ -11,34 +11,18 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          prompt: 'select_account',
-          access_type: 'offline',
-          response_type: 'code'
+          prompt: 'select_account'
         }
       }
     })
   ],
+  session: { strategy: 'jwt' },
   callbacks: {
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       if (session?.user) {
-        session.user.id = token.sub || user.id;
+        session.user.id = token.sub;
       }
       return session;
-    },
-    async signIn({ account, profile }) {
-      if (!profile?.email) {
-        throw new Error('No email found in profile');
-      }
-      return true;
     }
-  },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error',
-    signOut: '/auth/signout'
-  },
-  session: {
-    strategy: 'jwt'
-  },
-  debug: process.env.NODE_ENV === 'development'
+  }
 };

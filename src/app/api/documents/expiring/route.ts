@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authConfig } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { Document } from '@prisma/client';
+import type { Document } from '@prisma/client';
 
-export async function GET(): Promise<NextResponse<{ documents: Document[] } | { error: string }>> {
+type ResponseData = {
+  documents?: Document[];
+  error?: string;
+}
+
+export async function GET() {
   try {
-    const session = await getServerSession(authConfig);
-    const userId = session?.user?.id;
-
-    if (!userId) {
-      return NextResponse.json(
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      return NextResponse.json<ResponseData>(
         { error: 'Unauthorized' },
         { status: 401 }
       );
@@ -21,7 +24,7 @@ export async function GET(): Promise<NextResponse<{ documents: Document[] } | { 
 
     const documents = await prisma.document.findMany({
       where: {
-        userId: Number(userId),
+        userId: Number(session.user.id),
         expiryDate: {
           lte: thirtyDaysFromNow,
           gte: new Date(),
@@ -37,9 +40,9 @@ export async function GET(): Promise<NextResponse<{ documents: Document[] } | { 
       },
     });
 
-    return NextResponse.json({ documents });
+    return NextResponse.json<ResponseData>({ documents });
   } catch (error) {
     console.error('Error fetching expiring documents:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json<ResponseData>({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -21,6 +21,7 @@ model Document {
   userId     Int
   expiryDate DateTime
   title      String
+  status     String   @default("active")
   user       User     @relation(fields: [userId], references: [id])
 }
 

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   let session;
   try {
-    session = await getServerSession(authOptions);
+    session = await auth();
     console.log('Session data:', {
       exists: !!session,
       user: session?.user ? {

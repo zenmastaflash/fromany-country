@@ -14,11 +14,11 @@ export const authConfig = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-      callbackUrl: process.env.NEXTAUTH_URL,  // Add this line
       authorization: {
         params: {
           access_type: "offline",
           response_type: "code",
+          prompt: "consent",
         },
       },
     }),
@@ -37,9 +37,8 @@ export const authConfig = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
-  },
+  }
 }
 
-// Restore these lines if your code references 'auth' or 'config'
 export const auth = NextAuth(authConfig)
 export { authConfig as config }

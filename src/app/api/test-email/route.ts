@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { config as authOptions } from '@/lib/auth';
+import { config as authConfig } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { sendExpirationNotification } from '@/lib/email';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authConfig);
 
   if (!session?.user?.email) {
     return NextResponse.json(

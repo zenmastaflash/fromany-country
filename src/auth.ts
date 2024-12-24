@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
-import type { SessionStrategy } from 'next-auth';
+import type { SessionStrategy, Session, JWT } from 'next-auth';
 
 export const authConfig = {
   providers: [
@@ -23,7 +23,7 @@ export const authConfig = {
     error: '/auth/error'
   },
   callbacks: {
-    session({ session, token }) {
+    session({ session, token }: { session: Session; token: JWT }) {
       if (session?.user) {
         session.user.id = token.sub ? parseInt(token.sub, 10) : 0;
       }

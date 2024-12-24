@@ -29,29 +29,33 @@ export const authConfig: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log("SignIn Callback:", { user, account, profile });
-      return true;
-    },
-    session({ session, token }: { session: Session; token: JWT }) {
-      if (session?.user) {
-        session.user.id = Number(token.sub)
+      try {
+        console.log("SignIn Callback:", { user, account, profile });
+        return true;
+      } catch (error) {
+        console.error("SignIn Error:", error);
+        return false;
       }
-      return session
+    },
+    async session({ session, token }: { session: Session; token: JWT }) {
+      try {
+        if (session?.user) {
+          session.user.id = Number(token.sub)
+        }
+        return session
+      } catch (error) {
+        console.error("Session Error:", error);
+        return session;
+      }
     },
   },
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
   },
-  logger: {
-    error(code, metadata) {
-      console.error(code, metadata);
-    },
-    warn(code) {
-      console.warn(code);
-    },
-    debug(code, metadata) {
-      console.debug(code, metadata);
+  events: {
+    async error(error) {
+      console.error("Auth Error Event:", error);
     },
   },
 }

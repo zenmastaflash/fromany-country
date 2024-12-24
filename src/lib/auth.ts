@@ -8,10 +8,13 @@ import type { JWT } from "next-auth/jwt"
 
 export const authConfig = {
   adapter: PrismaAdapter(prisma),
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      callbackUrl: process.env.NEXTAUTH_URL,  // Add this line
       authorization: {
         params: {
           access_type: "offline",

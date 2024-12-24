@@ -1,8 +1,11 @@
 import NextAuth from 'next-auth'
 import Google from 'next-auth/providers/google'
 import type { SessionStrategy } from 'next-auth'
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import { prisma } from "@/lib/prisma"
 
 export const authConfig = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',

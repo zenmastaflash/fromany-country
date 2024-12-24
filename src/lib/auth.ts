@@ -1,33 +1,16 @@
-import NextAuth from 'next-auth'
-import Google from 'next-auth/providers/google'
+import { getServerSession } from 'next-auth';
+import { authConfig } from './auth.config';
 
-export const authConfig = {
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-      authorization: {
-        params: {
-          access_type: "offline",
-          response_type: "code"
-        }
-      }
-    })
-  ],
-  session: { strategy: 'jwt' },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error'
-  },
-  callbacks: {
-    session({ session, token }) {
-      if (session?.user) {
-        session.user.id = Number(token.sub)
-      }
-      return session
-    }
-  }
-}
+export const auth = () => getServerSession(authConfig);
 
-export const { auth, handlers: { GET, POST }, signIn, signOut } = NextAuth(authConfig)
-export { authConfig as config }
+export type AuthUser = {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+};
+
+export type Session = {
+  user: AuthUser;
+  expires: string;
+};

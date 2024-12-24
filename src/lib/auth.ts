@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth'
 import Google from 'next-auth/providers/google'
+import type { SessionStrategy } from 'next-auth'
 
 export const authConfig = {
   providers: [
@@ -14,7 +15,9 @@ export const authConfig = {
       }
     })
   ],
-  session: { strategy: 'jwt' },
+  session: { 
+    strategy: 'jwt' as SessionStrategy 
+  },
   pages: {
     signIn: '/auth/signin',
     error: '/auth/error'

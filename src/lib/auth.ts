@@ -53,11 +53,6 @@ export const authConfig: NextAuthOptions = {
     signIn: "/auth/signin",
     error: "/auth/error",
   },
-  events: {
-    async error(error) {
-      console.error("Auth Error Event:", error);
-    },
-  },
 }
 
 export const auth = NextAuth(authConfig)

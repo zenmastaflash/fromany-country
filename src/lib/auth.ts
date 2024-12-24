@@ -40,9 +40,9 @@ export const authConfig: NextAuthOptions = {
     async session({ session, token }: { session: Session; token: JWT }) {
       try {
         if (session?.user) {
-          session.user.id = Number(token.sub)
+          session.user.id = token.sub as string;
         }
-        return session
+        return session;
       } catch (error) {
         console.error("Session Error:", error);
         return session;

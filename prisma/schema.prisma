@@ -8,21 +8,41 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Define your Prisma models here
+enum DocumentType {
+  PASSPORT
+  VISA
+  TAX_RETURN
+  DRIVERS_LICENSE
+  RESIDENCY_PERMIT
+  BANK_STATEMENT
+  INSURANCE
+  OTHER
+}
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
+  name      String?
   documents Document[]
 }
 
 model Document {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  expiryDate DateTime
-  title      String
-  status     String   @default("active")
-  user       User     @relation(fields: [userId], references: [id])
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  type           DocumentType @default(OTHER)
+  status         String       @default("active")
+  title          String       // Already exists in your schema
+  number         String?      // Making optional since it wasn't in original
+  issueDate      DateTime?    // Making optional since it wasn't in original
+  expiryDate     DateTime
+  issuingCountry String?      // Making optional since it wasn't in original
+  fileName       String?
+  fileUrl        String?
+  metadata       Json?
+  tags           String[]     @default([])
+  sharedWith     String[]     @default([])
+  version        Int          @default(1)
+  user           User         @relation(fields: [userId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
-
-// ...existing code...

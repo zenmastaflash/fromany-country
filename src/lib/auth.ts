@@ -3,10 +3,11 @@ import NextAuth from "next-auth"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import GoogleProvider from "next-auth/providers/google"
+import type { NextAuthOptions } from "next-auth"
 import type { Session, SessionStrategy } from "next-auth"
 import type { JWT } from "next-auth/jwt"
 
-export const authConfig = {
+export const authConfig: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
   debug: true,
@@ -27,8 +28,8 @@ export const authConfig = {
     strategy: "jwt" as SessionStrategy,
   },
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      console.log("SignIn Callback:", { user, account, profile, email });
+    async signIn({ user, account, profile }) {
+      console.log("SignIn Callback:", { user, account, profile });
       return true;
     },
     session({ session, token }: { session: Session; token: JWT }) {
@@ -43,14 +44,14 @@ export const authConfig = {
     error: "/auth/error",
   },
   logger: {
-    error: (code, metadata) => {
-      console.error('Auth Error:', code, metadata);
+    error(code, metadata) {
+      console.error(code, metadata);
     },
-    warn: (code) => {
-      console.warn('Auth Warning:', code);
+    warn(code) {
+      console.warn(code);
     },
-    debug: (code, metadata) => {
-      console.debug('Auth Debug:', code, metadata);
+    debug(code, metadata) {
+      console.debug(code, metadata);
     },
   },
 }

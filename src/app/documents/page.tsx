@@ -7,6 +7,8 @@ import DocumentUpload from '@/components/documents/DocumentUpload';
 import DocumentList from '@/components/documents/DocumentList';
 import ExpirationDashboard from '@/components/documents/ExpirationDashboard';
 
+export const dynamic = "force-dynamic"
+
 export default function DocumentsPage() {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('tab') === 'expiring' ? 'expiring' : 'library';

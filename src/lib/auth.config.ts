@@ -1,6 +1,4 @@
-import GoogleProvider from 'next-auth/providers/google';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import { prisma } from './prisma';
+import type { Session, User } from 'next-auth';
 
 export const authConfig = {
   adapter: PrismaAdapter(prisma),
@@ -11,7 +9,7 @@ export const authConfig = {
     })
   ],
   callbacks: {
-    session: ({ session, user }) => ({
+    session: ({ session, user }: { session: Session; user: User }) => ({
       ...session,
       user: {
         ...session.user,

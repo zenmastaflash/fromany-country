@@ -31,11 +31,11 @@ model Document {
   userId         Int
   type           DocumentType @default(OTHER)
   status         String       @default("active")
-  title          String       // Already exists in your schema
-  number         String?      // Making optional since it wasn't in original
-  issueDate      DateTime?    // Making optional since it wasn't in original
+  title          String
+  number         String?
+  issueDate      DateTime?
   expiryDate     DateTime
-  issuingCountry String?      // Making optional since it wasn't in original
+  issuingCountry String?
   fileName       String?
   fileUrl        String?
   metadata       Json?

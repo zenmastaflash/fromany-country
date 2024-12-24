@@ -2,9 +2,12 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(request) {
   let session;
   try {
+    const { searchParams } = new URL(request.url);
+    const myParam = searchParams.get("myParam");
+
     session = await auth();
     console.log('Session data:', {
       exists: !!session,

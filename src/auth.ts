@@ -12,7 +12,8 @@ export const authConfig = {
           access_type: "offline",
           response_type: "code"
         }
-      })
+      }
+    })
   ],
   session: { 
     strategy: 'jwt' as SessionStrategy 

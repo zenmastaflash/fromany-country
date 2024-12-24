@@ -16,9 +16,9 @@ export const authConfig = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
       authorization: {
         params: {
+          prompt: "consent",
           access_type: "offline",
           response_type: "code",
-          prompt: "consent",
         },
       },
     }),
@@ -27,6 +27,10 @@ export const authConfig = {
     strategy: "jwt" as SessionStrategy,
   },
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      console.log("SignIn Callback:", { user, account, profile, email });
+      return true;
+    },
     session({ session, token }: { session: Session; token: JWT }) {
       if (session?.user) {
         session.user.id = Number(token.sub)
@@ -37,7 +41,18 @@ export const authConfig = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
-  }
+  },
+  logger: {
+    error: (code, metadata) => {
+      console.error('Auth Error:', code, metadata);
+    },
+    warn: (code) => {
+      console.warn('Auth Warning:', code);
+    },
+    debug: (code, metadata) => {
+      console.debug('Auth Debug:', code, metadata);
+    },
+  },
 }
 
 export const auth = NextAuth(authConfig)

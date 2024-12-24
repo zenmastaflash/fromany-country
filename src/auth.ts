@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
-import type { SessionStrategy, Session, JWT } from 'next-auth';
+import type { SessionStrategy, Session } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
 
 export const authConfig = {
   providers: [

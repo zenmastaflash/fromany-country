@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react'; // Import Suspense
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -7,14 +8,14 @@ import DocumentUpload from '@/components/documents/DocumentUpload';
 import DocumentList from '@/components/documents/DocumentList';
 import ExpirationDashboard from '@/components/documents/ExpirationDashboard';
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
-export default function DocumentsPage() {
+function DocumentsContent() {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('tab') === 'expiring' ? 'expiring' : 'library';
   const [activeTab, setActiveTab] = useState<'library' | 'expiring'>(defaultTab);
   const [refreshKey, setRefreshKey] = useState(0);
-  
+
   const handleUploadSuccess = () => {
     setRefreshKey(prev => prev + 1);
   };
@@ -75,5 +76,13 @@ export default function DocumentsPage() {
         <ExpirationDashboard />
       )}
     </main>
+  );
+}
+
+export default function DocumentsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DocumentsContent />
+    </Suspense>
   );
 }

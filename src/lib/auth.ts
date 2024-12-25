@@ -4,7 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import GoogleProvider from "next-auth/providers/google"
 import type { NextAuthOptions } from "next-auth"
-import type { Session, SessionStrategy } from "next-auth"
+import type { Session } from "next-auth"
 import type { JWT } from "next-auth/jwt"
 
 export const authConfig: NextAuthOptions = {
@@ -25,7 +25,7 @@ export const authConfig: NextAuthOptions = {
     }),
   ],
   session: {
-    strategy: "jwt" as SessionStrategy,
+    strategy: "jwt",
   },
   callbacks: {
     async signIn({ user, account, profile }) {
@@ -48,6 +48,13 @@ export const authConfig: NextAuthOptions = {
         return session;
       }
     },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
+    }
   },
   pages: {
     signIn: "/auth/signin",

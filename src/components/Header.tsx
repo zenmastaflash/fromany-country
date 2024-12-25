@@ -58,7 +58,6 @@ export default function Header() {
                   {session.user?.email}
                 </span>
                 <Button
-                  variant="outline"
                   onClick={() => signOut({ callbackUrl: '/' })}
                 >
                   Sign Out
@@ -66,7 +65,6 @@ export default function Header() {
               </>
             ) : (
               <Button
-                variant="outline"
                 onClick={() => signIn('google')}
               >
                 Sign In

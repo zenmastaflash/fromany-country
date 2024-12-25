@@ -1,9 +1,12 @@
 'use client';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation'; // Import usePathname
+import { Button } from '@/components/ui/button'; // Use Button component if available
 
 export default function Header() {
   const { data: session, status } = useSession();
+  const pathname = usePathname(); // Get current path
 
   if (status === 'loading') {
     return (
@@ -21,10 +24,11 @@ export default function Header() {
   }
 
   const navLinks = [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/travel", label: "Travel" },
-    { href: "/documents", label: "Documents" },
-    { href: "/resources", label: "Resources" }
+    { href: "/", label: "Home", protected: false },
+    { href: "/dashboard", label: "Dashboard", protected: true },
+    { href: "/travel", label: "Travel", protected: true },
+    { href: "/documents", label: "Documents", protected: true },
+    { href: "/resources", label: "Resources", protected: false }
   ];
 
   return (
@@ -35,31 +39,38 @@ export default function Header() {
             <Link href="/" className="text-2xl font-bold text-gray-900">fromany.country</Link>
           </div>
           <div className="ml-10 space-x-4">
+            {navLinks.map(link => (
+              (!link.protected || session) && (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-gray-500 hover:text-gray-900 ${
+                    pathname === link.href ? 'text-black' : ''
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            ))}
             {session ? (
               <>
-                {navLinks.map(link => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-gray-500 hover:text-gray-900"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <button
-                  onClick={() => signOut()}
-                  className="inline-block rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white hover:bg-opacity-75"
+                <span className="text-sm text-muted-foreground">
+                  {session.user?.email}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() => signOut({ callbackUrl: '/' })}
                 >
                   Sign Out
-                </button>
+                </Button>
               </>
             ) : (
-              <button
+              <Button
+                variant="outline"
                 onClick={() => signIn('google')}
-                className="inline-block rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white hover:bg-opacity-75"
               >
                 Sign In
-              </button>
+              </Button>
             )}
           </div>
         </div>

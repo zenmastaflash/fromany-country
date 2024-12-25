@@ -1,9 +1,9 @@
-import NextAuth from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 const handler = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -23,15 +23,15 @@ const handler = NextAuth({
   callbacks: {
     async signIn({ account, profile }) {
       if (account?.provider === "google") {
-        return profile?.email?.endsWith("@gmail.com") ?? false
+        return profile?.email?.endsWith("@gmail.com") ?? false;
       }
-      return true
+      return true;
     },
     async session({ session, user }) {
       if (session?.user) {
-        session.user.id = user.id
+        session.user.id = user.id;
       }
-      return session
+      return session;
     }
   },
   debug: process.env.NODE_ENV === "development",
@@ -42,6 +42,6 @@ const handler = NextAuth({
     signIn: '/auth/signin',
     error: '/auth/error',
   }
-})
+});
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };

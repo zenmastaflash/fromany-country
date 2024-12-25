@@ -2,7 +2,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation'; // Import usePathname
-import { Button } from '@/components/ui/button'; // Use Button component if available
+import { Button } from '@/components/ui/Button'; // Use Button component if available
 
 export default function Header() {
   const { data: session, status } = useSession();

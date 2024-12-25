@@ -40,7 +40,7 @@ export const authConfig: NextAuthOptions = {
     async session({ session, token }: { session: Session; token: JWT }) {
       try {
         if (session?.user) {
-          session.user.id = token.sub as unknown as number; // Convert to number if needed
+          session.user.id = token.sub!;
         }
         return session;
       } catch (error) {

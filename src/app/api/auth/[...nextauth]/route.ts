@@ -1,8 +1,8 @@
 import NextAuth from "next-auth";
 import { authConfig } from "@/lib/auth";
 
-// Create a NextAuth handler from your config
+export const runtime = 'nodejs' // Add this line to force Node.js runtime
+
 const handler = NextAuth(authConfig);
 
-// Export as GET and POST
 export { handler as GET, handler as POST };

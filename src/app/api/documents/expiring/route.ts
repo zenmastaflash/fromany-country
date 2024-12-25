@@ -11,7 +11,7 @@ interface ResponseData {
     number: string | null;
     metadata: any;
     version: number;
-    userId: number;
+    userId: string;
     issueDate: Date | null;
     expiryDate: Date;
     issuingCountry: string | null;

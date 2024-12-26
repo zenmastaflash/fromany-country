@@ -45,7 +45,7 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   className={`text-fac-light hover:text-fac-text ${
-                    pathname === link.href ? 'text-black' : ''
+                    pathname === link.href ? 'text-fac-text' : ''
                   }`}
                 >
                   {link.label}
@@ -54,7 +54,7 @@ export default function Header() {
             ))}
             {session ? (
               <>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-fac-light">
                   {session.user?.email}
                 </span>
                 <Button

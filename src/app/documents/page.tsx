@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react'; // Import Suspense
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -13,7 +13,7 @@ function DocumentsContent() {
   const defaultTab = searchParams.get('tab') === 'expiring' ? 'expiring' : 'library';
   const [activeTab, setActiveTab] = useState<'library' | 'expiring'>(defaultTab);
   const [refreshKey, setRefreshKey] = useState(0);
-
+  
   const handleUploadSuccess = () => {
     setRefreshKey(prev => prev + 1);
   };
@@ -25,13 +25,21 @@ function DocumentsContent() {
         <div className="flex space-x-4">
           <button
             onClick={() => setActiveTab('library')}
-            className={activeTab === 'library' ? 'px-4 py-2 rounded-md bg-indigo-600 text-white' : 'px-4 py-2 rounded-md bg-gray-100 text-gray-700'}
+            className={`px-4 py-2 rounded-md ${
+              activeTab === 'library'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700'
+            }`}
           >
             Library
           </button>
           <button
             onClick={() => setActiveTab('expiring')}
-            className={activeTab === 'expiring' ? 'px-4 py-2 rounded-md bg-indigo-600 text-white' : 'px-4 py-2 rounded-md bg-gray-100 text-gray-700'}
+            className={`px-4 py-2 rounded-md ${
+              activeTab === 'expiring'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700'
+            }`}
           >
             Expiring
           </button>

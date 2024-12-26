@@ -1,5 +1,5 @@
 import { HTMLAttributes } from 'react';
-import { getTextColor } from '@/utils/colorUtils';
+import { getTextColor } from '../../utils/colors';  // Updated import path
 
 interface DynamicTextProps extends HTMLAttributes<HTMLDivElement> {
   backgroundColor: string;

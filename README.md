@@ -3,120 +3,98 @@
 **Your Global Life, Simplified**  
 A comprehensive platform for digital nomads to manage their global lifestyle—track travel, store documents, calculate tax implications, and more.
 
----
-
 ## Table of Contents
 
 1. [Features](#features)  
 2. [Quick Start](#quick-start)  
 3. [Detailed Setup](#detailed-setup)  
-   - [Prerequisites](#prerequisites)  
-   - [Database (PostgreSQL)](#database-postgresql)  
-   - [Google OAuth](#google-oauth)  
-   - [Environment Variables](#environment-variables)  
 4. [Development](#development)  
-   - [Database Migrations](#database-migrations)  
-   - [Running Tests](#running-tests)  
 5. [Common Issues](#common-issues)  
 6. [Deployment](#deployment)  
-   - [Local Production](#local-production)  
-   - [Deploying to Vercel](#deploying-to-vercel)  
 7. [Contributing](#contributing)  
 8. [License](#license)
-
----
+9. [Environment Variables](#environment-variables)
 
 ## Features
 
-- **Travel tracking** with tax implications  
-- **Document management** system for passports, visas, and more  
-- **Tax residence calculator** to keep you compliant  
-- **Entry requirements** checker for global destinations  
-- **Resource center** with essential info for digital nomads
+### Core Features
 
----
+- **Document Management**
+  - Upload & storage using Supabase and AWS S3
+  - Document categorization
+  - Metadata tracking
+  - Expiration system
+  - Document sharing
+  - Version control
 
-## Quick Start
+- **Document Intelligence**
+  - OCR integration
+  - Automatic data extraction
+  - Smart categorization
+  - Authenticity validation
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/yourusername/fromany-country.git
-   cd fromany-country
-   ```
+- **Travel Integration**
+  - Calendar integration
+  - Flight data API connection
+  - Day-by-day location tracking
+  - Tax day calculations
+  - Visa requirement warnings
+  - Entry/exit tracking
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+- **Community Building**
+  - Links to partner communities (e.g., coliving spaces)
+  - Community forum or integrations with WhatsApp, Signal, Slack
 
-3. **Configure Environment Variables**  
-   Copy `.env.example` to `.env.local` (or create `.env.local`) and fill in your details:
-   ```ini
-   DATABASE_URL="postgresql://user:password@localhost:5432/fromany-country"
-   NEXTAUTH_URL="http://localhost:3000"
-   NEXTAUTH_SECRET="your-random-string"
-   GOOGLE_CLIENT_ID="your-google-client-id"
-   GOOGLE_CLIENT_SECRET="your-google-client-secret"
-   ```
+- **Resource Center**
+  - Coliving
+  - Geo Arbitrage
+  - Tax liability
+  - Legal resources
+  - Nomad visas
+  - Other tools
 
-4. **Set Up the Database**
-   ```bash
-   npx prisma migrate dev
-   ```
+### Next Steps
 
-5. **Start the Development Server**
-   ```bash
-   npm run dev
-   ```
+- Create a dashboard for tax residency, liability, and other useful insights
+- Fix document storage "internal error"
 
-Your app is now running at http://localhost:3000!
+### Recent Fixes
 
-## Detailed Setup
+- Resolved Google Callback Error:
+  - Ensured correct redirect URIs and environment variables.
+- Fixed useSession Hook Usage:
+  - Wrapped components with SessionProvider to ensure proper session handling.
+- Addressed Prisma Schema Mismatches:
+  - Updated database schema to match Prisma schema, adding missing columns like tags and sharedWith.
+- Corrected Import Paths:
+  - Fixed import paths for components like Button to resolve module not found errors.
+- Handled useSearchParams Error:
+  - Wrapped useSearchParams in a Suspense boundary to resolve client-side rendering issues.
+- Resolved Merge Conflicts:
+  - Merged changes from feat/auth-redirect-nav into main after resolving conflicts.
 
-### Prerequisites
+## Environment Variables
 
-- **Node.js 18+**
-  - Download from [nodejs.org](https://nodejs.org)
-  - Verify with `node --version`
-- **PostgreSQL**
-  - Download from [postgresql.org](https://postgresql.org)
-  - Keep track of your Postgres username and password
-  - Ensure PostgreSQL is running (e.g., via pgAdmin or TablePlus)
+### Production Variables
+- SUPABASE_ANON_KEY
+- POSTGRES_DATABASE
+- POSTGRES_PASSWORD (Sensitive)
+- POSTGRES_HOST
+- POSTGRES_USER
+- POSTGRES_URL_NON_POOLING (Sensitive)
+- POSTGRES_PRISMA_URL (Sensitive)
+- POSTGRES_URL (Sensitive)
 
-### Database (PostgreSQL)
-
-1. Create a Database named `fromany-country` (or any name you prefer)
-2. Update `DATABASE_URL` in your `.env.local` with your connection details:
-   ```ini
-   DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/fromany-country"
-   ```
-3. Apply Migrations:
-   ```bash
-   npx prisma migrate dev
-   ```
-   This ensures the schema is up-to-date.
-
-### Google OAuth
-
-1. Create a Project at [Google Cloud Console](https://console.cloud.google.com)
-   - APIs & Services → Credentials → Create Credentials → OAuth client ID
-   - Application type: Web application
-   - Authorized JavaScript origins:
-     ```
-     http://localhost:3000
-     https://fromany.country
-     ```
-   - Authorized redirect URIs:
-     ```
-     http://localhost:3000/api/auth/callback/google
-     https://fromany.country/api/auth/callback/google
-     ```
-2. Click Create and copy the Client ID and Client Secret into your `.env.local`:
-   ```ini
-   GOOGLE_CLIENT_ID="xxxxxxxxxxx.apps.googleusercontent.com"
-   GOOGLE_CLIENT_SECRET="your_google_secret"
-   ```
-
-### Environment Variables
-
-Your `.env.local` might look like this:
+### All Environments
+- NEXTAUTH_URL
+- GOOGLE_CLIENT_SECRET
+- GOOGLE_CLIENT_ID
+- DATABASE_URL
+- DIRECT_URL
+- AWS_SECRET_ACCESS_KEY
+- AWS_ACCESS_KEY_ID
+- RESEND_API_KEY
+- CRON_SECRET
+- AWS_BUCKET_NAME
+- AWS_REGION
+- NEXTAUTH_SECRET

@@ -1,15 +1,14 @@
-import './globals.css';
-import { Inter } from 'next/font/google';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import ClientLayout from "./ClientLayout"; // Import the client component
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: 'fromany.country',
-  description: 'Document management for digital nomads',
+export const metadata: Metadata = {
+  title: "fromany.country",
+  description: "Live Anywhere, Belong Everywhere",
 };
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default function RootLayout({
   children,
@@ -18,7 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
+      </body>
     </html>
   );
 }

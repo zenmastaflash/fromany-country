@@ -1,30 +1,23 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
-  let session;
-  try {
-    const { searchParams } = new URL(request.url);
-    const myParam = searchParams.get("myParam");
+export const dynamic = 'force-dynamic';
 
-    session = await auth();
-    console.log('Session data:', {
-      exists: !!session,
-      user: session?.user ? {
-        id: session.user.id,
-        email: session.user.email
-      } : null
-    });
+export async function GET() {
+  try {
+    const session = await auth();
+    console.log('Session:', session);
 
     if (!session?.user?.id) {
-      console.error('No user ID in session');
+      console.log('No valid session found');
       return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized', details: 'Please sign in again' }),
+        JSON.stringify({ error: 'Unauthorized' }),
         { status: 401 }
       );
     }
 
+    console.log('Attempting database query for user:', session.user.id);
     const documents = await prisma.document.findMany({
       where: {
         userId: session.user.id
@@ -33,14 +26,16 @@ export async function GET(request: NextRequest) {
         createdAt: 'desc'
       }
     });
+    console.log('Query successful, found documents:', documents.length);
 
-    console.log(`Found ${documents.length} documents for user ${session.user.id}`);
     return NextResponse.json(documents);
-
   } catch (error) {
-    console.error('Error in documents route:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      session: session ? { id: session.user?.id, email: session.user?.email } : null
+    console.error('Detailed error:', {
+      error: error instanceof Error ? {
+        message: error.message,
+        stack: error.stack
+      } : 'Unknown error',
+      type: typeof error
     });
 
     return new NextResponse(

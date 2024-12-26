@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       })
     );
 
-    // Create document record with defaults
+    // Create document record with defaults and nullable fields
     const document = await prisma.document.create({
       data: {
         userId: session.user.id,
@@ -55,9 +55,15 @@ export async function POST(request: Request) {
         fileUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
         title: file.name,
         type: 'OTHER',
-        number: 'TBD',
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        status: 'active'
+        status: 'active',
+        issueDate: null,        // Set nullable fields to null
+        expiryDate: null,       // Set nullable fields to null
+        number: null,           // Set nullable fields to null
+        issuingCountry: null,   // Set nullable fields to null
+        metadata: null,         // Set nullable fields to null
+        tags: [],              // Empty array for tags
+        sharedWith: [],        // Empty array for sharedWith
+        version: 1             // Default version
       }
     });
 

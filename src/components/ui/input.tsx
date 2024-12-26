@@ -1,20 +1,25 @@
-// Example usage
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { InputHTMLAttributes, forwardRef } from 'react';
 
-// In your component:
-<Button variant="primary">Click me</Button>
-<Button variant="secondary">Cancel</Button>
-<Button variant="outline">Learn More</Button>
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {}
 
-<Card variant="raised">
-  <h2>Card Title</h2>
-  <p>Card content</p>
-</Card>
+const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ className = '', ...props }, ref) => {
+    return (
+      <input
+        className={`
+          w-full rounded-md border border-fac-primary bg-fac-background px-3 py-2 
+          text-fac-text placeholder-fac-light
+          focus:outline-none focus:ring-2 focus:ring-fac-primary
+          disabled:opacity-50
+          ${className}
+        `}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
 
-<Input 
-  variant="search"
-  placeholder="Search..."
-  type="text"
-/>
+Input.displayName = 'Input';
+
+export { Input };

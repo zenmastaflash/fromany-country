@@ -25,7 +25,7 @@ export default function ExpirationDashboard() {
           throw new Error('Failed to fetch expiring documents');
         }
         const data = await response.json();
-        setDocuments(data);
+        setDocuments(data.documents);
       } catch (error) {
         console.error('Error fetching expiring documents:', error);
         setError('Failed to load expiring documents');

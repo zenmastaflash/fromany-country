@@ -8,8 +8,6 @@ import DocumentUpload from '@/components/documents/DocumentUpload';
 import DocumentList from '@/components/documents/DocumentList';
 import ExpirationDashboard from '@/components/documents/ExpirationDashboard';
 
-export const dynamic = "force-dynamic";
-
 function DocumentsContent() {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('tab') === 'expiring' ? 'expiring' : 'library';
@@ -27,21 +25,13 @@ function DocumentsContent() {
         <div className="flex space-x-4">
           <button
             onClick={() => setActiveTab('library')}
-            className={`px-4 py-2 rounded-md ${
-              activeTab === 'library'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700'
-            }`}
+            className={activeTab === 'library' ? 'px-4 py-2 rounded-md bg-indigo-600 text-white' : 'px-4 py-2 rounded-md bg-gray-100 text-gray-700'}
           >
             Library
           </button>
           <button
             onClick={() => setActiveTab('expiring')}
-            className={`px-4 py-2 rounded-md ${
-              activeTab === 'expiring'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700'
-            }`}
+            className={activeTab === 'expiring' ? 'px-4 py-2 rounded-md bg-indigo-600 text-white' : 'px-4 py-2 rounded-md bg-gray-100 text-gray-700'}
           >
             Expiring
           </button>

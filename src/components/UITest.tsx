@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/Button';  // Capital B
+import { Card } from '@/components/ui/Card';      // Capital C
+import { Input } from '@/components/ui/input';    // lowercase i
 
 export default function UITest() {
   return (

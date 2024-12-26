@@ -17,6 +17,31 @@ A comprehensive platform for digital nomads to manage their global lifestyle—t
 
 ## Features
 
+### Design Elements
+
+**Colors**
+#003135
+#024950
+#964734
+#0FA4AF
+#AFDDE5
+
+**Dark by Default**
+We believe in dark mode for many reasons, as listed below:
+Reduced Eye Strain
+Dark mode can significantly reduce eye strain, particularly in low-light environments. The contrast between text and background is less harsh, making it easier for users to read for extended periods without discomfort. This is especially beneficial when using devices at night or in dimly lit rooms.
+Battery Efficiency
+For devices with OLED or AMOLED screens, dark mode can extend battery life. On these displays, dark mode reduces power consumption as black pixels are turned off completely. For example:
+	•	iPhones playing video in dark mode lasted 20 hours compared to 15 hours in light mode, a 33% increase.
+	•	At 100% screen brightness, the dark interface in the YouTube app saves about 60% of screen energy compared to a white background.
+Aesthetic Appeal
+Many users find dark mode visually appealing and modern. It offers a different visual experience that is often perceived as less harsh than light mode. Dark colors can symbolize luxury and elegance, and light tones pop more effectively against a dark background.
+Potential Sleep Benefits
+Dark mode may improve sleep quality by reducing exposure to blue light, which can disrupt sleep patterns. By decreasing blue light emission, especially in the evening, dark mode may help maintain the body’s natural circadian rhythm.
+Accessibility Improvements
+For individuals with certain visual impairments, such as sensitivity to bright light or photophobia, dark mode can provide a more comfortable and accessible viewing experience. It offers a gentler visual experience, allowing for better focus and comprehension.
+While dark mode offers these benefits, it’s important to note that it may not be suitable for everyone, particularly those with astigmatism or in brightly lit environments. Users should choose the mode that works best for their individual needs and preferences.
+
 ### Core Features
 
 - **Document Management**
@@ -60,18 +85,8 @@ A comprehensive platform for digital nomads to manage their global lifestyle—t
 
 ### Recent Fixes
 
-- Resolved Google Callback Error:
-  - Ensured correct redirect URIs and environment variables.
-- Fixed useSession Hook Usage:
-  - Wrapped components with SessionProvider to ensure proper session handling.
-- Addressed Prisma Schema Mismatches:
-  - Updated database schema to match Prisma schema, adding missing columns like tags and sharedWith.
-- Corrected Import Paths:
-  - Fixed import paths for components like Button to resolve module not found errors.
-- Handled useSearchParams Error:
-  - Wrapped useSearchParams in a Suspense boundary to resolve client-side rendering issues.
-- Resolved Merge Conflicts:
-  - Merged changes from feat/auth-redirect-nav into main after resolving conflicts.
+- Resolved document errors (some still pending)
+- Resolved auth issues
 
 ## Environment Variables
 
@@ -98,3 +113,5 @@ A comprehensive platform for digital nomads to manage their global lifestyle—t
 - AWS_BUCKET_NAME
 - AWS_REGION
 - NEXTAUTH_SECRET
+- NEXT_PUBLIC_S3_BUCKET
+- NEXT_PUBLIC_S3_REGION

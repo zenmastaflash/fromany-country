@@ -10,11 +10,11 @@ export default function Header() {
 
   if (status === 'loading') {
     return (
-      <header className="bg-white shadow-sm">
+      <header className="bg-fac-dark shadow-sm">
         <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-gray-900">fromany.country</Link>
+              <Link href="/" className="text-2xl font-bold text-fac-text">fromany.country</Link>
             </div>
             <div className="ml-10 space-x-4"><p>Loading...</p></div>
           </div>
@@ -32,11 +32,11 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-fac-dark shadow-sm">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-gray-900">fromany.country</Link>
+            <Link href="/" className="text-2xl font-bold text-fac-text">fromany.country</Link>
           </div>
           <div className="ml-10 space-x-4">
             {navLinks.map(link => (
@@ -44,7 +44,7 @@ export default function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-gray-500 hover:text-gray-900 ${
+                  className={`text-fac-light hover:text-fac-text ${
                     pathname === link.href ? 'text-black' : ''
                   }`}
                 >
@@ -59,6 +59,7 @@ export default function Header() {
                 </span>
                 <Button
                   onClick={() => signOut({ callbackUrl: '/' })}
+                  className="bg-fac-primary hover:bg-fac-accent text-fac-text"
                 >
                   Sign Out
                 </Button>
@@ -66,6 +67,7 @@ export default function Header() {
             ) : (
               <Button
                 onClick={() => signIn('google')}
+                className="bg-fac-primary hover:bg-fac-accent text-fac-text"
               >
                 Sign In
               </Button>

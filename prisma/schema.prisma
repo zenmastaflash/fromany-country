@@ -16,6 +16,7 @@ enum DocumentType {
   RESIDENCY_PERMIT
   BANK_STATEMENT
   INSURANCE
+  TRAVEL
   OTHER
 }
 

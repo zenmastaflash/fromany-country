@@ -6,7 +6,7 @@ import { DocumentType } from '@prisma/client';
 
 interface ResponseData {
   documents?: Array<{
-    id: number;
+    id: string;
     title: string;
     status: string;
     type: DocumentType;

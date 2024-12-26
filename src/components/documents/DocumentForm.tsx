@@ -19,10 +19,20 @@ interface DocumentFormProps {
   onCancel?: () => void;
 }
 
+interface FormData {
+  title: string;
+  type: DocumentType;
+  number: string;
+  issueDate: string;
+  expiryDate: string;
+  issuingCountry: string;
+  tags: string[];
+}
+
 export default function DocumentForm({ initialData, onSubmit, onCancel }: DocumentFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: initialData?.title || '',
-    type: initialData?.type || 'OTHER',
+    type: initialData?.type || DocumentType.OTHER,
     number: initialData?.number || '',
     issueDate: initialData?.issueDate ? new Date(initialData.issueDate).toISOString().split('T')[0] : '',
     expiryDate: initialData?.expiryDate ? new Date(initialData.expiryDate).toISOString().split('T')[0] : '',
@@ -30,16 +40,7 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
     tags: initialData?.tags || [],
   });
 
-  const documentTypes = [
-    'PASSPORT',
-    'VISA',
-    'TAX_RETURN',
-    'DRIVERS_LICENSE',
-    'RESIDENCY_PERMIT',
-    'BANK_STATEMENT',
-    'INSURANCE',
-    'OTHER'
-  ];
+  const documentTypes = Object.values(DocumentType);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +55,7 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
         </label>
         <select
           value={formData.type}
-          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+          onChange={(e) => setFormData({ ...formData, type: e.target.value as DocumentType })}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           required
         >

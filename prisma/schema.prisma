@@ -31,14 +31,14 @@ model User {
 }
 
 model Document {
-  id             Int          @id @default(autoincrement())
+  id             String       @id @default(cuid())
   userId         String
   type           DocumentType @default(OTHER)
   status         String       @default("active")
-  title          String
+  title          String?
   number         String?
   issueDate      DateTime?
-  expiryDate     DateTime
+  expiryDate     DateTime?
   issuingCountry String?
   fileName       String?
   fileUrl        String?

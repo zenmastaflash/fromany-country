@@ -1,13 +1,13 @@
-export const dynamic = 'force-dynamic';
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { DocumentType } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 interface ResponseData {
   documents?: Array<{
-    id: number;
-    title: string;
+    id: string;
+    title: string | null;
     status: string;
     type: DocumentType;
     number: string | null;
@@ -15,7 +15,7 @@ interface ResponseData {
     version: number;
     userId: string;
     issueDate: Date | null;
-    expiryDate: Date;
+    expiryDate: Date | null;  // Update this to allow null
     issuingCountry: string | null;
     fileName: string | null;
     fileUrl: string | null;
@@ -34,27 +34,9 @@ export async function GET() {
         status: 'active',
         expiryDate: {
           lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          gte: new Date() // Not expired yet
+          gte: new Date(), // Not expired yet
+          not: null // Ensure expiryDate is not null
         }
-      },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        type: true,
-        number: true,
-        metadata: true,
-        version: true,
-        userId: true,
-        issueDate: true,
-        expiryDate: true,
-        issuingCountry: true,
-        fileName: true,
-        fileUrl: true,
-        tags: true,
-        sharedWith: true,
-        createdAt: true,
-        updatedAt: true
       }
     });
 

@@ -30,6 +30,9 @@ export async function GET(request: Request) {
     let notificationsSent = 0;
 
     for (const doc of documents) {
+      // Skip if no expiry date
+      if (!doc.expiryDate) continue;
+
       const expiryDate = new Date(doc.expiryDate);
       const daysUntilExpiry = Math.ceil(
         (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
@@ -52,6 +55,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Error checking document expirations:', error);
-    return new NextResponse('Internal error', { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

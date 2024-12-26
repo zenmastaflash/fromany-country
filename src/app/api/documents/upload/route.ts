@@ -2,6 +2,9 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { prisma } from '@/lib/prisma';
+import { authConfig } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -12,23 +15,29 @@ const s3 = new S3Client({
 });
 
 export async function POST(request: Request) {
-  const session = await getServerSession();
+  const session = await getServerSession(authConfig);
 
-  if (!session) {
-    return new NextResponse('Unauthorized', { status: 401 });
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: 'Unauthorized', message: 'Please sign in to upload documents' },
+      { status: 401 }
+    );
   }
 
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     if (!file) {
-      return new NextResponse('No file provided', { status: 400 });
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const key = `${session.user?.email}/${Date.now()}-${file.name}`;
+    const key = `documents/${session.user.id}/${Date.now()}-${file.name}`;
 
     await s3.send(
       new PutObjectCommand({
@@ -39,9 +48,32 @@ export async function POST(request: Request) {
       })
     );
 
-    return NextResponse.json({ success: true, key });
+    // Create document record with defaults and nullable fields
+    const document = await prisma.document.create({
+      data: {
+        userId: session.user.id,
+        fileName: file.name,
+        fileUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+        title: file.name,
+        type: 'OTHER',
+        status: 'active',
+        issueDate: null,
+        expiryDate: null,
+        number: null,
+        issuingCountry: null,
+        metadata: Prisma.JsonNull,  // Using Prisma.JsonNull from @prisma/client
+        tags: [],
+        sharedWith: [],
+        version: 1
+      }
+    });
+
+    return NextResponse.json({ success: true, key, document });
   } catch (error) {
     console.error('Upload error:', error);
-    return new NextResponse('Error uploading file', { status: 500 });
+    return NextResponse.json(
+      { error: 'Error uploading file', message: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }

@@ -38,7 +38,7 @@ model Document {
   title          String?
   number         String?
   issueDate      DateTime?
-  expiryDate     DateTime
+  expiryDate     DateTime?
   issuingCountry String?
   fileName       String?
   fileUrl        String?

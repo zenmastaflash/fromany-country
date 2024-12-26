@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getServerSession } from "next-auth/next";
+import { authConfig } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  let session;
   try {
-    session = await auth();
+    const session = await getServerSession(authConfig);
     console.log('Session attempt:', { hasSession: !!session });
 
     if (!session?.user?.id) {
@@ -18,7 +18,6 @@ export async function GET() {
       );
     }
 
-    console.log('Session found for user:', session.user.id);
     const documents = await prisma.document.findMany({
       where: {
         userId: session.user.id
@@ -32,8 +31,7 @@ export async function GET() {
 
   } catch (error) {
     console.error('Error in documents route:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      session: session ? { id: session.user?.id, email: session.user?.email } : null
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
 
     return new NextResponse(

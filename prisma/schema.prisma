@@ -35,7 +35,7 @@ model Document {
   userId         String
   type           DocumentType @default(OTHER)
   status         String       @default("active")
-  title          String
+  title          String?
   number         String?
   issueDate      DateTime?
   expiryDate     DateTime

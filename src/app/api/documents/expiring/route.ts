@@ -1,8 +1,8 @@
-export const dynamic = 'force-dynamic';
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { DocumentType } from '@prisma/client';
+
+export const dynamic = 'force-dynamic';
 
 interface ResponseData {
   documents?: Array<{

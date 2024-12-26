@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { prisma } from '@/lib/prisma';
+import { prisma, Prisma } from '@/lib/prisma';
 import { authConfig } from '@/lib/auth';
 
 const s3 = new S3Client({
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         expiryDate: null,       // Set nullable fields to null
         number: null,           // Set nullable fields to null
         issuingCountry: null,   // Set nullable fields to null
-        metadata: null,         // Set nullable fields to null
+        metadata: Prisma.JsonNull,  // Changed this line - proper way to set JSON to null
         tags: [],              // Empty array for tags
         sharedWith: [],        // Empty array for sharedWith
         version: 1             // Default version

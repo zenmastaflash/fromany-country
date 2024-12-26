@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { prisma } from '@/lib/prisma';
+import { authConfig } from '@/lib/auth';
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -13,7 +14,7 @@ const s3 = new S3Client({
 });
 
 export async function POST(request: Request) {
-  const session = await getServerSession();
+  const session = await getServerSession(authConfig);
 
   if (!session?.user?.id) {
     return NextResponse.json(

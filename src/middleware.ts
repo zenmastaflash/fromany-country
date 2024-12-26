@@ -4,7 +4,8 @@ export const config = {
   matcher: [
     '/documents/:path*',
     '/dashboard/:path*',
+    '/travel/:path*',
     '/api/documents/:path*',
-    '/((?!api|_next/static|_next/image|favicon.ico).*)'
+    '/api/travel/:path*'
   ]
 };

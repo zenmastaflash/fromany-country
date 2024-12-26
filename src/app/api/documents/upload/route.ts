@@ -55,6 +55,7 @@ export async function POST(request: Request) {
         fileUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
         title: file.name,
         type: 'OTHER',
+        number: 'TBD',
         expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         status: 'active'
       }

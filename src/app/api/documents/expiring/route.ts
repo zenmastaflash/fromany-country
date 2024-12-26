@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 interface ResponseData {
   documents?: Array<{
     id: string;
-    title: string;
+    title: string | null;  // Update to allow null
     status: string;
     type: DocumentType;
     number: string | null;
@@ -36,25 +36,6 @@ export async function GET() {
           lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
           gte: new Date() // Not expired yet
         }
-      },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        type: true,
-        number: true,
-        metadata: true,
-        version: true,
-        userId: true,
-        issueDate: true,
-        expiryDate: true,
-        issuingCountry: true,
-        fileName: true,
-        fileUrl: true,
-        tags: true,
-        sharedWith: true,
-        createdAt: true,
-        updatedAt: true
       }
     });
 

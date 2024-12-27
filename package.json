@@ -19,7 +19,8 @@
     "@next-auth/prisma-adapter": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "resend": "^2.1.0"
+    "resend": "^2.1.0",
+    "lucide-react": "^0.263.1"
   },
   "devDependencies": {
     "@types/node": "^20",

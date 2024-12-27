@@ -40,13 +40,17 @@ export default function DocumentUploadFlow() {
   const handleFormSubmit = async (data: any) => {
     console.log('Form data submitted:', data);
     try {
-      // Simulate API call to create document
-      const response = await fetch('/api/documents/create', {
+      // Send form data to the existing upload endpoint
+      const response = await fetch('/api/documents/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          fileName: uploadedFile?.document.fileName,
+          fileUrl: uploadedFile?.document.fileUrl,
+        }),
       });
 
       if (!response.ok) {
@@ -86,7 +90,7 @@ export default function DocumentUploadFlow() {
             View Document
           </a>
           <Button onClick={handleCancel} variant="secondary">Edit</Button>
-          <Button onClick={handleFormSubmit} variant="primary">Confirm</Button> {/* Ensure this triggers the submit */}
+          <Button onClick={() => console.log('Confirmed')} variant="primary">Confirm</Button>
         </div>
       )}
     </div>

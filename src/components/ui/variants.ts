@@ -1,9 +1,18 @@
 export const buttonVariants = {
+  // Primary - bright teal
   primary: "bg-primary hover:bg-primary-hover text-text focus:ring-primary",
-  secondary: "bg-secondary hover:bg-primary text-text focus:ring-secondary",
+  
+  // Secondary - darker teal
+  secondary: "bg-secondary hover:bg-secondary-dark text-text focus:ring-secondary",
+  
+  // Accent - reddish brown
+  accent: "bg-accent hover:bg-primary text-text focus:ring-accent",
+  
+  // Outline style
   outline: "border-2 border-primary text-primary hover:bg-primary hover:text-text focus:ring-primary",
-  ghost: "text-link hover:bg-secondary hover:text-text",
-  accent: "bg-accent hover:bg-secondary text-text focus:ring-accent"
+  
+  // Ghost style
+  ghost: "text-link hover:bg-secondary hover:text-text"
 };
 
 export const cardVariants = {

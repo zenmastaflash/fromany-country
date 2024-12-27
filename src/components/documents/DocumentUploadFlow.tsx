@@ -24,8 +24,7 @@ export default function DocumentUploadFlow() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
   const handleFileSelect = (file: File) => {
-    // Handle file selection and move to the next step
-    setCurrentStep('details');
+    console.log('File selected:', file.name); // Log file selection
     // Simulate file upload and set uploaded file state
     setUploadedFile({
       key: 'example-key',
@@ -35,6 +34,8 @@ export default function DocumentUploadFlow() {
         fileUrl: 'https://example.com/file-url',
       },
     });
+    setCurrentStep('details'); // Move to the details step
+    console.log('Current step:', currentStep); // Log current step
   };
 
   const handleFormSubmit = (data: any) => {

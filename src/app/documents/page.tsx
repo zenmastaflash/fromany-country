@@ -1,94 +1,84 @@
-// src/components/documents/DocumentUploadFlow.tsx
 'use client';
 
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import DocumentUpload from './DocumentUpload';
-import DocumentForm from './DocumentForm';
-import { DocumentType } from '@prisma/client';
-import { Button } from '../ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import DocumentUploadFlow from '@/components/documents/DocumentUploadFlow'; // Use the new component
+import DocumentList from '@/components/documents/DocumentList';
+import ExpirationDashboard from '@/components/documents/ExpirationDashboard';
 
-type UploadStep = 'upload' | 'details' | 'preview';
-
-interface UploadedFile {
-  key: string;
-  document: {
-    id: string;
-    fileName: string;
-    fileUrl: string;
-    // ... other document fields
-  };
-}
-
-export default function DocumentUploadFlow() {
-  const [currentStep, setCurrentStep] = useState<UploadStep>('upload');
-  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
-
-  const handleFileSelect = (file: File) => {
-    console.log('File selected:', file.name);
-    setUploadedFile({
-      key: 'example-key',
-      document: {
-        id: 'example-id',
-        fileName: file.name,
-        fileUrl: 'https://example.com/file-url',
-      },
-    });
-    setCurrentStep('details');
-    console.log('Current step:', currentStep);
-  };
-
-  const handleFormSubmit = async (data: any) => {
-    console.log('Form data submitted:', data);
-    try {
-      // Simulate API call to create document
-      const response = await fetch('/api/documents/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create document');
-      }
-
-      const result = await response.json();
-      console.log('Document created:', result);
-      setCurrentStep('preview');
-    } catch (error) {
-      console.error('Error creating document:', error);
-    }
-  };
-
-  const handleCancel = () => {
-    setCurrentStep('upload');
-    setUploadedFile(null);
+function DocumentsContent() {
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get('tab') === 'expiring' ? 'expiring' : 'library';
+  const [activeTab, setActiveTab] = useState<'library' | 'expiring'>(defaultTab);
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  const handleUploadSuccess = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
-    <div className="space-y-6">
-      {currentStep === 'upload' && (
-        <DocumentUpload onFileSelect={handleFileSelect} />
-      )}
-      {currentStep === 'details' && uploadedFile && (
-        <DocumentForm
-          initialData={uploadedFile.document}
-          onSubmit={handleFormSubmit}
-          onCancel={handleCancel}
-        />
-      )}
-      {currentStep === 'preview' && uploadedFile && (
-        <div>
-          <h2 className="text-lg font-medium text-text">Preview Document</h2>
-          <p>File Name: {uploadedFile.document.fileName}</p>
-          <a href={uploadedFile.document.fileUrl} target="_blank" rel="noopener noreferrer" className="text-link hover:text-link-hover">
-            View Document
-          </a>
-          <Button onClick={handleCancel} variant="secondary">Edit</Button>
-          <Button onClick={() => console.log('Confirmed')} variant="primary">Confirm</Button>
+    <main className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold">Documents</h1>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setActiveTab('library')}
+            className={`px-4 py-2 rounded-md ${
+              activeTab === 'library'
+                ? 'bg-primary text-text'
+                : 'bg-secondary text-text hover:bg-secondary-dark'
+            }`}
+          >
+            Library
+          </button>
+          <button
+            onClick={() => setActiveTab('expiring')}
+            className={`px-4 py-2 rounded-md ${
+              activeTab === 'expiring'
+                ? 'bg-primary text-text'
+                : 'bg-secondary text-text hover:bg-secondary-dark'
+            }`}
+          >
+            Expiring
+          </button>
         </div>
+      </div>
+
+      {activeTab === 'library' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Document</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DocumentUploadFlow /> {/* Use the new multi-step flow */}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Document Library</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DocumentList refreshKey={refreshKey} />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      ) : (
+        <ExpirationDashboard />
       )}
-    </div>
+    </main>
   );
 }
+
+export default function DocumentsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DocumentsContent />
+    </Suspense>

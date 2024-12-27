@@ -24,8 +24,7 @@ export default function DocumentUploadFlow() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
   const handleFileSelect = (file: File) => {
-    console.log('File selected:', file.name); // Log file selection
-    // Simulate file upload and set uploaded file state
+    console.log('File selected:', file.name);
     setUploadedFile({
       key: 'example-key',
       document: {
@@ -34,18 +33,35 @@ export default function DocumentUploadFlow() {
         fileUrl: 'https://example.com/file-url',
       },
     });
-    setCurrentStep('details'); // Move to the details step
-    console.log('Current step:', currentStep); // Log current step
+    setCurrentStep('details');
+    console.log('Current step:', currentStep);
   };
 
-  const handleFormSubmit = (data: any) => {
-    // Handle form submission and move to the next step
+  const handleFormSubmit = async (data: any) => {
     console.log('Form data submitted:', data);
-    setCurrentStep('preview');
+    try {
+      // Simulate API call to create document
+      const response = await fetch('/api/documents/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create document');
+      }
+
+      const result = await response.json();
+      console.log('Document created:', result);
+      setCurrentStep('preview');
+    } catch (error) {
+      console.error('Error creating document:', error);
+    }
   };
 
   const handleCancel = () => {
-    // Handle cancel action
     setCurrentStep('upload');
     setUploadedFile(null);
   };
@@ -70,7 +86,7 @@ export default function DocumentUploadFlow() {
             View Document
           </a>
           <Button onClick={handleCancel} variant="secondary">Edit</Button>
-          <Button onClick={() => console.log('Confirmed')} variant="primary">Confirm</Button>
+          <Button onClick={handleFormSubmit} variant="primary">Confirm</Button> {/* Ensure this triggers the submit */}
         </div>
       )}
     </div>

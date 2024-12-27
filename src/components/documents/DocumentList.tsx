@@ -73,11 +73,11 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
 
   if (error) {
     return (
-      <div className="p-4 text-red-600 bg-red-50 rounded-md">
+      <div className="alert">
         <p>Error: {error}</p>
         <button 
           onClick={fetchDocuments}
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          className="btn-primary mt-2"
         >
           Retry
         </button>
@@ -91,7 +91,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         <select
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
-          className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="rounded-md border-border bg-secondary text-text shadow-sm focus:border-primary focus:ring-primary"
         >
           <option value="">All Types</option>
           {documentTypes.map(type => (
@@ -105,20 +105,20 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
           placeholder="Search documents..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
         />
       </div>
 
       {isLoading ? (
         <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : filteredDocuments.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">No documents found.</p>
+        <p className="text-link text-center py-8">No documents found.</p>
       ) : (
         <div className="space-y-4">
           {filteredDocuments.map((doc) => (
-            <div key={doc.id} className="border rounded-lg p-4 hover:bg-gray-50">
+            <div key={doc.id} className="card hover:bg-secondary">
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="text-lg font-medium">
@@ -126,23 +126,23 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                       href={doc.fileUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800"
+                      className="link"
                     >
                       {doc.fileName}
                     </a>
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-link">
                     Type: {doc.type.replace('_', ' ')}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-link">
                     Document Number: {doc.number}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-link">
                     Issued: {new Date(doc.issueDate).toLocaleDateString()}
                     {' | '}
                     Expires: {new Date(doc.expiryDate).toLocaleDateString()}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-link">
                     Country: {doc.issuingCountry}
                   </p>
                   {doc.tags.length > 0 && (
@@ -150,7 +150,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                       {doc.tags.map((tag, index) => (
                         <span
                           key={index}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-link"
                         >
                           {tag}
                         </span>
@@ -161,8 +161,8 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                 <span
                   className={`px-2 py-1 text-xs font-semibold rounded ${
                     doc.status === 'active'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
+                      ? 'bg-primary text-text'
+                      : 'bg-accent text-text'
                   }`}
                 >
                   {doc.status}

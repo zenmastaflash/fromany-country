@@ -6,7 +6,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className = '', ...props }, ref) => (
     <div
       ref={ref}
-      className={`rounded-lg border bg-white shadow-sm ${className}`}
+      className={`rounded-lg border border-fac-primary bg-fac-dark shadow-lg ${className}`}
       {...props}
     />
   )
@@ -16,7 +16,7 @@ export const CardHeader = forwardRef<HTMLDivElement, CardProps>(
   ({ className = '', ...props }, ref) => (
     <div
       ref={ref}
-      className={`flex flex-col space-y-1.5 p-6 ${className}`}
+      className={`flex flex-col space-y-1.5 p-6 text-fac-text ${className}`}
       {...props}
     />
   )
@@ -26,7 +26,7 @@ export const CardTitle = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLHea
   ({ className = '', ...props }, ref) => (
     <h3
       ref={ref}
-      className={`text-2xl font-semibold leading-none tracking-tight ${className}`}
+      className={`text-2xl font-semibold leading-none tracking-tight text-fac-primary ${className}`}
       {...props}
     />
   )
@@ -36,7 +36,7 @@ export const CardContent = forwardRef<HTMLDivElement, CardProps>(
   ({ className = '', ...props }, ref) => (
     <div
       ref={ref}
-      className={`p-6 pt-0 ${className}`}
+      className={`p-6 pt-0 text-fac-light ${className}`}
       {...props}
     />
   )

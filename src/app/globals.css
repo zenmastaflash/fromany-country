@@ -2,12 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
+@layer base {
+  body {
+    @apply bg-background text-text;
+  }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+@layer components {
+  /* Primary Button */
+  .btn-primary {
+    @apply bg-primary text-text px-4 py-2 rounded-md 
+           hover:bg-primary-hover transition-colors duration-200;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply bg-secondary text-text px-4 py-2 rounded-md 
+           hover:bg-primary transition-colors duration-200;
+  }
+
+  /* Links */
+  .link {
+    @apply text-link hover:text-link-hover transition-colors duration-200;
+  }
+
+  /* Cards/Sections */
+  .card {
+    @apply bg-secondary-dark border border-border rounded-lg p-4;
+  }
+
+  /* Alert/Notification */
+  .alert {
+    @apply bg-accent text-text px-4 py-2 rounded-md;
+  }
+}
+
+/* Optional: Define CSS variables for use outside of Tailwind */
+:root {
+  --color-background: #2E2E2E;
+  --color-text: #F0F0F0;
+  --color-primary: #0FA4AF;
+  --color-secondary: #024950;
+  --color-accent: #964734;
+  --color-link: #AFDDE5;
 }

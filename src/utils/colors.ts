@@ -1,4 +1,30 @@
-// Function to convert hex to RGB
+// Tailwind class mappings
+export const colorClasses = {
+  // Text colors
+  text: {
+    primary: 'text-fac-text',
+    secondary: 'text-fac-light',
+    accent: 'text-fac-accent',
+  },
+  // Background colors
+  bg: {
+    main: 'bg-fac-background',
+    dark: 'bg-fac-dark',
+    accent: 'bg-fac-accent',
+  },
+  // Border colors
+  border: {
+    primary: 'border-fac-primary',
+    light: 'border-fac-light',
+  },
+  // Hover states
+  hover: {
+    text: 'hover:text-fac-text',
+    bg: 'hover:bg-fac-primary',
+  }
+};
+
+// Color utility functions
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
@@ -8,7 +34,6 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   } : null;
 }
 
-// Calculate relative luminance
 function getLuminance(r: number, g: number, b: number): number {
   const [rs, gs, bs] = [r, g, b].map(c => {
     c = c / 255;
@@ -17,14 +42,12 @@ function getLuminance(r: number, g: number, b: number): number {
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
 
-// Calculate contrast ratio
 function getContrastRatio(l1: number, l2: number): number {
   const lighter = Math.max(l1, l2);
   const darker = Math.min(l1, l2);
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-// Get appropriate text color (black or white) based on background
 export function getTextColor(backgroundColor: string): string {
   const rgb = hexToRgb(backgroundColor);
   if (!rgb) return '#F0F0F0'; // Default to light text if invalid hex
@@ -39,7 +62,6 @@ export function getTextColor(backgroundColor: string): string {
   return whiteContrast > blackContrast ? '#F0F0F0' : '#000000';
 }
 
-// Custom hook for dynamic text color
 export function useDynamicTextColor(backgroundColor: string) {
   return getTextColor(backgroundColor);
 }

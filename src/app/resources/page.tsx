@@ -92,10 +92,10 @@ export default function ResourcesPage() {
                     href={item.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="block p-4 rounded-lg bg-secondary hover:bg-secondary-dark transition-colors"
                   >
-                    <h3 className="text-lg font-medium text-indigo-600">{item.title}</h3>
-                    <p className="mt-1 text-gray-600">{item.description}</p>
+                    <h3 className="text-lg font-medium text-primary">{item.title}</h3>
+                    <p className="mt-1 text-link">{item.description}</p>
                   </a>
                 ))}
               </div>

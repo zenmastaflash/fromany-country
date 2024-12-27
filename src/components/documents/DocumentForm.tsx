@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { DocumentType } from '@prisma/client';
 import { Input } from '../ui/input'; // Assuming you have an input component
-import { Button } from '../ui/button'; // Assuming you have a button component
+import { Button } from '../ui/Button'; // Correct path and case
 
 interface DocumentFormProps {
   initialData?: {

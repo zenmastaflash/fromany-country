@@ -5,6 +5,7 @@ import { useState } from 'react';
 import DocumentUpload from './DocumentUpload';
 import DocumentForm from './DocumentForm';
 import { DocumentType } from '@prisma/client';
+import { Button } from '../ui/Button';
 
 type UploadStep = 'upload' | 'details' | 'preview';
 

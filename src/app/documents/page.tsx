@@ -27,8 +27,8 @@ function DocumentsContent() {
             onClick={() => setActiveTab('library')}
             className={`px-4 py-2 rounded-md ${
               activeTab === 'library'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700'
+                ? 'bg-primary text-text'
+                : 'bg-secondary text-text hover:bg-secondary-dark'
             }`}
           >
             Library
@@ -37,8 +37,8 @@ function DocumentsContent() {
             onClick={() => setActiveTab('expiring')}
             className={`px-4 py-2 rounded-md ${
               activeTab === 'expiring'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700'
+                ? 'bg-primary text-text'
+                : 'bg-secondary text-text hover:bg-secondary-dark'
             }`}
           >
             Expiring

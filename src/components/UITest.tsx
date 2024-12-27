@@ -43,21 +43,21 @@ export default function UITest() {
         <h2 className="text-2xl font-bold text-text">Buttons</h2>
         <div className="flex flex-wrap gap-4">
           <div className="space-y-2">
-            <Button className="btn-primary">
+            <Button variant="primary">
               Primary Button
             </Button>
             <p className="text-sm text-link">#0FA4AF with #AFDDE5 hover</p>
           </div>
           
           <div className="space-y-2">
-            <Button className="btn-secondary">
+            <Button variant="secondary">
               Secondary Button
             </Button>
             <p className="text-sm text-link">#024950 with #003135 hover</p>
           </div>
           
           <div className="space-y-2">
-            <Button className="bg-accent hover:bg-primary text-text">
+            <Button variant="accent">
               Accent Button
             </Button>
             <p className="text-sm text-link">#964734 with #0FA4AF hover</p>

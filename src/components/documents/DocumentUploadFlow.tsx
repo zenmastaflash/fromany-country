@@ -1,4 +1,3 @@
-```typescript
 // src/components/documents/DocumentUploadFlow.tsx
 'use client';
 
@@ -21,4 +20,57 @@ interface UploadedFile {
 
 export default function DocumentUploadFlow() {
   const [currentStep, setCurrentStep] = useState<UploadStep>('upload');
-  const [uploadedFile, setUploadedFile] = useState
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+
+  const handleFileSelect = (file: File) => {
+    // Handle file selection and move to the next step
+    setCurrentStep('details');
+    // Simulate file upload and set uploaded file state
+    setUploadedFile({
+      key: 'example-key',
+      document: {
+        id: 'example-id',
+        fileName: file.name,
+        fileUrl: 'https://example.com/file-url',
+      },
+    });
+  };
+
+  const handleFormSubmit = (data: any) => {
+    // Handle form submission and move to the next step
+    console.log('Form data submitted:', data);
+    setCurrentStep('preview');
+  };
+
+  const handleCancel = () => {
+    // Handle cancel action
+    setCurrentStep('upload');
+    setUploadedFile(null);
+  };
+
+  return (
+    <div className="space-y-6">
+      {currentStep === 'upload' && (
+        <DocumentUpload onFileSelect={handleFileSelect} />
+      )}
+      {currentStep === 'details' && uploadedFile && (
+        <DocumentForm
+          initialData={uploadedFile.document}
+          onSubmit={handleFormSubmit}
+          onCancel={handleCancel}
+        />
+      )}
+      {currentStep === 'preview' && uploadedFile && (
+        <div>
+          <h2 className="text-lg font-medium text-text">Preview Document</h2>
+          <p>File Name: {uploadedFile.document.fileName}</p>
+          <a href={uploadedFile.document.fileUrl} target="_blank" rel="noopener noreferrer" className="text-link hover:text-link-hover">
+            View Document
+          </a>
+          <Button onClick={handleCancel} variant="secondary">Edit</Button>
+          <Button onClick={() => console.log('Confirmed')} variant="primary">Confirm</Button>
+        </div>
+      )}
+    </div>
+  );
+}

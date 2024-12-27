@@ -105,7 +105,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
           placeholder="Search documents..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 rounded-md border-border bg-secondary text-text shadow-sm focus:border-primary focus:ring-primary placeholder-link"
+          className="flex-1 rounded-md border-border bg-background text-text shadow-sm focus:border-primary focus:ring-primary placeholder-link"
         />
       </div>
 

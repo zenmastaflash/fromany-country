@@ -19,7 +19,13 @@ A comprehensive platform for digital nomads to manage their global lifestyle—t
 
 ### Design Elements
 
-**Colors**
+**Background**
+- #2E2E2E (Dark Grey)
+
+**Font**
+#F0F0F0 (Light Grey)
+
+**Primary Colors**
 - #003135
 - #024950
 - #964734

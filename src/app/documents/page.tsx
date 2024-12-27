@@ -82,3 +82,5 @@ export default function DocumentsPage() {
     <Suspense fallback={<div>Loading...</div>}>
       <DocumentsContent />
     </Suspense>
+  );
+}

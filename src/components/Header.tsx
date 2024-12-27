@@ -1,20 +1,20 @@
 'use client';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // Import usePathname
-import { Button } from '@/components/ui/Button'; // Use Button component if available
+import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
 
 export default function Header() {
   const { data: session, status } = useSession();
-  const pathname = usePathname(); // Get current path
+  const pathname = usePathname();
 
   if (status === 'loading') {
     return (
-      <header className="bg-fac-dark shadow-sm">
+      <header className="bg-secondary shadow-sm">
         <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-fac-text">fromany.country</Link>
+              <Link href="/" className="text-2xl font-bold text-text">fromany.country</Link>
             </div>
             <div className="ml-10 space-x-4"><p>Loading...</p></div>
           </div>
@@ -32,11 +32,11 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-fac-dark shadow-sm">
+    <header className="bg-secondary shadow-sm">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-fac-text">fromany.country</Link>
+            <Link href="/" className="text-2xl font-bold text-text">fromany.country</Link>
           </div>
           <div className="ml-10 space-x-4">
             {navLinks.map(link => (
@@ -44,8 +44,8 @@ export default function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-fac-light hover:text-fac-text ${
-                    pathname === link.href ? 'text-fac-text' : ''
+                  className={`text-link hover:text-text ${
+                    pathname === link.href ? 'text-text' : ''
                   }`}
                 >
                   {link.label}
@@ -54,12 +54,12 @@ export default function Header() {
             ))}
             {session ? (
               <>
-                <span className="text-sm text-fac-light">
+                <span className="text-sm text-link">
                   {session.user?.email}
                 </span>
                 <Button
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="bg-fac-primary hover:bg-fac-accent text-fac-text"
+                  className="btn-primary"
                 >
                   Sign Out
                 </Button>
@@ -67,7 +67,7 @@ export default function Header() {
             ) : (
               <Button
                 onClick={() => signIn('google')}
-                className="bg-fac-primary hover:bg-fac-accent text-fac-text"
+                className="btn-primary"
               >
                 Sign In
               </Button>

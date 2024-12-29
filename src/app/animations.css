@@ -3,12 +3,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 500px; /* Creates space for the animated words */
+  padding-left: 200px; /* Creates space for the animated words */
 }
 
 .animated-word {
   position: absolute;
-  right: calc(100% + 20px); /* Positions the word further left with additional spacing */
+  right: calc(80% + 20px); /* Positions the word further left with additional spacing */
   opacity: 0;
   white-space: nowrap; /* Prevents word wrapping */
   animation: slideAndFade 2s forwards;

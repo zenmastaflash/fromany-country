@@ -40,8 +40,8 @@ export default function DocumentUploadFlow() {
   const handleFormSubmit = async (data: any) => {
     console.log('Form data submitted:', data);
     try {
-      // Send form data to the existing upload endpoint
-      const response = await fetch('/api/documents/upload', {
+      // Send form data to the new create endpoint
+      const response = await fetch('/api/documents/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,6 +50,7 @@ export default function DocumentUploadFlow() {
           ...data,
           fileName: uploadedFile?.document.fileName,
           fileUrl: uploadedFile?.document.fileUrl,
+          userId: 'your-user-id', // Replace with actual user ID
         }),
       });
 

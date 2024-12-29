@@ -2,7 +2,7 @@
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-b from-background via-secondary/50 to-accent/20">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-br from-background via-secondary/40 to-accent/30">
       <div className="max-w-4xl w-full text-center space-y-8">
         <h1 className="text-4xl md:text-6xl font-bold text-text mb-4">
           fromany.country

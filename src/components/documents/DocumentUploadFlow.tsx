@@ -40,6 +40,9 @@ export default function DocumentUploadFlow() {
   const handleFormSubmit = async (data: any) => {
     console.log('Form data submitted:', data);
     try {
+      // Fetch the user ID from the session or context
+      const userId = 'your-user-id'; // Replace with actual user ID from session
+
       // Send form data to the new create endpoint
       const response = await fetch('/api/documents/create', {
         method: 'POST',
@@ -50,7 +53,7 @@ export default function DocumentUploadFlow() {
           ...data,
           fileName: uploadedFile?.document.fileName,
           fileUrl: uploadedFile?.document.fileUrl,
-          userId: 'your-user-id', // Replace with actual user ID
+          userId, // Use the correct user ID
         }),
       });
 

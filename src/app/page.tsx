@@ -1,10 +1,11 @@
 'use client';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const words = ['Work', 'Live', 'Thrive'];
-  const [currentWord, setCurrentWord] = React.useState(0);
+  const [currentWord, setCurrentWord] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentWord((prev) => (prev + 1) % words.length);
     }, 2000);
@@ -26,12 +27,14 @@ export default function Home() {
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl w-full text-center space-y-8">
-        <div className="title-container">
-          {words.map((word, index) => (
-            index === currentWord && (
+        <div className="title-container flex flex-col items-center">
+          <div className="h-[72px] md:h-[96px] flex items-center justify-center">
+            {words.map((word, index) => (
               <span 
-                key={word} 
-                className="animated-word text-4xl md:text-6xl font-bold"
+                key={word}
+                className={`animated-word text-4xl md:text-6xl font-bold absolute transition-opacity duration-500 ${
+                  index === currentWord ? 'opacity-100' : 'opacity-0'
+                }`}
                 style={{ 
                   color: 
                     index === 0 ? '#0FA4AF' :  // Primary color for "Work"
@@ -41,8 +44,8 @@ export default function Home() {
               >
                 {word}
               </span>
-            )
-          ))}
+            ))}
+          </div>
           <h1 className="text-4xl md:text-6xl font-bold text-text">
             fromany.country
           </h1>

@@ -8,7 +8,7 @@
 
 .animated-word {
   position: absolute;
-  right: calc(100% + 200px); /* Positions the word further left with additional spacing */
+  right: calc(100% + 20px); /* Positions the word further left with additional spacing */
   opacity: 0;
   white-space: nowrap; /* Prevents word wrapping */
   animation: slideAndFade 2s forwards;
@@ -28,7 +28,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateX(-50px); /* Move left */
+    transform: translateX(-500px); /* Move left */
     opacity: 0;
   }
 }

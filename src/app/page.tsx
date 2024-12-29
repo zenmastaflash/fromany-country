@@ -37,8 +37,8 @@ export default function Home() {
                 }`}
                 style={{ 
                   color: 
-                    index === 0 ? '#0FA4AF' :  // Primary color for "work"
-                    index === 1 ? '#AFDDE5' :  // Link color for "live"
+                    index === 0 ? '#964734' :  // Primary color for "work"
+                    index === 1 ? '#964734' :  // Link color for "live"
                     '#964734'                  // Accent color for "thrive"
                 }}
               >

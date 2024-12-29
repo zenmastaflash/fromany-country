@@ -8,7 +8,7 @@
 
 .animated-word {
   position: absolute;
-  right: calc(80% + 20px); /* Positions the word further left with additional spacing */
+  right: 200%; /* Positions the word further left with additional spacing */
   opacity: 0;
   white-space: nowrap; /* Prevents word wrapping */
   animation: slideAndFade 2s forwards;

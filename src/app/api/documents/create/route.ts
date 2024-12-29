@@ -1,13 +1,24 @@
 // src/app/api/documents/create/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authConfig } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authConfig);
+
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: 'Unauthorized', message: 'Please sign in to create documents' },
+      { status: 401 }
+    );
+  }
+
   try {
     const data = await request.json();
     const document = await prisma.document.create({
       data: {
-        userId: data.userId,
+        userId: session.user.id,
         fileName: data.fileName,
         fileUrl: data.fileUrl,
         title: data.title,

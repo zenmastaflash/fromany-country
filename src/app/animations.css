@@ -1,20 +1,21 @@
 .title-container {
   position: relative;
-  display: inline-flex;  /* Changed to inline-flex */
+  display: flex;
   align-items: center;
-  gap: 4px;  /* Adds space between animated word and title */
+  justify-content: center;
 }
 
 .animated-word {
-  position: relative;  /* Changed from absolute */
+  position: absolute;
+  right: 100%; /* This positions the word to the left of the title */
+  margin-right: 1rem; /* Space between word and title */
   opacity: 0;
-  margin-right: 0.5rem;  /* Space between animated word and title */
   animation: slideAndFade 2s forwards;
 }
 
 @keyframes slideAndFade {
   0% {
-    transform: translateX(-100%);
+    transform: translateX(100%);
     opacity: 0;
   }
   20% {

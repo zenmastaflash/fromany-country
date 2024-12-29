@@ -3,18 +3,16 @@
 export default function Home() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center p-8">
-      {/* Background Image with Overlay */}
+      {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center z-0" 
+        className="absolute top-0 left-0 w-full h-full z-0" 
         style={{ 
           backgroundImage: "url('/images/home-bg.webp')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
         }}
-      >
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-secondary/80 to-secondary/90"></div>
-      </div>
+      />
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl w-full text-center space-y-8">

@@ -27,7 +27,7 @@ export default function Home() {
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl w-full text-center space-y-8">
-        <div className="title-container flex flex-col items-center">
+        <div className="title-container relative inline-flex items-center justify-center">
           <div className="h-[72px] md:h-[96px] flex items-center justify-center">
             {words.map((word, index) => (
               <span 

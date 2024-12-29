@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 200px; /* Creates space for the animated words */
+  padding-left: 500px; /* Creates space for the animated words */
 }
 
 .animated-word {
@@ -28,7 +28,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateX(-500px); /* Move left */
+    transform: translateX(-50px); /* Move left */
     opacity: 0;
   }
 }

@@ -1,19 +1,15 @@
 'use client';
-import { useEffect, useState } from 'react';
-import './animations.css';
 
 export default function Home() {
-  const [currentWord, setCurrentWord] = useState(0);
   const words = ['Work', 'Live', 'Thrive'];
-  
-  useEffect(() => {
-    if (currentWord < words.length) {
-      const timer = setTimeout(() => {
-        setCurrentWord(currentWord + 1);
-      }, 2000); // 2 seconds per word
-      return () => clearTimeout(timer);
-    }
-  }, [currentWord]);
+  const [currentWord, setCurrentWord] = React.useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWord((prev) => (prev + 1) % words.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center p-8">
@@ -28,21 +24,28 @@ export default function Home() {
         }}
       />
 
+      {/* Content */}
       <div className="relative z-10 max-w-4xl w-full text-center space-y-8">
         <div className="title-container">
-          <h1 className="text-4xl md:text-6xl font-bold text-text mb-4">
-            fromany.country
-          </h1>
           {words.map((word, index) => (
             index === currentWord && (
               <span 
                 key={word} 
-                className="animated-word text-4xl md:text-6xl font-bold text-primary"
+                className="animated-word text-4xl md:text-6xl font-bold"
+                style={{ 
+                  color: 
+                    index === 0 ? '#0FA4AF' :  // Primary color for "Work"
+                    index === 1 ? '#AFDDE5' :  // Link color for "Live"
+                    '#964734'                  // Accent color for "Thrive"
+                }}
               >
                 {word}
               </span>
             )
           ))}
+          <h1 className="text-4xl md:text-6xl font-bold text-text">
+            fromany.country
+          </h1>
         </div>
         <p className="text-xl md:text-2xl text-link mb-8">
           Live Anywhere. Belong Everywhere.

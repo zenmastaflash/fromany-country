@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 export default function Home() {
-  const words = ['Work', 'Live', 'Thrive'];
+  const words = ['work', 'live', 'thrive'];
   const [currentWord, setCurrentWord] = useState(0);
 
   useEffect(() => {
@@ -37,9 +37,9 @@ export default function Home() {
                 }`}
                 style={{ 
                   color: 
-                    index === 0 ? '#0FA4AF' :  // Primary color for "Work"
-                    index === 1 ? '#AFDDE5' :  // Link color for "Live"
-                    '#964734'                  // Accent color for "Thrive"
+                    index === 0 ? '#0FA4AF' :  // Primary color for "work"
+                    index === 1 ? '#AFDDE5' :  // Link color for "live"
+                    '#964734'                  // Accent color for "thrive"
                 }}
               >
                 {word}

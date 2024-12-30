@@ -1,6 +1,4 @@
-// src/middleware.ts
-
-// export { default } from "next-auth/middleware"; // Comment this out temporarily
+export { default } from "next-auth/middleware"; 
 
 export const config = {
   matcher: [

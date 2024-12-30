@@ -63,7 +63,7 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
         <select
           value={formData.type}
           onChange={(e) => setFormData({ ...formData, type: e.target.value as DocumentType })}
-          className="mt-1 block w-full rounded-md border border-border bg-background text-text shadow-sm focus:border-primary focus:ring-primary"
+          className="mt-1 block w-full rounded-md border-border bg-secondary text-text shadow-sm focus:border-primary focus:ring-primary"
           required
         >
           {documentTypes.map((type) => (

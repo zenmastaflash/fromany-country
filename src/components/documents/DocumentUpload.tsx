@@ -32,7 +32,7 @@ export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUplo
     return null;
   };
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     const validationError = validateFile(file);
     if (validationError) {
       setError(validationError);
@@ -42,36 +42,38 @@ export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUplo
     setError(null);
     
     if (onFileSelect) {
-      // Pass the file up for the multi-step process
+      // If we're doing multi-step, just pass the file up
       onFileSelect(file);
       return;
     }
 
-    // Direct upload (if not using multi-step)
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+    // Otherwise proceed with direct upload (existing functionality)
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
 
-    fetch('/api/documents/upload', {
-      method: 'POST',
-      body: formData,
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.error) {
-        throw new Error(data.error);
+      const response = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to upload document');
       }
-      onSuccess?.();
-    })
-    .catch(error => {
-      setError({ type: error.message });
-    })
-    .finally(() => {
-      setIsUploading(false);
+
+      // Clear the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    });
+
+      onSuccess?.();
+    } catch (error) {
+      setError({ type: error instanceof Error ? error.message : 'Failed to upload document' });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -126,7 +128,7 @@ export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUplo
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
               />
             </svg>
             <p className="mb-2 text-sm text-gray-500">

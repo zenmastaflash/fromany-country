@@ -54,7 +54,7 @@ function DocumentsContent() {
                 <CardTitle>Upload Document</CardTitle>
               </CardHeader>
               <CardContent>
-                <DocumentUploadFlow /> {/* Use the new multi-step flow */}
+                <DocumentUploadFlow onUploadSuccess={handleUploadSuccess} /> {/* Pass the success handler */}
               </CardContent>
             </Card>
           </div>

@@ -66,7 +66,11 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   });
 
   const handleEdit = (document: Document) => {
-    setEditingDocument(document);
+    setEditingDocument({
+      ...document,
+      issueDate: document.issueDate ? new Date(document.issueDate) : null,
+      expiryDate: document.expiryDate ? new Date(document.expiryDate) : null,
+    });
   };
 
   const handleDelete = async (id: string) => {

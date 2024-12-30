@@ -7,6 +7,11 @@
 .animation-space {
   width: 150px; /* Fixed width for animated words */
   text-align: right;
+  min-height: 4rem;  /* Add this line for smaller screens */
+  height: 6rem;      /* Add this line for larger screens */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .animated-word {

@@ -2,8 +2,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { prisma } from '@/lib/prisma'; // Import prisma from your local setup
-import { Prisma } from '@prisma/client'; // Import Prisma from @prisma/client
+import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { authConfig } from '@/lib/auth';
 
 const s3 = new S3Client({

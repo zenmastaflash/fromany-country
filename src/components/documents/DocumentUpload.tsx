@@ -55,7 +55,7 @@ export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUplo
 
       const response = await fetch('/api/documents/upload', {
         method: 'POST',
-        body: formData,
+        body: formData, // Do not set Content-Type manually
       });
 
       if (!response.ok) {

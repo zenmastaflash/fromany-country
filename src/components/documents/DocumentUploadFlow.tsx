@@ -7,7 +7,7 @@ import DocumentForm from './DocumentForm';
 import { DocumentType } from '@prisma/client';
 import { Button } from '../ui/Button';
 
-type UploadStep = 'upload' | 'details' | 'preview';
+type UploadStep = 'upload' | 'details';
 
 interface UploadedFile {
   key: string;
@@ -102,17 +102,6 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
           onSubmit={handleFormSubmit}
           onCancel={handleCancel}
         />
-      )}
-      {currentStep === 'preview' && uploadedFile && (
-        <div>
-          <h2 className="text-lg font-medium text-text">Preview Document</h2>
-          <p>File Name: {uploadedFile.document.fileName}</p>
-          <a href={uploadedFile.document.fileUrl} target="_blank" rel="noopener noreferrer" className="text-link hover:text-link-hover">
-            View Document
-          </a>
-          <Button onClick={handleCancel} variant="secondary">Edit</Button>
-          <Button onClick={() => console.log('Confirmed')} variant="primary">Confirm</Button>
-        </div>
       )}
     </div>
   );

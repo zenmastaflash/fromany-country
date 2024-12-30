@@ -1,10 +1,9 @@
-export const dynamic = 'force-dynamic';
+// src/app/api/documents/upload/route.ts
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { prisma } from '@/lib/prisma';
 import { authConfig } from '@/lib/auth';
-import { Prisma } from '@prisma/client';
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,

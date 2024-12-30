@@ -38,12 +38,7 @@ export default function Home() {
                   <span 
                     key={word} 
                     className="animated-word text-4xl md:text-6xl font-bold"
-                    style={{ 
-                      color: 
-                        index === 0 ? '#964734' :  // Primary color for "Work"
-                        index === 1 ? '#964734' :  // Link color for "Live"
-                        '#964734'                  // Accent color for "Thrive"
-                    }}
+                    style={{ color: '#964734' }}  // Single color for all words
                   >
                     {word}
                   </span>

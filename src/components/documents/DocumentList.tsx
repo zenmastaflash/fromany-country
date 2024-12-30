@@ -120,6 +120,17 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
     }
   };
 
+  const calculateStatus = (expiryDate: Date | null): string => {
+    if (!expiryDate) return 'Unknown';
+    const today = new Date();
+    const timeDiff = expiryDate.getTime() - today.getTime();
+    const daysUntilExpiry = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+    if (daysUntilExpiry < 0) return 'Expired';
+    if (daysUntilExpiry <= 30) return 'Expiring Soon';
+    return 'Active';
+  };
+
   const documentTypes = [
     'PASSPORT',
     'VISA',
@@ -188,7 +199,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                       rel="noopener noreferrer"
                       className="link"
                     >
-                      {doc.fileName || 'Untitled Document'}
+                      {doc.title || 'Untitled Document'}
                     </a>
                   </h3>
                   <p className="text-sm text-link">
@@ -220,12 +231,14 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                 </div>
                 <span
                   className={`px-2 py-1 text-xs font-semibold rounded ${
-                    doc.status === 'active'
+                    calculateStatus(doc.expiryDate) === 'Active'
                       ? 'bg-primary text-text'
-                      : 'bg-accent text-text'
+                      : calculateStatus(doc.expiryDate) === 'Expiring Soon'
+                      ? 'bg-yellow-500 text-text'
+                      : 'bg-red-500 text-text'
                   }`}
                 >
-                  {doc.status}
+                  {calculateStatus(doc.expiryDate)}
                 </span>
               </div>
               <div className="flex space-x-2 mt-4">

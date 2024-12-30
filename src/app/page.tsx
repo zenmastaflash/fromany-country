@@ -6,11 +6,14 @@ export default function Home() {
   const [currentWord, setCurrentWord] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWord((prev) => (prev + 1) % words.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
+    // Will run each word once and stop
+    if (currentWord < words.length - 1) {  // Changed condition to stop at last word
+      const timeout = setTimeout(() => {
+        setCurrentWord(currentWord + 1);
+      }, 2000);
+      return () => clearTimeout(timeout);  // Changed from interval to timeout
+    }
+  }, [currentWord, words.length]);
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center p-8">
@@ -37,8 +40,8 @@ export default function Home() {
                     className="animated-word text-4xl md:text-6xl font-bold"
                     style={{ 
                       color: 
-                        index === 0 ? '#0FA4AF' :  // Primary color for "Work"
-                        index === 1 ? '#AFDDE5' :  // Link color for "Live"
+                        index === 0 ? '#964734' :  // Primary color for "Work"
+                        index === 1 ? '#964734' :  // Link color for "Live"
                         '#964734'                  // Accent color for "Thrive"
                     }}
                   >

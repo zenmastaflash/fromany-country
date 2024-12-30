@@ -7,43 +7,34 @@
 .animation-space {
   width: 150px;
   text-align: right;
-  position: relative;  /* Added */
+  height: 4rem;  /* Match your text height */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .animated-word {
   opacity: 0;
   animation: slideAndFade 2s forwards;
-  position: absolute;  /* Added */
-  right: 0;           /* Added */
-  top: 50%;          /* Added */
-  transform-origin: right center;  /* Added */
-}
-
-/* Add an invisible placeholder to maintain space */
-.animation-space::before {
-  content: "thrive";  /* Use your longest word */
-  opacity: 0;
-  visibility: hidden;
-  display: inline-block;
   font-size: inherit;
-  font-weight: inherit;
+  line-height: inherit;
 }
 
 @keyframes slideAndFade {
   0% {
-    transform: translateX(-20px) translateY(-50%);  /* Modified */
+    transform: translateX(-20px);
     opacity: 0;
   }
   20% {
-    transform: translateX(0) translateY(-50%);      /* Modified */
+    transform: translateX(0);
     opacity: 1;
   }
   80% {
-    transform: translateX(0) translateY(-50%);      /* Modified */
+    transform: translateX(0);
     opacity: 1;
   }
   100% {
-    transform: translateX(20px) translateY(-50%);   /* Modified */
+    transform: translateX(20px);
     opacity: 0;
   }
 }

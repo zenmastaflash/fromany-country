@@ -1,10 +1,10 @@
-// src/app/api/documents/upload/route.ts
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 import { authConfig } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -25,8 +25,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    console.log('Request Headers:', request.headers); // Log request headers
-
     const formData = await request.formData();
     const file = formData.get('file') as File;
     if (!file) {

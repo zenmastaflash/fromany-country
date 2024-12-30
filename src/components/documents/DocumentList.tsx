@@ -68,8 +68,8 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const handleEdit = (document: Document) => {
     setEditingDocument({
       ...document,
-      issueDate: document.issueDate ? new Date(document.issueDate) : null,
-      expiryDate: document.expiryDate ? new Date(document.expiryDate) : null,
+      issueDate: document.issueDate ? new Date(document.issueDate).toISOString().split('T')[0] : '',
+      expiryDate: document.expiryDate ? new Date(document.expiryDate).toISOString().split('T')[0] : '',
     });
   };
 

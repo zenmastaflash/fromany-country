@@ -79,8 +79,7 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
 
       const result = await response.json();
       console.log('Document created:', result);
-      setCurrentStep('preview');
-      onUploadSuccess();
+setCurrentStep('upload'); // Reset back to upload step      onUploadSuccess();
     } catch (error) {
       console.error('Error creating document:', error);
     }

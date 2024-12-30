@@ -55,31 +55,33 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
   };
 
   const handleFormSubmit = async (data: any) => {
-    console.log('Form data submitted:', data);
+    if (!uploadedFile?.document.id) {
+      console.error('No document ID found');
+      return;
+    }
+
     try {
-      // Send form data to the existing upload endpoint
-      const response = await fetch('/api/documents/upload', {
-        method: 'POST',
+      const response = await fetch('/api/documents/update', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          id: uploadedFile.document.id,
           ...data,
-          fileName: uploadedFile?.document.fileName,
-          fileUrl: uploadedFile?.document.fileUrl,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create document');
+        throw new Error('Failed to update document');
       }
 
       const result = await response.json();
-      console.log('Document created:', result);
+      console.log('Document updated:', result);
       setCurrentStep('preview');
       onUploadSuccess();
     } catch (error) {
-      console.error('Error creating document:', error);
+      console.error('Error updating document:', error);
     }
   };
 

@@ -33,12 +33,15 @@ export default function Home() {
         <div className="relative flex justify-center">
           <div className="title-container">
             <div className="animation-space">
+              {/* Always render a hidden placeholder */}
+              <span className="opacity-0 invisible h-0">thrive</span>
+              {/* Render the animated word if needed */}
               {words.map((word, index) => (
                 index === currentWord && currentWord < words.length && (
                   <span 
                     key={word} 
-                    className="animated-word text-4xl md:text-6xl font-bold"
-                    style={{ color: '#964734' }}  // Single color for all words
+                    className="animated-word text-4xl md:text-6xl font-bold absolute"
+                    style={{ color: '#964734' }}
                   >
                     {word}
                   </span>

@@ -25,6 +25,8 @@ export async function POST(request: Request) {
   }
 
   try {
+    console.log('Request Headers:', request.headers); // Log request headers
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     if (!file) {

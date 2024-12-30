@@ -18,6 +18,19 @@ export async function POST(request: Request) {
     const data = await request.json();
     console.log('Update request data:', data); // Log incoming data
 
+    // Check if the document exists
+    const existingDocument = await prisma.document.findUnique({
+      where: { id: data.id },
+    });
+
+    if (!existingDocument) {
+      console.error('Document not found:', data.id);
+      return NextResponse.json(
+        { error: 'Document not found' },
+        { status: 404 }
+      );
+    }
+
     const document = await prisma.document.update({
       where: { id: data.id },
       data: {

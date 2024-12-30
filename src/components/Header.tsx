@@ -26,7 +26,7 @@ export default function Header() {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
               <Link href="/" className="text-2xl font-bold text-text">
-                fromany.country
+                from any country
               </Link>
             </div>
           </div>
@@ -45,7 +45,7 @@ export default function Header() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="text-2xl font-bold text-text">
-              fromany.country
+              from any country
             </Link>
           </div>
 

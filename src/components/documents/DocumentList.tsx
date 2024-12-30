@@ -2,11 +2,12 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import DocumentForm from './DocumentForm';
+import { DocumentType } from '@prisma/client'; // Import DocumentType
 
 type Document = {
   id: string;
   fileName: string;
-  type: string;
+  type: DocumentType; // Use DocumentType enum
   fileUrl: string;
   number: string;
   issueDate: string;

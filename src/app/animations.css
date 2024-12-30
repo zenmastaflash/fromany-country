@@ -1,13 +1,13 @@
 .title-container {
   display: grid;
   grid-template-columns: 150px auto;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .animation-space {
   height: 4rem;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-end;
 }
 

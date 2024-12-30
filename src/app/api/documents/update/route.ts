@@ -1,3 +1,4 @@
+// src/app/api/documents/update/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
@@ -15,6 +16,8 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
+    console.log('Update request data:', data); // Log incoming data
+
     const document = await prisma.document.update({
       where: { id: data.id },
       data: {
@@ -28,6 +31,7 @@ export async function POST(request: Request) {
       },
     });
 
+    console.log('Document updated:', document); // Log updated document
     return NextResponse.json({ success: true, document });
   } catch (error) {
     console.error('Error updating document:', error);

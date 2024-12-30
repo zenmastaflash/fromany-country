@@ -56,7 +56,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
 
   useEffect(() => {
     fetchDocuments();
-  }, [refreshKey]);
+  }, [refreshKey]); // Re-fetch when refreshKey changes
 
   const filteredDocuments = documents.filter(doc => {
     const matchesType = selectedType ? doc.type === selectedType : true;

@@ -6,12 +6,12 @@ export default function Home() {
   const [currentWord, setCurrentWord] = useState(0);
 
   useEffect(() => {
-    // Will run each word once and stop
-    if (currentWord < words.length - 1) {  // Changed condition to stop at last word
+    // Run for all words including the last one
+    if (currentWord <= words.length - 1) {
       const timeout = setTimeout(() => {
-        setCurrentWord(currentWord + 1);
+        setCurrentWord(currentWord + 1);  // This will make it go one step beyond the last word
       }, 2000);
-      return () => clearTimeout(timeout);  // Changed from interval to timeout
+      return () => clearTimeout(timeout);
     }
   }, [currentWord, words.length]);
 
@@ -34,7 +34,7 @@ export default function Home() {
           <div className="title-container">
             <div className="animation-space">
               {words.map((word, index) => (
-                index === currentWord && (
+                index === currentWord && currentWord < words.length && (
                   <span 
                     key={word} 
                     className="animated-word text-4xl md:text-6xl font-bold"

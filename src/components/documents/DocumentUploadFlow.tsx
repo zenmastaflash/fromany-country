@@ -19,7 +19,11 @@ interface UploadedFile {
   };
 }
 
-export default function DocumentUploadFlow() {
+interface DocumentUploadFlowProps {
+  onUploadSuccess: () => void;
+}
+
+export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFlowProps) {
   const [currentStep, setCurrentStep] = useState<UploadStep>('upload');
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
@@ -40,11 +44,8 @@ export default function DocumentUploadFlow() {
   const handleFormSubmit = async (data: any) => {
     console.log('Form data submitted:', data);
     try {
-      // Fetch the user ID from the session or context
-      const userId = 'your-user-id'; // Replace with actual user ID from session
-
-      // Send form data to the new create endpoint
-      const response = await fetch('/api/documents/create', {
+      // Send form data to the existing upload endpoint
+      const response = await fetch('/api/documents/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +54,6 @@ export default function DocumentUploadFlow() {
           ...data,
           fileName: uploadedFile?.document.fileName,
           fileUrl: uploadedFile?.document.fileUrl,
-          userId, // Use the correct user ID
         }),
       });
 
@@ -64,6 +64,7 @@ export default function DocumentUploadFlow() {
       const result = await response.json();
       console.log('Document created:', result);
       setCurrentStep('preview');
+      onUploadSuccess();
     } catch (error) {
       console.error('Error creating document:', error);
     }

@@ -5,35 +5,45 @@
 }
 
 .animation-space {
-  width: 150px; /* Fixed width for animated words */
+  width: 150px;
   text-align: right;
-  min-height: 4rem;  /* Add this line for smaller screens */
-  height: 6rem;      /* Add this line for larger screens */
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  position: relative;  /* Added */
 }
 
 .animated-word {
   opacity: 0;
   animation: slideAndFade 2s forwards;
+  position: absolute;  /* Added */
+  right: 0;           /* Added */
+  top: 50%;          /* Added */
+  transform-origin: right center;  /* Added */
+}
+
+/* Add an invisible placeholder to maintain space */
+.animation-space::before {
+  content: "thrive";  /* Use your longest word */
+  opacity: 0;
+  visibility: hidden;
+  display: inline-block;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 @keyframes slideAndFade {
   0% {
-    transform: translateX(-20px);
+    transform: translateX(-20px) translateY(-50%);  /* Modified */
     opacity: 0;
   }
   20% {
-    transform: translateX(0);
+    transform: translateX(0) translateY(-50%);      /* Modified */
     opacity: 1;
   }
   80% {
-    transform: translateX(0);
+    transform: translateX(0) translateY(-50%);      /* Modified */
     opacity: 1;
   }
   100% {
-    transform: translateX(20px);
+    transform: translateX(20px) translateY(-50%);   /* Modified */
     opacity: 0;
   }
 }

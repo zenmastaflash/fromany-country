@@ -61,27 +61,28 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
     }
 
     try {
-      const response = await fetch('/api/documents/update', {
-        method: 'PUT',
+      const response = await fetch('/api/documents/create', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: uploadedFile.document.id,
           ...data,
+          fileName: uploadedFile.document.fileName,
+          fileUrl: uploadedFile.document.fileUrl,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update document');
+        throw new Error('Failed to create document');
       }
 
       const result = await response.json();
-      console.log('Document updated:', result);
+      console.log('Document created:', result);
       setCurrentStep('preview');
       onUploadSuccess();
     } catch (error) {
-      console.error('Error updating document:', error);
+      console.error('Error creating document:', error);
     }
   };
 

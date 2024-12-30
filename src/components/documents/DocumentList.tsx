@@ -29,7 +29,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [editingDocumentId, setEditingDocumentId] = useState<string | null>(null);
 
   const fetchDocuments = async () => {
     try {
@@ -69,8 +69,8 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
     return matchesType && matchesSearch;
   });
 
-  const handleEdit = (document: Document) => {
-    setEditingDocument(document);
+  const handleEdit = (documentId: string) => {
+    setEditingDocumentId(documentId);
   };
 
   const handleDelete = async (id: string) => {
@@ -111,7 +111,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
       setDocuments((prev) =>
         prev.map((doc) => (doc.id === updatedDocument.id ? updatedDocument : doc))
       );
-      setEditingDocument(null);
+      setEditingDocumentId(null);
     } catch (error) {
       console.error('Error updating document:', error);
     }
@@ -226,20 +226,19 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                 </span>
               </div>
               <div className="flex space-x-2 mt-4">
-                <Button onClick={() => handleEdit(doc)} variant="secondary">Edit</Button>
+                <Button onClick={() => handleEdit(doc.id)} variant="secondary">Edit</Button>
                 <Button onClick={() => handleDelete(doc.id)} variant="accent">Delete</Button>
               </div>
+              {editingDocumentId === doc.id && (
+                <DocumentForm
+                  initialData={doc}
+                  onSubmit={handleFormSubmit}
+                  onCancel={() => setEditingDocumentId(null)}
+                />
+              )}
             </div>
           ))}
         </div>
-      )}
-
-      {editingDocument && (
-        <DocumentForm
-          initialData={editingDocument}
-          onSubmit={handleFormSubmit}
-          onCancel={() => setEditingDocument(null)}
-        />
       )}
     </div>
   );

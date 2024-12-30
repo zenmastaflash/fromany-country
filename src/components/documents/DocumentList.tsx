@@ -1,5 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/Button';
+import DocumentForm from './DocumentForm';
 
 type Document = {
   id: string;
@@ -13,6 +15,7 @@ type Document = {
   status: string;
   tags: string[];
   createdAt: string;
+  title: string | null;
 };
 
 type DocumentListProps = {
@@ -25,6 +28,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
 
   const fetchDocuments = async () => {
     try {
@@ -59,6 +63,54 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
       : true;
     return matchesType && matchesSearch;
   });
+
+  const handleEdit = (document: Document) => {
+    setEditingDocument(document);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch('/api/documents/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+    } catch (error) {
+      console.error('Error deleting document:', error);
+    }
+  };
+
+  const handleFormSubmit = async (data: any) => {
+    try {
+      const response = await fetch('/api/documents/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update document');
+      }
+
+      const updatedDocument = await response.json();
+      setDocuments((prev) =>
+        prev.map((doc) => (doc.id === updatedDocument.id ? updatedDocument : doc))
+      );
+      setEditingDocument(null);
+    } catch (error) {
+      console.error('Error updating document:', error);
+    }
+  };
 
   const documentTypes = [
     'PASSPORT',
@@ -168,9 +220,21 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                   {doc.status}
                 </span>
               </div>
+              <div className="flex space-x-2 mt-4">
+                <Button onClick={() => handleEdit(doc)} variant="secondary">Edit</Button>
+                <Button onClick={() => handleDelete(doc.id)} variant="accent">Delete</Button>
+              </div>
             </div>
           ))}
         </div>
+      )}
+
+      {editingDocument && (
+        <DocumentForm
+          initialData={editingDocument}
+          onSubmit={handleFormSubmit}
+          onCancel={() => setEditingDocument(null)}
+        />
       )}
     </div>
   );

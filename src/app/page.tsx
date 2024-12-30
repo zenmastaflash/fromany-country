@@ -29,22 +29,24 @@ export default function Home() {
       <div className="relative z-10 max-w-4xl w-full text-center space-y-8">
         <div className="relative flex justify-center">
           <div className="title-container">
-            {words.map((word, index) => (
-              index === currentWord && (
-                <span 
-                  key={word} 
-                  className="animated-word text-4xl md:text-6xl font-bold"
-                  style={{ 
-                    color: 
-                      index === 0 ? '#0FA4AF' :  // Primary color for "Work"
-                      index === 1 ? '#AFDDE5' :  // Link color for "Live"
-                      '#964734'                  // Accent color for "Thrive"
-                  }}
-                >
-                  {word}
-                </span>
-              )
-            ))}
+            <div className="animation-space">
+              {words.map((word, index) => (
+                index === currentWord && (
+                  <span 
+                    key={word} 
+                    className="animated-word text-4xl md:text-6xl font-bold"
+                    style={{ 
+                      color: 
+                        index === 0 ? '#0FA4AF' :  // Primary color for "Work"
+                        index === 1 ? '#AFDDE5' :  // Link color for "Live"
+                        '#964734'                  // Accent color for "Thrive"
+                    }}
+                  >
+                    {word}
+                  </span>
+                )
+              ))}
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold text-text">
               fromany.country
             </h1>

@@ -6,16 +6,16 @@ import { DocumentType } from '@prisma/client'; // Import DocumentType
 
 type Document = {
   id: string;
-  fileName: string;
+  fileName: string | null;
   type: DocumentType; // Use DocumentType enum
-  fileUrl: string;
-  number: string;
-  issueDate: string;
-  expiryDate: string;
-  issuingCountry: string;
+  fileUrl: string | null;
+  number: string | null;
+  issueDate: Date | null; // Use Date type
+  expiryDate: Date | null; // Use Date type
+  issuingCountry: string | null;
   status: string;
   tags: string[];
-  createdAt: string;
+  createdAt: Date;
   title: string | null;
 };
 
@@ -41,7 +41,11 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         throw new Error(errorData.error || 'Failed to fetch documents');
       }
       const data = await response.json();
-      setDocuments(data);
+      setDocuments(data.map((doc: any) => ({
+        ...doc,
+        issueDate: doc.issueDate ? new Date(doc.issueDate) : null,
+        expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : null,
+      })));
     } catch (error) {
       console.error('Error fetching documents:', error);
       setError(error instanceof Error ? error.message : 'Failed to load documents');
@@ -57,20 +61,16 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const filteredDocuments = documents.filter(doc => {
     const matchesType = selectedType ? doc.type === selectedType : true;
     const matchesSearch = searchTerm
-      ? doc.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.issuingCountry.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ? (doc.fileName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (doc.number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (doc.issuingCountry || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       : true;
     return matchesType && matchesSearch;
   });
 
   const handleEdit = (document: Document) => {
-    setEditingDocument({
-      ...document,
-      issueDate: document.issueDate ? new Date(document.issueDate).toISOString().split('T')[0] : '',
-      expiryDate: document.expiryDate ? new Date(document.expiryDate).toISOString().split('T')[0] : '',
-    });
+    setEditingDocument(document);
   };
 
   const handleDelete = async (id: string) => {
@@ -180,27 +180,27 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                 <div>
                   <h3 className="text-lg font-medium">
                     <a 
-                      href={doc.fileUrl} 
+                      href={doc.fileUrl || '#'} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="link"
                     >
-                      {doc.fileName}
+                      {doc.fileName || 'Untitled Document'}
                     </a>
                   </h3>
                   <p className="text-sm text-link">
                     Type: {doc.type.replace('_', ' ')}
                   </p>
                   <p className="text-sm text-link">
-                    Document Number: {doc.number}
+                    Document Number: {doc.number || 'N/A'}
                   </p>
                   <p className="text-sm text-link">
-                    Issued: {new Date(doc.issueDate).toLocaleDateString()}
+                    Issued: {doc.issueDate ? new Date(doc.issueDate).toLocaleDateString() : 'N/A'}
                     {' | '}
-                    Expires: {new Date(doc.expiryDate).toLocaleDateString()}
+                    Expires: {doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : 'N/A'}
                   </p>
                   <p className="text-sm text-link">
-                    Country: {doc.issuingCountry}
+                    Country: {doc.issuingCountry || 'N/A'}
                   </p>
                   {doc.tags.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">

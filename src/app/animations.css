@@ -2,22 +2,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1rem; /* Add spacing between animation area and title */
 }
 
 .animation-space {
   width: 150px;
   text-align: right;
-  height: 4rem;  /* Match your text height */
+  height: 4rem;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  position: relative; /* Add this */
 }
 
 .animated-word {
+  position: absolute; /* Add this */
+  right: 0;         /* Add this */
   opacity: 0;
   animation: slideAndFade 2s forwards;
-  font-size: inherit;
-  line-height: inherit;
 }
 
 @keyframes slideAndFade {

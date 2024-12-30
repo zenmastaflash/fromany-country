@@ -27,18 +27,31 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
   const [currentStep, setCurrentStep] = useState<UploadStep>('upload');
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = async (file: File) => {
     console.log('File selected:', file.name);
-    setUploadedFile({
-      key: 'example-key',
-      document: {
-        id: 'example-id',
-        fileName: file.name,
-        fileUrl: 'https://example.com/file-url',
-      },
-    });
-    setCurrentStep('details');
-    console.log('Current step:', currentStep);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload document');
+      }
+
+      const result = await response.json();
+      console.log('Document uploaded:', result);
+      setUploadedFile({
+        key: result.key,
+        document: result.document,
+      });
+      setCurrentStep('details');
+    } catch (error) {
+      console.error('Error uploading document:', error);
+    }
   };
 
   const handleFormSubmit = async (data: any) => {

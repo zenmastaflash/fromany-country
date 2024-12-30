@@ -1,19 +1,22 @@
 .title-container {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 1rem; /* Space between animated word and title */
+  justify-content: center;
+}
+
+.animation-space {
+  width: 150px; /* Fixed width for animated words */
+  text-align: right;
 }
 
 .animated-word {
-  position: absolute;
-  left: -150px; /* Fixed distance from the title */
   opacity: 0;
   animation: slideAndFade 2s forwards;
 }
 
 @keyframes slideAndFade {
   0% {
-    transform: translateX(-50px);
+    transform: translateX(-20px);
     opacity: 0;
   }
   20% {
@@ -25,7 +28,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateX(50px);
+    transform: translateX(20px);
     opacity: 0;
   }
 }

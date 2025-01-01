@@ -41,11 +41,17 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         throw new Error(errorData.error || 'Failed to fetch documents');
       }
       const data = await response.json();
-      setDocuments(data.map((doc: any) => ({
-        ...doc,
-        issueDate: doc.issueDate ? new Date(doc.issueDate) : null,
-        expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : null,
-      })));
+      setDocuments(data.map((doc: any) => {
+        const issueDate = doc.issueDate ? new Date(doc.issueDate) : null;
+        const expiryDate = doc.expiryDate ? new Date(doc.expiryDate) : null;
+        
+        // Validate that dates are valid before using them
+        return {
+          ...doc,
+          issueDate: issueDate instanceof Date && !isNaN(issueDate.getTime()) ? issueDate : null,
+          expiryDate: expiryDate instanceof Date && !isNaN(expiryDate.getTime()) ? expiryDate : null,
+        };
+      }));
     } catch (error) {
       console.error('Error fetching documents:', error);
       setError(error instanceof Error ? error.message : 'Failed to load documents');

@@ -34,7 +34,7 @@ export async function GET() {
         status: 'active',
         expiryDate: {
           lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          gte: new Date(), // Not expired yet
+          gt: new Date(), // Not expired yet
           not: null // Ensure expiryDate is not null
         }
       }

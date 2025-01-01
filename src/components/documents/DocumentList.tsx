@@ -23,6 +23,8 @@ type DocumentListProps = {
   refreshKey?: number;
 };
 
+type StatusType = 'Active' | 'Expiring Soon' | 'Expired' | 'Unknown';
+
 export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -173,11 +175,11 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
     return acc;
   }, {} as Record<string, Document[]>);
 
-  const [expandedSections, setExpandedSections] = useState({
-    Active: true,
+  const [expandedSections, setExpandedSections] = useState<Record<StatusType, boolean>>({
+    'Active': true,
     'Expiring Soon': true,
-    Expired: true,
-    Unknown: true
+    'Expired': true,
+    'Unknown': true
   });
 
   if (error) {

@@ -3,6 +3,8 @@
 
 import { useState } from 'react';
 import { DocumentType } from '@prisma/client';
+import { Input } from '../ui/input'; // Assuming you have an input component
+import { Button } from '../ui/Button'; // Correct path and case
 
 interface DocumentFormProps {
   initialData?: {
@@ -14,6 +16,8 @@ interface DocumentFormProps {
     expiryDate?: Date | null;
     issuingCountry?: string | null;
     tags?: string[];
+    fileName?: string | null;
+    fileUrl?: string | null;
   };
   onSubmit: (data: any) => void;
   onCancel?: () => void;
@@ -26,7 +30,7 @@ interface FormData {
   issueDate: string;
   expiryDate: string;
   issuingCountry: string;
-  tags: string[];
+  tags: string;
 }
 
 export default function DocumentForm({ initialData, onSubmit, onCancel }: DocumentFormProps) {
@@ -37,26 +41,29 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
     issueDate: initialData?.issueDate ? new Date(initialData.issueDate).toISOString().split('T')[0] : '',
     expiryDate: initialData?.expiryDate ? new Date(initialData.expiryDate).toISOString().split('T')[0] : '',
     issuingCountry: initialData?.issuingCountry || '',
-    tags: initialData?.tags || [],
+    tags: initialData?.tags?.join(', ') || '',
   });
 
   const documentTypes = Object.values(DocumentType);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit({
+      ...formData,
+      tags: formData.tags.split(',').map(tag => tag.trim()), // Convert tags to array
+    });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-text">
           Document Type *
         </label>
         <select
           value={formData.type}
           onChange={(e) => setFormData({ ...formData, type: e.target.value as DocumentType })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-md border-border bg-secondary text-text shadow-sm focus:border-primary focus:ring-primary"
           required
         >
           {documentTypes.map((type) => (
@@ -68,83 +75,95 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-text">
           Title *
         </label>
-        <input
+        <Input
           type="text"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-text">
           Expiry Date *
         </label>
-        <input
+        <Input
           type="date"
           value={formData.expiryDate}
           onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-text">
           Issue Date
         </label>
-        <input
+        <Input
           type="date"
           value={formData.issueDate}
           onChange={(e) => setFormData({ ...formData, issueDate: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-text">
           Document Number
         </label>
-        <input
+        <Input
           type="text"
           value={formData.number}
           onChange={(e) => setFormData({ ...formData, number: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-text">
           Issuing Country
         </label>
-        <input
+        <Input
           type="text"
           value={formData.issuingCountry}
           onChange={(e) => setFormData({ ...formData, issuingCountry: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-text">
+          Tags (comma-separated)
+        </label>
+        <Input
+          type="text"
+          value={formData.tags}
+          onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+          className="mt-1"
         />
       </div>
 
       <div className="flex justify-end space-x-3">
         {onCancel && (
-          <button
+          <Button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            variant="secondary"
           >
             Cancel
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+          variant="primary"
         >
           Save
-        </button>
+        </Button>
       </div>
     </form>
   );

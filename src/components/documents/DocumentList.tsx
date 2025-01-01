@@ -1,18 +1,22 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/Button';
+import DocumentForm from './DocumentForm';
+import { DocumentType } from '@prisma/client'; // Import DocumentType
 
 type Document = {
   id: string;
-  fileName: string;
-  type: string;
-  fileUrl: string;
-  number: string;
-  issueDate: string;
-  expiryDate: string;
-  issuingCountry: string;
+  fileName: string | null;
+  type: DocumentType; // Use DocumentType enum
+  fileUrl: string | null;
+  number: string | null;
+  issueDate: Date | null; // Use Date type
+  expiryDate: Date | null; // Use Date type
+  issuingCountry: string | null;
   status: string;
   tags: string[];
-  createdAt: string;
+  createdAt: Date;
+  title: string | null;
 };
 
 type DocumentListProps = {
@@ -25,6 +29,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingDocumentId, setEditingDocumentId] = useState<string | null>(null);
 
   const fetchDocuments = async () => {
     try {
@@ -36,7 +41,11 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         throw new Error(errorData.error || 'Failed to fetch documents');
       }
       const data = await response.json();
-      setDocuments(data);
+      setDocuments(data.map((doc: any) => ({
+        ...doc,
+        issueDate: doc.issueDate ? new Date(doc.issueDate) : null,
+        expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : null,
+      })));
     } catch (error) {
       console.error('Error fetching documents:', error);
       setError(error instanceof Error ? error.message : 'Failed to load documents');
@@ -47,18 +56,80 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
 
   useEffect(() => {
     fetchDocuments();
-  }, [refreshKey]);
+  }, [refreshKey]); // Re-fetch when refreshKey changes
 
   const filteredDocuments = documents.filter(doc => {
     const matchesType = selectedType ? doc.type === selectedType : true;
     const matchesSearch = searchTerm
-      ? doc.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.issuingCountry.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ? (doc.fileName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (doc.number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (doc.issuingCountry || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       : true;
     return matchesType && matchesSearch;
   });
+
+  const handleEdit = (documentId: string) => {
+    setEditingDocumentId(documentId);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch('/api/documents/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
+    } catch (error) {
+      console.error('Error deleting document:', error);
+    }
+  };
+
+  const handleFormSubmit = async (data: any) => {
+    try {
+      const response = await fetch('/api/documents/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          id: editingDocumentId
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update document');
+      }
+
+      const updatedDocument = await response.json();
+      setDocuments((prev) =>
+        prev.map((doc) => (doc.id === updatedDocument.id ? updatedDocument : doc))
+      );
+      setEditingDocumentId(null);
+    } catch (error) {
+      console.error('Error updating document:', error);
+    }
+  };
+
+  const calculateStatus = (expiryDate: Date | null): string => {
+    if (!expiryDate) return 'Unknown';
+    const today = new Date();
+    const timeDiff = expiryDate.getTime() - today.getTime();
+    const daysUntilExpiry = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+    if (daysUntilExpiry < 0) return 'Expired';
+    if (daysUntilExpiry <= 30) return 'Expiring Soon';
+    return 'Active';
+  };
 
   const documentTypes = [
     'PASSPORT',
@@ -123,27 +194,27 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                 <div>
                   <h3 className="text-lg font-medium">
                     <a 
-                      href={doc.fileUrl} 
+                      href={doc.fileUrl || '#'} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="link"
                     >
-                      {doc.fileName}
+                      {doc.title || 'Untitled Document'}
                     </a>
                   </h3>
                   <p className="text-sm text-link">
                     Type: {doc.type.replace('_', ' ')}
                   </p>
                   <p className="text-sm text-link">
-                    Document Number: {doc.number}
+                    Document Number: {doc.number || 'N/A'}
                   </p>
                   <p className="text-sm text-link">
-                    Issued: {new Date(doc.issueDate).toLocaleDateString()}
+                    Issued: {doc.issueDate ? new Date(doc.issueDate).toLocaleDateString() : 'N/A'}
                     {' | '}
-                    Expires: {new Date(doc.expiryDate).toLocaleDateString()}
+                    Expires: {doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : 'N/A'}
                   </p>
                   <p className="text-sm text-link">
-                    Country: {doc.issuingCountry}
+                    Country: {doc.issuingCountry || 'N/A'}
                   </p>
                   {doc.tags.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -160,14 +231,27 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                 </div>
                 <span
                   className={`px-2 py-1 text-xs font-semibold rounded ${
-                    doc.status === 'active'
+                    calculateStatus(doc.expiryDate) === 'Active'
                       ? 'bg-primary text-text'
-                      : 'bg-accent text-text'
+                      : calculateStatus(doc.expiryDate) === 'Expiring Soon'
+                      ? 'bg-yellow-500 text-text'
+                      : 'bg-red-500 text-text'
                   }`}
                 >
-                  {doc.status}
+                  {calculateStatus(doc.expiryDate)}
                 </span>
               </div>
+              <div className="flex space-x-2 mt-4">
+                <Button onClick={() => handleEdit(doc.id)} variant="secondary">Edit</Button>
+                <Button onClick={() => handleDelete(doc.id)} variant="accent">Delete</Button>
+              </div>
+              {editingDocumentId === doc.id && (
+                <DocumentForm
+                  initialData={doc}
+                  onSubmit={handleFormSubmit}
+                  onCancel={() => setEditingDocumentId(null)}
+                />
+              )}
             </div>
           ))}
         </div>

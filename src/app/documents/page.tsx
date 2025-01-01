@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import DocumentUpload from '@/components/documents/DocumentUpload';
+import DocumentUploadFlow from '@/components/documents/DocumentUploadFlow'; // Use the new component
 import DocumentList from '@/components/documents/DocumentList';
 import ExpirationDashboard from '@/components/documents/ExpirationDashboard';
 
@@ -54,7 +54,7 @@ function DocumentsContent() {
                 <CardTitle>Upload Document</CardTitle>
               </CardHeader>
               <CardContent>
-                <DocumentUpload onSuccess={handleUploadSuccess} />
+                <DocumentUploadFlow onUploadSuccess={handleUploadSuccess} /> {/* Pass the success handler */}
               </CardContent>
             </Card>
           </div>

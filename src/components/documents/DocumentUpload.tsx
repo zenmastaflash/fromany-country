@@ -1,8 +1,8 @@
+// src/components/documents/DocumentUpload.tsx
 'use client';
 
 import { useState, useRef } from 'react';
 
-// Define allowed file types and size limit
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
@@ -55,7 +55,7 @@ export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUplo
 
       const response = await fetch('/api/documents/upload', {
         method: 'POST',
-        body: formData,
+        body: formData, // Do not set Content-Type manually
       });
 
       if (!response.ok) {

@@ -1,12 +1,60 @@
 'use client';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const words = ['work', 'live', 'thrive'];
+  const [currentWord, setCurrentWord] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key state
+
+  useEffect(() => {
+    // Run for all words including the last one
+    if (currentWord <= words.length - 1) {
+      const timeout = setTimeout(() => {
+        setCurrentWord(currentWord + 1);  // This will make it go one step beyond the last word
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentWord, words.length]);
+
+  const handleUploadSuccess = () => {
+    setRefreshKey(prev => prev + 1); // Trigger refresh when docs are uploaded
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-background">
-      <div className="max-w-4xl w-full text-center space-y-8">
-        <h1 className="text-4xl md:text-6xl font-bold text-text mb-4">
-          fromany.country
-        </h1>
+    <main className="relative flex min-h-screen flex-col items-center justify-center p-8">
+      {/* Background Image */}
+      <div 
+        className="absolute top-0 left-0 w-full h-full z-0" 
+        style={{ 
+          backgroundImage: "url('/images/home-bg.webp')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 max-w-4xl w-full text-center space-y-8">
+        <div className="relative flex justify-center">
+          <div className="title-container">
+            <div className="animation-space">
+              {words.map((word, index) => (
+                index === currentWord && currentWord < words.length && (
+                  <span 
+                    key={word} 
+                    className="animated-word text-4xl md:text-6xl font-bold"
+                    style={{ color: '#964734' }}
+                  >
+                    {word}
+                  </span>
+                )
+              ))}
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold text-text">
+              from any country
+            </h1>
+          </div>
+        </div>
         <p className="text-xl md:text-2xl text-link mb-8">
           Live Anywhere. Belong Everywhere.
         </p>
@@ -27,4 +75,4 @@ export default function Home() {
       </div>
     </main>
   );
-}
+}  

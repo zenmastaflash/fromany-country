@@ -126,9 +126,17 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
       }
 
       const result = await response.json();
-      // Update the documents state with the returned document
       setDocuments((prev) =>
-        prev.map((doc) => (doc.id === editingDocumentId ? result.document : doc))
+        prev.map((doc) => {
+          if (doc.id === editingDocumentId) {
+            return {
+              ...result.document,
+              issueDate: result.document.issueDate ? new Date(result.document.issueDate) : null,
+              expiryDate: result.document.expiryDate ? new Date(result.document.expiryDate) : null,
+            };
+          }
+          return doc;
+        })
       );
       setEditingDocumentId(null);
     } catch (error) {

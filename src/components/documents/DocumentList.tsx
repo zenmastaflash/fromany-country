@@ -41,11 +41,17 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         throw new Error(errorData.error || 'Failed to fetch documents');
       }
       const data = await response.json();
-      setDocuments(data.map((doc: any) => ({
-        ...doc,
-        issueDate: doc.issueDate ? new Date(doc.issueDate) : null,
-        expiryDate: doc.expiryDate ? new Date(doc.expiryDate) : null,
-      })));
+      setDocuments(data.map((doc: any) => {
+        const issueDate = doc.issueDate ? new Date(doc.issueDate) : null;
+        const expiryDate = doc.expiryDate ? new Date(doc.expiryDate) : null;
+        
+        // Validate that dates are valid before using them
+        return {
+          ...doc,
+          issueDate: issueDate instanceof Date && !isNaN(issueDate.getTime()) ? issueDate : null,
+          expiryDate: expiryDate instanceof Date && !isNaN(expiryDate.getTime()) ? expiryDate : null,
+        };
+      }));
     } catch (error) {
       console.error('Error fetching documents:', error);
       setError(error instanceof Error ? error.message : 'Failed to load documents');
@@ -68,6 +74,15 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
       : true;
     return matchesType && matchesSearch;
   });
+
+  const sortedAndFilteredDocuments = filteredDocuments
+    .sort((a, b) => {
+      // Documents without expiry dates go to the end
+      if (!a.expiryDate && !b.expiryDate) return 0;
+      if (!a.expiryDate) return 1;
+      if (!b.expiryDate) return -1;
+      return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+    });
 
   const handleEdit = (documentId: string) => {
     setEditingDocumentId(documentId);
@@ -110,9 +125,18 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         throw new Error('Failed to update document');
       }
 
-      const updatedDocument = await response.json();
+      const result = await response.json();
       setDocuments((prev) =>
-        prev.map((doc) => (doc.id === updatedDocument.id ? updatedDocument : doc))
+        prev.map((doc) => {
+          if (doc.id === editingDocumentId) {
+            return {
+              ...result.document,
+              issueDate: result.document.issueDate ? new Date(result.document.issueDate) : null,
+              expiryDate: result.document.expiryDate ? new Date(result.document.expiryDate) : null,
+            };
+          }
+          return doc;
+        })
       );
       setEditingDocumentId(null);
     } catch (error) {
@@ -184,11 +208,11 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      ) : filteredDocuments.length === 0 ? (
+      ) : sortedAndFilteredDocuments.length === 0 ? (
         <p className="text-link text-center py-8">No documents found.</p>
       ) : (
         <div className="space-y-4">
-          {filteredDocuments.map((doc) => (
+          {sortedAndFilteredDocuments.map((doc) => (
             <div key={doc.id} className="card hover:bg-secondary">
               <div className="flex justify-between items-start">
                 <div>

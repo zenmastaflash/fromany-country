@@ -89,6 +89,18 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
 
       <div>
         <label className="block text-sm font-medium text-text">
+          Issue Date
+        </label>
+        <Input
+          type="date"
+          value={formData.issueDate}
+          onChange={(e) => setFormData({ ...formData, issueDate: e.target.value })}
+          className="mt-1"
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-text">
           Expiry Date *
         </label>
         <Input
@@ -97,18 +109,6 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
           onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
           className="mt-1"
           required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-text">
-          Issue Date
-        </label>
-        <Input
-          type="date"
-          value={formData.issueDate}
-          onChange={(e) => setFormData({ ...formData, issueDate: e.target.value })}
-          className="mt-1"
         />
       </div>
 

@@ -69,6 +69,15 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
     return matchesType && matchesSearch;
   });
 
+  const sortedAndFilteredDocuments = filteredDocuments
+    .sort((a, b) => {
+      // Documents without expiry dates go to the end
+      if (!a.expiryDate && !b.expiryDate) return 0;
+      if (!a.expiryDate) return 1;
+      if (!b.expiryDate) return -1;
+      return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+    });
+
   const handleEdit = (documentId: string) => {
     setEditingDocumentId(documentId);
   };
@@ -110,9 +119,10 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         throw new Error('Failed to update document');
       }
 
-      const updatedDocument = await response.json();
+      const result = await response.json();
+      // Update the documents state with the returned document
       setDocuments((prev) =>
-        prev.map((doc) => (doc.id === updatedDocument.id ? updatedDocument : doc))
+        prev.map((doc) => (doc.id === editingDocumentId ? result.document : doc))
       );
       setEditingDocumentId(null);
     } catch (error) {
@@ -184,11 +194,11 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      ) : filteredDocuments.length === 0 ? (
+      ) : sortedAndFilteredDocuments.length === 0 ? (
         <p className="text-link text-center py-8">No documents found.</p>
       ) : (
         <div className="space-y-4">
-          {filteredDocuments.map((doc) => (
+          {sortedAndFilteredDocuments.map((doc) => (
             <div key={doc.id} className="card hover:bg-secondary">
               <div className="flex justify-between items-start">
                 <div>

@@ -55,11 +55,6 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
   };
 
   const handleFormSubmit = async (data: any) => {
-    if (!uploadedFile?.document.id) {
-      console.error('No document ID found');
-      return;
-    }
-
     try {
       const response = await fetch('/api/documents/create', {
         method: 'POST',
@@ -68,8 +63,8 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
         },
         body: JSON.stringify({
           ...data,
-          fileName: uploadedFile.document.fileName,
-          fileUrl: uploadedFile.document.fileUrl,
+          fileName: uploadedFile?.document.fileName,
+          fileUrl: uploadedFile?.document.fileUrl,
         }),
       });
 
@@ -79,7 +74,9 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
 
       const result = await response.json();
       console.log('Document created:', result);
-setCurrentStep('upload'); // Reset back to upload step      onUploadSuccess();
+      setUploadedFile(null);  // Reset uploaded file
+      setCurrentStep('upload');  // Reset to upload step
+      onUploadSuccess();  // This triggers the list refresh
     } catch (error) {
       console.error('Error creating document:', error);
     }

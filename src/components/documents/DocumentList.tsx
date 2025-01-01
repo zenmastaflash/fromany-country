@@ -146,7 +146,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
     }
   };
 
-  const calculateStatus = (expiryDate: Date | null): string => {
+  const calculateStatus = (expiryDate: Date | null): StatusType => {
     if (!expiryDate) return 'Unknown';
     const today = new Date();
     const timeDiff = expiryDate.getTime() - today.getTime();
@@ -173,7 +173,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
     if (!acc[status]) acc[status] = [];
     acc[status].push(doc);
     return acc;
-  }, {} as Record<string, Document[]>);
+  }, {} as Record<StatusType, Document[]>);
 
   const [expandedSections, setExpandedSections] = useState<Record<StatusType, boolean>>({
     'Active': true,
@@ -228,88 +228,94 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
         <p className="text-link text-center py-8">No documents found.</p>
       ) : (
         <div className="space-y-4">
-          {Object.entries(groupedDocuments).map(([status, docs]) => (
-            <div key={status} className="mb-4">
-              <div
-                onClick={() => setExpandedSections(prev => ({ ...prev, [status]: !prev[status] }))}
-                className="flex justify-between items-center p-3 bg-secondary rounded-md cursor-pointer hover:bg-opacity-80"
-              >
-                <h2 className="text-lg font-medium">{status} ({docs.length})</h2>
-                <span>{expandedSections[status] ? '▼' : '▶'}</span>
-              </div>
-              
-              {expandedSections[status] && (
-                <div className="mt-4 space-y-4">
-                  {docs.map((doc) => (
-                    <div key={doc.id} className="card hover:bg-secondary">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-lg font-medium">
-                            <a 
-                              href={doc.fileUrl || '#'} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="link"
-                            >
-                              {doc.title || 'Untitled Document'}
-                            </a>
-                          </h3>
-                          <p className="text-sm text-link">
-                            Type: {doc.type.replace('_', ' ')}
-                          </p>
-                          <p className="text-sm text-link">
-                            Document Number: {doc.number || 'N/A'}
-                          </p>
-                          <p className="text-sm text-link">
-                            Issued: {doc.issueDate ? new Date(doc.issueDate).toLocaleDateString() : 'N/A'}
-                            {' | '}
-                            Expires: {doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : 'N/A'}
-                          </p>
-                          <p className="text-sm text-link">
-                            Country: {doc.issuingCountry || 'N/A'}
-                          </p>
-                          {doc.tags.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {doc.tags.map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-link"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded ${
-                            calculateStatus(doc.expiryDate) === 'Active'
-                              ? 'bg-primary text-text'
-                              : calculateStatus(doc.expiryDate) === 'Expiring Soon'
-                              ? 'bg-yellow-500 text-text'
-                              : 'bg-red-500 text-text'
-                          }`}
-                        >
-                          {calculateStatus(doc.expiryDate)}
-                        </span>
-                      </div>
-                      <div className="flex space-x-2 mt-4">
-                        <Button onClick={() => handleEdit(doc.id)} variant="secondary">Edit</Button>
-                        <Button onClick={() => handleDelete(doc.id)} variant="accent">Delete</Button>
-                      </div>
-                      {editingDocumentId === doc.id && (
-                        <DocumentForm
-                          initialData={doc}
-                          onSubmit={handleFormSubmit}
-                          onCancel={() => setEditingDocumentId(null)}
-                        />
-                      )}
-                    </div>
-                  ))}
+          {Object.entries(groupedDocuments).map(([status, docs]) => {
+            const statusKey = status as StatusType;
+            return (
+              <div key={status} className="mb-4">
+                <div
+                  onClick={() => setExpandedSections(prev => ({ 
+                    ...prev, 
+                    [statusKey]: !prev[statusKey] 
+                  }))}
+                  className="flex justify-between items-center p-3 bg-secondary rounded-md cursor-pointer hover:bg-opacity-80"
+                >
+                  <h2 className="text-lg font-medium">{status} ({docs.length})</h2>
+                  <span>{expandedSections[statusKey] ? '▼' : '▶'}</span>
                 </div>
-              )}
-            </div>
-          ))}
+                
+                {expandedSections[statusKey] && (
+                  <div className="mt-4 space-y-4">
+                    {docs.map((doc) => (
+                      <div key={doc.id} className="card hover:bg-secondary">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-medium">
+                              <a 
+                                href={doc.fileUrl || '#'} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="link"
+                              >
+                                {doc.title || 'Untitled Document'}
+                              </a>
+                            </h3>
+                            <p className="text-sm text-link">
+                              Type: {doc.type.replace('_', ' ')}
+                            </p>
+                            <p className="text-sm text-link">
+                              Document Number: {doc.number || 'N/A'}
+                            </p>
+                            <p className="text-sm text-link">
+                              Issued: {doc.issueDate ? new Date(doc.issueDate).toLocaleDateString() : 'N/A'}
+                              {' | '}
+                              Expires: {doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString() : 'N/A'}
+                            </p>
+                            <p className="text-sm text-link">
+                              Country: {doc.issuingCountry || 'N/A'}
+                            </p>
+                            {doc.tags.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {doc.tags.map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-link"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <span
+                            className={`px-2 py-1 text-xs font-semibold rounded ${
+                              calculateStatus(doc.expiryDate) === 'Active'
+                                ? 'bg-primary text-text'
+                                : calculateStatus(doc.expiryDate) === 'Expiring Soon'
+                                ? 'bg-yellow-500 text-text'
+                                : 'bg-red-500 text-text'
+                            }`}
+                          >
+                            {calculateStatus(doc.expiryDate)}
+                          </span>
+                        </div>
+                        <div className="flex space-x-2 mt-4">
+                          <Button onClick={() => handleEdit(doc.id)} variant="secondary">Edit</Button>
+                          <Button onClick={() => handleDelete(doc.id)} variant="accent">Delete</Button>
+                        </div>
+                        {editingDocumentId === doc.id && (
+                          <DocumentForm
+                            initialData={doc}
+                            onSubmit={handleFormSubmit}
+                            onCancel={() => setEditingDocumentId(null)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

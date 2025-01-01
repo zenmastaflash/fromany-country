@@ -1,7 +1,7 @@
 // src/components/documents/DocumentForm.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DocumentType } from '@prisma/client';
 import { Input } from '../ui/input'; // Assuming you have an input component
 import { Button } from '../ui/Button'; // Correct path and case
@@ -43,8 +43,22 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
     issuingCountry: initialData?.issuingCountry || '',
     tags: initialData?.tags?.join(', ') || '',
   });
+  const [countries, setCountries] = useState<string[]>([]);
 
   const documentTypes = Object.values(DocumentType);
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await fetch('/api/countries');
+        const data = await response.json();
+        setCountries(data.countries);
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+      }
+    };
+    fetchCountries();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,12 +142,16 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
         <label className="block text-sm font-medium text-text">
           Issuing Country
         </label>
-        <Input
-          type="text"
+        <select
           value={formData.issuingCountry}
           onChange={(e) => setFormData({ ...formData, issuingCountry: e.target.value })}
-          className="mt-1"
-        />
+          className="mt-1 block w-full rounded-md border-border bg-secondary text-text shadow-sm focus:border-primary focus:ring-primary"
+        >
+          <option value="">Select a country</option>
+          {countries.map((country) => (
+            <option key={country} value={country}>{country}</option>
+          ))}
+        </select>
       </div>
 
       <div>

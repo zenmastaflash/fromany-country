@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 export default function Home() {
   const words = ['work', 'live', 'thrive'];
   const [currentWord, setCurrentWord] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0); // Add refresh key state
 
   useEffect(() => {
     // Run for all words including the last one
@@ -14,6 +15,10 @@ export default function Home() {
       return () => clearTimeout(timeout);
     }
   }, [currentWord, words.length]);
+
+  const handleUploadSuccess = () => {
+    setRefreshKey(prev => prev + 1); // Trigger refresh when docs are uploaded
+  };
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center p-8">

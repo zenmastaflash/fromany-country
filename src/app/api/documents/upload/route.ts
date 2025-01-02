@@ -4,7 +4,17 @@ import { getServerSession } from 'next-auth';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { prisma } from '@/lib/prisma';
 import { authConfig } from '@/lib/auth';
-import { Prisma } from '@prisma/client';
+import { Prisma, DocumentType } from '@prisma/client';
+
+type DocumentMetadata = {
+  title?: string;
+  type?: DocumentType;
+  issueDate?: string | null;
+  expiryDate?: string | null;
+  number?: string | null;
+  issuingCountry?: string | null;
+  tags?: string[];
+};
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -27,11 +37,40 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const metadataStr = formData.get('metadata') as string | null;
+    
     if (!file) {
       return NextResponse.json(
         { error: 'No file provided' },
         { status: 400 }
       );
+    }
+
+    let metadata: DocumentMetadata = {
+      title: undefined,
+      type: undefined,
+      issueDate: null,
+      expiryDate: null,
+      number: null,
+      issuingCountry: null,
+      tags: []
+    };
+    if (metadataStr) {
+      try {
+        const parsed = JSON.parse(metadataStr);
+        metadata = {
+          ...metadata,  // Keep the default values
+          title: parsed.title || undefined,
+          type: parsed.type as DocumentType || undefined,
+          issueDate: parsed.issueDate || null,
+          expiryDate: parsed.expiryDate || null,
+          number: parsed.number || null,
+          issuingCountry: parsed.issuingCountry || null,
+          tags: Array.isArray(parsed.tags) ? parsed.tags : []
+        };
+      } catch (e) {
+        console.error('Error parsing metadata:', e);
+      }
     }
 
     const bytes = await file.arrayBuffer();
@@ -48,21 +87,21 @@ export async function POST(request: Request) {
       })
     );
 
-    // Create document record with defaults and nullable fields
+    // Create document record with metadata
     const document = await prisma.document.create({
       data: {
         userId: session.user.id,
         fileName: file.name,
         fileUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
-        title: file.name,
-        type: 'OTHER',
+        title: metadata.title || file.name,
+        type: metadata.type || DocumentType.OTHER,
         status: 'active',
-        issueDate: null,
-        expiryDate: null,
-        number: null,
-        issuingCountry: null,
-        metadata: Prisma.JsonNull,  // Using Prisma.JsonNull from @prisma/client
-        tags: [],
+        issueDate: metadata.issueDate ? new Date(metadata.issueDate) : null,
+        expiryDate: metadata.expiryDate ? new Date(metadata.expiryDate) : null,
+        number: metadata.number || null,
+        issuingCountry: metadata.issuingCountry || null,
+        metadata: metadata as Prisma.JsonObject,
+        tags: metadata.tags || [],
         sharedWith: [],
         version: 1
       }

@@ -16,8 +16,7 @@ type ValidationError = {
   size?: string;
 };
 
-export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUploadProps) {
-  const [isUploading, setIsUploading] = useState(false);
+export default function DocumentUpload(props: DocumentUploadProps) {
   const [error, setError] = useState<ValidationError | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +31,7 @@ export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUplo
     return null;
   };
 
-  const handleFile = async (file: File) => {
+  const handleFile = (file: File) => {
     const validationError = validateFile(file);
     if (validationError) {
       setError(validationError);
@@ -40,39 +39,8 @@ export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUplo
     }
 
     setError(null);
-    
-    if (onFileSelect) {
-      // If we're doing multi-step, just pass the file up
-      onFileSelect(file);
-      return;
-    }
-
-    // Otherwise proceed with direct upload (existing functionality)
-    try {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/documents/upload', {
-        method: 'POST',
-        body: formData, // Do not set Content-Type manually
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to upload document');
-      }
-
-      // Clear the file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-
-      onSuccess?.();
-    } catch (error) {
-      setError({ type: error instanceof Error ? error.message : 'Failed to upload document' });
-    } finally {
-      setIsUploading(false);
+    if (props.onFileSelect) {
+      props.onFileSelect(file);
     }
   };
 
@@ -142,16 +110,9 @@ export default function DocumentUpload({ onSuccess, onFileSelect }: DocumentUplo
             className="hidden"
             onChange={handleFileChange}
             accept=".pdf,.png,.jpg,.jpeg"
-            disabled={isUploading}
           />
         </label>
       </div>
-
-      {isUploading && (
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
-        </div>
-      )}
 
       {error && (
         <div className="text-red-600 text-sm">

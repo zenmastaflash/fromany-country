@@ -4,90 +4,82 @@
 import { useState } from 'react';
 import DocumentUpload from './DocumentUpload';
 import DocumentForm from './DocumentForm';
-import { DocumentType } from '@prisma/client';
 import { Button } from '../ui/Button';
+import { DocumentType } from '@prisma/client';
 
 type UploadStep = 'upload' | 'details';
-
-interface UploadedFile {
-  key: string;
-  document: {
-    id: string;
-    fileName: string;
-    fileUrl: string;
-    // ... other document fields
-  };
-}
 
 interface DocumentUploadFlowProps {
   onUploadSuccess: () => void;
 }
 
+interface DocumentFormData {
+  title: string;
+  type: DocumentType;
+  issueDate?: string | null;
+  expiryDate?: string | null;
+  number?: string | null;
+  issuingCountry?: string | null;
+  tags?: string[];
+}
+
 export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFlowProps) {
   const [currentStep, setCurrentStep] = useState<UploadStep>('upload');
-  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileSelect = async (file: File) => {
     console.log('File selected:', file.name);
-    const formData = new FormData();
-    formData.append('file', file);
+    setSelectedFile(file);
+    setCurrentStep('details');
+  };
+
+  const handleFormSubmit = async (data: DocumentFormData) => {
+    if (!selectedFile) {
+      console.error('No file selected');
+      return;
+    }
 
     try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      // Ensure all fields are properly typed and formatted
+      const metadataToSend: DocumentFormData = {
+        title: data.title,
+        type: data.type || DocumentType.OTHER,
+        issueDate: data.issueDate || null,
+        expiryDate: data.expiryDate || null,
+        number: data.number || null,
+        issuingCountry: data.issuingCountry || null,
+        tags: Array.isArray(data.tags) ? data.tags : []
+      };
+      
+      formData.append('metadata', JSON.stringify(metadataToSend));
+
       const response = await fetch('/api/documents/upload', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload document');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload document');
       }
 
       const result = await response.json();
-      console.log('Document uploaded:', result);
-      setUploadedFile({
-        key: result.key,
-        document: result.document,
-      });
-      setCurrentStep('details');
+      console.log('Document uploaded with metadata:', result);
+      
+      setCurrentStep('upload');
+      setSelectedFile(null);
+      onUploadSuccess();
     } catch (error) {
       console.error('Error uploading document:', error);
     }
   };
 
-  const handleFormSubmit = async (data: any) => {
-    if (!uploadedFile?.document.id) {
-      console.error('No document ID found');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/documents/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: uploadedFile.document.id,
-          ...data,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update document');
-      }
-
-      const result = await response.json();
-      console.log('Document updated:', result);
-      setCurrentStep('upload');
-      onUploadSuccess();
-    } catch (error) {
-      console.error('Error updating document:', error);
-    }
-  };
-
   const handleCancel = () => {
     setCurrentStep('upload');
-    setUploadedFile(null);
+    setSelectedFile(null);
   };
 
   return (
@@ -95,9 +87,9 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
       {currentStep === 'upload' && (
         <DocumentUpload onFileSelect={handleFileSelect} />
       )}
-      {currentStep === 'details' && uploadedFile && (
+      {currentStep === 'details' && selectedFile && (
         <DocumentForm
-          initialData={uploadedFile.document}
+          initialData={{ fileName: selectedFile.name }}
           onSubmit={handleFormSubmit}
           onCancel={handleCancel}
         />

@@ -20,21 +20,72 @@ const resources = {
       link: 'https://discoverysessions.com/digital-nomad-visas/'
     },
   ],
+  coliving: [
+    {
+      title: 'Best Coliving Spaces 2024',
+      description: 'Curated directory of top-rated coliving spaces worldwide with community reviews.',
+      link: 'https://www.coliving.com/spaces'
+    },
+    {
+      title: 'Digital Nomad Houses',
+      description: 'Community-driven platform connecting digital nomads with coliving spaces.',
+      link: 'https://digitalnomadhouses.com'
+    },
+    {
+      title: 'Coliving Directory',
+      description: 'Global directory of vetted coliving spaces with detailed amenities and community features.',
+      link: 'https://coliving.directory'
+    },
+  ],
+  geoArbitrage: [
+    {
+      title: 'Global Cost Calculator',
+      description: 'Compare living costs across cities to optimize your global lifestyle.',
+      link: 'https://www.numbeo.com/cost-of-living/'
+    },
+    {
+      title: 'Nomad Quality of Life Index',
+      description: 'Comprehensive city rankings based on cost, internet, safety, and more.',
+      link: 'https://nomadlist.com'
+    },
+    {
+      title: 'Arbitrage Guide 2024',
+      description: 'Strategic guide to maximizing your income through geographic arbitrage.',
+      link: 'https://www.nomadjunky.com/geo-arbitrage/'
+    },
+  ],
   tax: [
     {
-      title: 'US Nomad Tax Guide',
-      description: 'Comprehensive tax guide for US citizens, including strategies to minimize US tax liability.',
-      link: 'https://brighttax.com/blog/digital-nomad-taxes-a-complete-guide/'
+      title: 'PKF Worldwide Tax Guide 2024',
+      description: 'Comprehensive guide covering taxation systems in 150 countries, updated annually.',
+      link: 'https://www.pkf.com/publications/tax-guides/worldwide-tax-guide-2023-24/'
     },
     {
-      title: '2024 Tax Country Guide',
-      description: 'Detailed breakdown of tax implications in popular digital nomad destinations.',
-      link: 'https://immigrantinvest.com/blog/digital-nomad-taxes/'
+      title: 'Global Remote Work Tax Guide',
+      description: 'Understanding international tax obligations for remote workers and digital nomads.',
+      link: 'https://remote.com/blog/where-remote-workers-pay-taxes'
     },
     {
-      title: 'Ultimate US Tax Guide 2024',
-      description: 'How to legally minimize tax as an American digital nomad or remote worker.',
-      link: 'https://nomadgate.com/us-tax-guide/'
+      title: 'Digital Nomad Tax Navigator',
+      description: 'Country-by-country breakdown of tax implications for location-independent workers.',
+      link: 'https://velocityglobal.com/resources/blog/remote-work-taxes/'
+    },
+  ],
+  legal: [
+    {
+      title: 'Global Compliance Guide',
+      description: 'Essential legal considerations for digital nomads and remote workers.',
+      link: 'https://www.travelingwithkristin.com/digital-nomad-legal-guide'
+    },
+    {
+      title: 'Business Structure Guide',
+      description: 'Choosing the right business structure for location-independent entrepreneurs.',
+      link: 'https://flagtheory.com/business-structures/'
+    },
+    {
+      title: 'International Contract Templates',
+      description: 'Legal templates and documents for global remote work.',
+      link: 'https://www.contractscounsel.com/remote-work'
     },
   ],
   banking: [
@@ -56,19 +107,19 @@ const resources = {
   ],
   tools: [
     {
-      title: 'Document Templates',
-      description: 'Collection of essential templates for digital nomads (contracts, invoices, etc.).',
-      link: '#'
+      title: 'Remote Work Setup Guide',
+      description: 'Comprehensive guide to creating an efficient and ergonomic remote workspace.',
+      link: 'https://nomadsunveiled.com/remote-work-setup-tips-nomads-remote-workers/'
     },
     {
-      title: 'Remote Work Setup',
-      description: 'Guide to setting up a reliable remote work environment anywhere.',
-      link: '#'
+      title: 'Digital Nomad Toolkit 2024',
+      description: 'Current essential tools, software, and services for location-independent work.',
+      link: 'https://www.oberlo.com/blog/digital-nomad'
     },
     {
-      title: 'Compliance Checklist',
-      description: 'Essential checklist for maintaining legal compliance while traveling.',
-      link: '#'
+      title: 'Global Compliance Guide',
+      description: 'Essential legal and regulatory requirements for digital nomads worldwide.',
+      link: 'https://drummondadvisors.com/en/2024/10/22/complete-guide-for-digital-nomads-essential-legal-rules/'
     },
   ]
 };
@@ -76,9 +127,12 @@ const resources = {
 export default function ResourcesPage() {
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">Resources</h1>
+      <h1 className="text-4xl font-bold mb-4">Resources</h1>
+      <p className="text-xl text-link mb-8">
+        Curated resources to help you thrive as a location-independent professional.
+      </p>
       
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {Object.entries(resources).map(([category, items]) => (
           <Card key={category} className="h-full">
             <CardHeader>

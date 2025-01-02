@@ -16,7 +16,7 @@ type ValidationError = {
   size?: string;
 };
 
-export default function DocumentUpload({ onFileSelect }: DocumentUploadProps) {
+export default function DocumentUpload(props: DocumentUploadProps) {
   const [error, setError] = useState<ValidationError | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +39,9 @@ export default function DocumentUpload({ onFileSelect }: DocumentUploadProps) {
     }
 
     setError(null);
-    onFileSelect(file);
+    if (props.onFileSelect) {
+      props.onFileSelect(file);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {

@@ -27,11 +27,22 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const metadataStr = formData.get('metadata') as string;
+    
     if (!file) {
       return NextResponse.json(
         { error: 'No file provided' },
         { status: 400 }
       );
+    }
+
+    let metadata = {};
+    if (metadataStr) {
+      try {
+        metadata = JSON.parse(metadataStr);
+      } catch (e) {
+        console.error('Error parsing metadata:', e);
+      }
     }
 
     const bytes = await file.arrayBuffer();
@@ -48,21 +59,21 @@ export async function POST(request: Request) {
       })
     );
 
-    // Create document record with defaults and nullable fields
+    // Create document record with metadata
     const document = await prisma.document.create({
       data: {
         userId: session.user.id,
         fileName: file.name,
         fileUrl: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
-        title: file.name,
-        type: 'OTHER',
+        title: metadata.title || file.name,
+        type: metadata.type || 'OTHER',
         status: 'active',
-        issueDate: null,
-        expiryDate: null,
-        number: null,
-        issuingCountry: null,
-        metadata: Prisma.JsonNull,  // Using Prisma.JsonNull from @prisma/client
-        tags: [],
+        issueDate: metadata.issueDate ? new Date(metadata.issueDate) : null,
+        expiryDate: metadata.expiryDate ? new Date(metadata.expiryDate) : null,
+        number: metadata.number || null,
+        issuingCountry: metadata.issuingCountry || null,
+        metadata: metadata || Prisma.JsonNull,
+        tags: metadata.tags || [],
         sharedWith: [],
         version: 1
       }

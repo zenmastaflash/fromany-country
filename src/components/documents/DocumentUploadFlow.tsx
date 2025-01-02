@@ -5,11 +5,22 @@ import { useState } from 'react';
 import DocumentUpload from './DocumentUpload';
 import DocumentForm from './DocumentForm';
 import { Button } from '../ui/Button';
+import { DocumentType } from '@prisma/client';
 
 type UploadStep = 'upload' | 'details';
 
 interface DocumentUploadFlowProps {
   onUploadSuccess: () => void;
+}
+
+interface DocumentFormData {
+  title: string;
+  type: DocumentType;
+  issueDate?: string | null;
+  expiryDate?: string | null;
+  number?: string | null;
+  issuingCountry?: string | null;
+  tags?: string[];
 }
 
 export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFlowProps) {
@@ -22,23 +33,24 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
     setCurrentStep('details');
   };
 
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: DocumentFormData) => {
     if (!selectedFile) {
       console.error('No file selected');
       return;
     }
 
     try {
-      // First upload the file
       const formData = new FormData();
       formData.append('file', selectedFile);
       
-      // Make sure dates are properly formatted
-      const metadataToSend = {
-        ...data,
+      // Ensure all fields are properly typed and formatted
+      const metadataToSend: DocumentFormData = {
+        title: data.title,
+        type: data.type || DocumentType.OTHER,
         issueDate: data.issueDate || null,
         expiryDate: data.expiryDate || null,
-        type: data.type || 'OTHER',
+        number: data.number || null,
+        issuingCountry: data.issuingCountry || null,
         tags: Array.isArray(data.tags) ? data.tags : []
       };
       

@@ -128,7 +128,7 @@ export default function ResourcesPage() {
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-4">Resources</h1>
-      <p className="text-xl text-gray-600 mb-8">
+      <p className="text-xl text-link mb-8">
         Curated resources to help you thrive as a location-independent professional.
       </p>
       

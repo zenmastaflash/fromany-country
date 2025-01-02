@@ -32,7 +32,17 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
       // First upload the file
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('metadata', JSON.stringify(data));  // Include metadata with upload
+      
+      // Make sure dates are properly formatted
+      const metadataToSend = {
+        ...data,
+        issueDate: data.issueDate || null,
+        expiryDate: data.expiryDate || null,
+        type: data.type || 'OTHER',
+        tags: Array.isArray(data.tags) ? data.tags : []
+      };
+      
+      formData.append('metadata', JSON.stringify(metadataToSend));
 
       const response = await fetch('/api/documents/upload', {
         method: 'POST',
@@ -40,7 +50,8 @@ export default function DocumentUploadFlow({ onUploadSuccess }: DocumentUploadFl
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload document');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload document');
       }
 
       const result = await response.json();

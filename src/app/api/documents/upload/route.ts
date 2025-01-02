@@ -46,17 +46,26 @@ export async function POST(request: Request) {
       );
     }
 
-    let metadata: DocumentMetadata = {};
+    let metadata: DocumentMetadata = {
+      title: undefined,
+      type: undefined,
+      issueDate: null,
+      expiryDate: null,
+      number: null,
+      issuingCountry: null,
+      tags: []
+    };
     if (metadataStr) {
       try {
         const parsed = JSON.parse(metadataStr);
         metadata = {
-          title: parsed.title,
-          type: parsed.type as DocumentType,
-          issueDate: parsed.issueDate,
-          expiryDate: parsed.expiryDate,
-          number: parsed.number,
-          issuingCountry: parsed.issuingCountry,
+          ...metadata,  // Keep the default values
+          title: parsed.title || undefined,
+          type: parsed.type as DocumentType || undefined,
+          issueDate: parsed.issueDate || null,
+          expiryDate: parsed.expiryDate || null,
+          number: parsed.number || null,
+          issuingCountry: parsed.issuingCountry || null,
           tags: Array.isArray(parsed.tags) ? parsed.tags : []
         };
       } catch (e) {

@@ -176,10 +176,10 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   }, {} as Record<StatusType, Document[]>);
 
   const [expandedSections, setExpandedSections] = useState<Record<StatusType, boolean>>({
-    'Active': true,
-    'Expiring Soon': true,
-    'Expired': true,
-    'Unknown': true
+    'Active': false,
+    'Expiring Soon': false,
+    'Expired': false,
+    'Unknown': false
   });
 
   if (error) {

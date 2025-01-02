@@ -5,15 +5,11 @@ A comprehensive platform for digital nomads to manage their global lifestyle—t
 
 ## Table of Contents
 
-1. [Features](#features)  
-2. [Quick Start](#quick-start)  
-3. [Detailed Setup](#detailed-setup)  
-4. [Development](#development)  
-5. [Common Issues](#common-issues)  
-6. [Deployment](#deployment)  
-7. [Contributing](#contributing)  
-8. [License](#license)
-9. [Environment Variables](#environment-variables)
+1. [Features](#features)
+2. [Quick Start](#quick-start)
+3. [Common Issues](#common-issues)
+4. [Environment Variables](#environment-variables)
+5. [License](#license)
 
 ## Features
 
@@ -47,11 +43,11 @@ For devices with OLED or AMOLED screens, dark mode can extend battery life. On t
 Many users find dark mode visually appealing and modern. It offers a different visual experience that is often perceived as less harsh than light mode. Dark colors can symbolize luxury and elegance, and light tones pop more effectively against a dark background.
 
 - **Potential Sleep Benefits**
-Dark mode may improve sleep quality by reducing exposure to blue light, which can disrupt sleep patterns. By decreasing blue light emission, especially in the evening, dark mode may help maintain the body’s natural circadian rhythm.
+Dark mode may improve sleep quality by reducing exposure to blue light, which can disrupt sleep patterns. By decreasing blue light emission, especially in the evening, dark mode may help maintain the body's natural circadian rhythm.
 
 - **Accessibility Improvements**
 For individuals with certain visual impairments, such as sensitivity to bright light or photophobia, dark mode can provide a more comfortable and accessible viewing experience. It offers a gentler visual experience, allowing for better focus and comprehension.
-While dark mode offers these benefits, it’s important to note that it may not be suitable for everyone, particularly those with astigmatism or in brightly lit environments. Users should choose the mode that works best for their individual needs and preferences.
+While dark mode offers these benefits, it's important to note that it may not be suitable for everyone, particularly those with astigmatism or in brightly lit environments. Users should choose the mode that works best for their individual needs and preferences.
 
 ### Core Features
 
@@ -99,6 +95,85 @@ While dark mode offers these benefits, it’s important to note that it may not 
 - Resolved document errors (some still pending)
 - Resolved auth issues
 
+## Quick Start
+
+### Prerequisites
+
+1. Create accounts on:
+   - Vercel (https://vercel.com)
+   - Supabase (https://supabase.com) for database
+   - Google Cloud (https://console.cloud.google.com/) for OAuth
+
+### Step 1: Set Up Database
+
+1. Go to Supabase
+2. Create a new project
+3. Get your database connection string from Settings > Database
+4. Save this for later use
+
+### Step 2: Deploy to Vercel
+
+1. Go to https://vercel.com
+2. Click 'Add New Project'
+3. Import your GitHub repository
+4. Configure the Environment Variables at the bottom of this page
+5. Click Deploy
+
+### Step 3: Configure Domain
+
+1. In Vercel, go to your project settings
+2. Click 'Domains'
+3. Add your domain 'fromany.country'
+4. Follow the DNS configuration instructions
+
+### Step 4: Google OAuth Setup
+
+1. Go to https://console.cloud.google.com/
+2. Create a new project (or select an existing one)
+3. In the sidebar, click 'APIs & Services' > 'Credentials'
+4. Click 'Create Credentials' > 'OAuth client ID'
+5. Configure the OAuth consent screen if prompted
+6. Select 'Web application' as the application type
+7. Add these Authorized redirect URIs:
+   - http://localhost:3000/api/auth/callback/google (for development)
+   - https://fromany.country/api/auth/callback/google (for production)
+8. Click 'Create'
+9. Copy the Client ID and Client Secret
+
+## Common Issues
+
+1. **Database Connection Issues**
+   - Check if your DATABASE_URL is correct
+   - Verify IP restrictions in Supabase
+
+2. **Authentication Problems**
+   - Ensure Google OAuth redirect URIs are updated
+   - Check NEXTAUTH_URL matches your domain
+
+3. **Build Failures**
+   - Check build logs in Vercel
+   - Verify all environment variables are set
+
+### Maintenance
+
+1. **Regular Updates**
+   ```bash
+   # Update dependencies
+   npm update
+   
+   # Check for security vulnerabilities
+   npm audit
+   ```
+
+2. **Database Backups**
+   - Supabase handles automatic backups
+   - Consider setting up additional backup procedures
+
+3. **SSL Certificates**
+   - Vercel handles SSL automatically
+   - Renews certificates automatically
+
+
 ## Environment Variables
 
 ### Production Variables
@@ -126,3 +201,8 @@ While dark mode offers these benefits, it’s important to note that it may not 
 - NEXTAUTH_SECRET
 - NEXT_PUBLIC_S3_BUCKET
 - NEXT_PUBLIC_S3_REGION
+
+## License
+
+This project is licensed under the [GNU General Public License v3](./LICENSE).
+

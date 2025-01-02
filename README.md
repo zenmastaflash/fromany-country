@@ -52,10 +52,10 @@ While dark mode offers these benefits, it's important to note that it may not be
 ### Core Features
 
 - **Document Management**
-  - Upload & storage using Supabase and AWS S3
-  - Document categorization
-  - Metadata tracking
-  - Expiration system
+  - ✅ Upload & storage using Supabase and AWS S3 
+  - ✅ Document categorization
+  - ✅ Metadata tracking
+  - ✅ Expiration system
   - Document sharing
   - Version control
 
@@ -78,22 +78,26 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Community forum or integrations with WhatsApp, Signal, Slack
 
 - **Resource Center**
-  - Coliving
-  - Geo Arbitrage
-  - Tax liability
-  - Legal resources
-  - Nomad visas
+  - ✅ Coliving
+  - ✅ Geo Arbitrage
+  - ✅ Tax liability
+  - ✅ Legal resources
+  - ✅ Nomad visas
   - Other tools
 
 ### Next Steps
 
+- Travel Integration
 - Create a dashboard for tax residency, liability, and other useful insights
-- Fix document storage "internal error"
 
 ### Recent Fixes
 
-- Resolved document errors (some still pending)
-- Resolved auth issues
+- Fixed various document upload and storage issues
+- Fixed home page CSS issue
+- Removed background image. It was pretty, but too hard to read font.
+- Fixed Google OAuth callback issue
+- Added country dropdown to document upload
+
 
 ## Quick Start
 

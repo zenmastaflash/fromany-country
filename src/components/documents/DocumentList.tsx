@@ -114,6 +114,28 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
     }
   };
 
+  const handleShare = async (documentId: string) => {
+    setSelectedDocumentId(documentId);
+    setShareModalOpen(true);
+  };
+
+  const handleShareSubmit = async (email: string) => {
+    if (!selectedDocumentId) return;
+
+    const response = await fetch('/api/documents/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        documentId: selectedDocumentId,
+        email
+      }),
+    });
+
+    if (response.ok) {
+      fetchDocuments(); // Refresh document list
+    }
+  };
+
   const handleFormSubmit = async (data: any) => {
     try {
       const response = await fetch('/api/documents/update', {
@@ -305,10 +327,15 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                         <div className="flex space-x-2 mt-4">
                           <Button onClick={() => handleEdit(doc.id)} variant="secondary">Edit</Button>
                           <Button onClick={() => handleDelete(doc.id)} variant="accent">Delete</Button>
-                          <Button onClick={() => {
-                            setSelectedDocumentId(doc.id);
-                            setShareModalOpen(true);
-                          }} variant="secondary">Share</Button>
+                          <Button onClick={() => handleShare(doc.id)} variant="secondary">Share</Button>
+                          {shareModalOpen && selectedDocumentId === doc.id && (
+                            <ShareModal
+                              documentId={doc.id}
+                              onClose={() => setShareModalOpen(false)}
+                              onShare={handleShareSubmit}
+                              currentShares={doc.sharedWith}
+                            />
+                          )}
                         </div>
                         {editingDocumentId === doc.id && (
                           <DocumentForm

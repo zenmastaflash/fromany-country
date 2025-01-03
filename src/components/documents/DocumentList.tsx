@@ -17,6 +17,8 @@ type Document = {
   tags: string[];
   createdAt: Date;
   title: string | null;
+  sharedWith: string[];
+  sharedBy: string | null;
 };
 
 type DocumentListProps = {
@@ -32,6 +34,8 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [selectedType, setSelectedType] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingDocumentId, setEditingDocumentId] = useState<string | null>(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
 
   const fetchDocuments = async () => {
     try {
@@ -301,6 +305,10 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                         <div className="flex space-x-2 mt-4">
                           <Button onClick={() => handleEdit(doc.id)} variant="secondary">Edit</Button>
                           <Button onClick={() => handleDelete(doc.id)} variant="accent">Delete</Button>
+                          <Button onClick={() => {
+                            setSelectedDocumentId(doc.id);
+                            setShareModalOpen(true);
+                          }} variant="secondary">Share</Button>
                         </div>
                         {editingDocumentId === doc.id && (
                           <DocumentForm

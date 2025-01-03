@@ -133,6 +133,7 @@ export default function ProfilePage() {
       if (response.ok) {
         const data = await response.json();
         setProfile(prev => ({ ...prev, image: data.imageUrl }));
+        setIsDirty(true); // Add this line to enable save button
         showNotification('success', 'Profile photo updated');
       }
     } catch (error) {

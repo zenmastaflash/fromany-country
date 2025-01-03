@@ -20,23 +20,28 @@ enum DocumentType {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  emailVerified DateTime?
-  image         String?
-  displayName   String?
-  timezone      String?
-  preferences   Json?     
-  visibility    String?   @default("private")
-  bio           String?   @default("")
-  location      String?
-  socialLinks   String[]  @default([])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  documents     Document[]
-  accounts      Account[]
-  sessions      Session[]
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  name                    String?
+  emailVerified          DateTime?
+  image                   String?
+  displayName             String?
+  timezone                String?
+  preferences             Json?     
+  visibility              String?   @default("private")
+  bio                     String?   @default("")
+  location                String?
+  socialLinks             String[]  @default([])
+  notificationPreferences Json?     @default("{ \"documentExpiry\": true, \"travelReminders\": true, \"securityAlerts\": true, \"newsletter\": false }")
+  primaryCurrency         String?   @default("USD")
+  taxResidency           String?
+  emergencyContact       Json?
+  preferredLanguage      String?   @default("en")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  documents              Document[]
+  accounts               Account[]
+  sessions               Session[]
 }
 
 model Document {

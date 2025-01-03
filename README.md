@@ -77,6 +77,15 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Links to partner communities (e.g., coliving spaces)
   - Community forum or integrations with WhatsApp, Signal, Slack
 
+- **Profile Page**
+  - ✅ Profile Photo
+  - ✅ Display name, bio, current location
+  - Profile Visibility - Complete, but currently not active
+  - Notification Preferences - Complete but currently not active
+  - Emergency Contact - created, but doesn't stick on refresh
+  - SOS button (sends info to emergency contact with last known wheereabouts. Considering integration with a tool like internationalSOS or other)
+  - Account Deletion - Button added, functionality not there yet.
+
 - **Resource Center**
   - ✅ Coliving
   - ✅ Geo Arbitrage
@@ -87,6 +96,7 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Next Steps
 
+- Finish Profile Page and ensure all functions work as expected
 - Travel Integration
 - Create a dashboard for tax residency, liability, and other useful insights
 

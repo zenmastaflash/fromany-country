@@ -85,7 +85,7 @@ export default function ProfilePage() {
                 value={profile.displayName}
                 onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
                 placeholder="How you want to be known"
-                className="max-w-md bg-background text-text placeholder-text/50"
+                className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
               />
             </div>
 
@@ -95,7 +95,7 @@ export default function ProfilePage() {
                 value={profile.bio}
                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                 placeholder="Tell us about yourself"
-                className="max-w-md bg-background text-text placeholder-text/50"
+                className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
               />
             </div>
 
@@ -105,7 +105,7 @@ export default function ProfilePage() {
                 value={profile.location}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                 placeholder="Current location"
-                className="max-w-md bg-background text-text placeholder-text/50"
+                className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
               />
             </div>
 
@@ -114,7 +114,7 @@ export default function ProfilePage() {
               <select 
                 value={profile.visibility}
                 onChange={(e) => setProfile({ ...profile, visibility: e.target.value })}
-                className="block w-full max-w-md rounded-md bg-background text-text border-border px-3 py-2"
+                className="rounded-md border-border bg-secondary text-text shadow-sm focus:border-primary focus:ring-primary w-full"
               >
                 <option value="public">Public</option>
                 <option value="private">Private</option>
@@ -138,7 +138,7 @@ export default function ProfilePage() {
                     setProfile({ ...profile, socialLinks: newLinks });
                   }}
                   placeholder="https://"
-                  className="max-w-md bg-background text-text placeholder-text/50"
+                  className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
                 />
               </div>
             ))}

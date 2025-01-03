@@ -3,7 +3,9 @@ import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
 import { authConfig } from '@/lib/auth';
 
-export async function POST(request: Request) {
+export const runtime = 'nodejs';
+
+async function POST(request: Request) {
   const session = await getServerSession(authConfig);
   if (!session?.user?.id) return new NextResponse('Unauthorized', { status: 401 });
 
@@ -36,3 +38,5 @@ export async function POST(request: Request) {
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
+
+export { POST };

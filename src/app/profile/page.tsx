@@ -62,59 +62,59 @@ export default function ProfilePage() {
   };
 
   if (status === 'loading') {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center min-h-screen text-text">Loading...</div>;
   }
 
   if (status === 'unauthenticated') {
-    return <div className="flex justify-center items-center min-h-screen">Please sign in to view your profile.</div>;
+    return <div className="flex justify-center items-center min-h-screen text-text">Please sign in to view your profile.</div>;
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">Profile Settings</h1>
+      <h1 className="text-4xl font-bold mb-8 text-text">Profile Settings</h1>
       
       <form onSubmit={handleSubmit} className="space-y-8">
-        <Card>
+        <Card className="bg-secondary">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle className="text-text">Basic Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <div className="font-medium">Display Name</div>
+              <div className="text-sm font-medium text-text">Display Name</div>
               <Input
                 value={profile.displayName}
                 onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
                 placeholder="How you want to be known"
-                className="max-w-md"
+                className="max-w-md bg-background text-text placeholder-text/50"
               />
             </div>
 
             <div className="space-y-2">
-              <div className="font-medium">Bio</div>
+              <div className="text-sm font-medium text-text">Bio</div>
               <Input
                 value={profile.bio}
                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                 placeholder="Tell us about yourself"
-                className="max-w-md"
+                className="max-w-md bg-background text-text placeholder-text/50"
               />
             </div>
 
             <div className="space-y-2">
-              <div className="font-medium">Location</div>
+              <div className="text-sm font-medium text-text">Location</div>
               <Input
                 value={profile.location}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                 placeholder="Current location"
-                className="max-w-md"
+                className="max-w-md bg-background text-text placeholder-text/50"
               />
             </div>
 
             <div className="space-y-2">
-              <div className="font-medium">Profile Visibility</div>
+              <div className="text-sm font-medium text-text">Profile Visibility</div>
               <select 
                 value={profile.visibility}
                 onChange={(e) => setProfile({ ...profile, visibility: e.target.value })}
-                className="block w-full max-w-md rounded-md border border-gray-300 px-3 py-2"
+                className="block w-full max-w-md rounded-md bg-background text-text border-border px-3 py-2"
               >
                 <option value="public">Public</option>
                 <option value="private">Private</option>
@@ -123,9 +123,9 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-secondary">
           <CardHeader>
-            <CardTitle>Social Links</CardTitle>
+            <CardTitle className="text-text">Social Links</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {profile.socialLinks.map((link, index) => (
@@ -138,17 +138,17 @@ export default function ProfilePage() {
                     setProfile({ ...profile, socialLinks: newLinks });
                   }}
                   placeholder="https://"
-                  className="max-w-md"
+                  className="max-w-md bg-background text-text placeholder-text/50"
                 />
               </div>
             ))}
             <Button
               type="button"
-              className="mt-2"
               onClick={() => setProfile({
                 ...profile,
                 socialLinks: [...profile.socialLinks, '']
               })}
+              className="btn-secondary"
             >
               Add Social Link
             </Button>
@@ -156,7 +156,9 @@ export default function ProfilePage() {
         </Card>
 
         <div className="flex justify-end">
-          <Button type="submit">Save Changes</Button>
+          <Button type="submit" className="btn-primary">
+            Save Changes
+          </Button>
         </div>
       </form>
     </div>

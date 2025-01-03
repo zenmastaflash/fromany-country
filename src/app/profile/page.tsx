@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
@@ -157,8 +157,7 @@ export default function ProfilePage() {
       });
 
       if (response.ok) {
-        // Redirect to home page or sign out
-        window.location.href = '/';
+        await signOut({ callbackUrl: '/' });
       } else {
         throw new Error('Failed to delete account');
       }

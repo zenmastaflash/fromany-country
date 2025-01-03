@@ -481,7 +481,7 @@ export default function ProfilePage() {
           <CardContent>
             <Button
               onClick={handleDeleteAccount}
-              variant="destructive"
+              variant="primary"
               className="w-full bg-red-500 hover:bg-red-600 text-white"
               disabled={isDeleting}
             >

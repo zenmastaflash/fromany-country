@@ -25,6 +25,15 @@ model User {
   name          String?
   emailVerified DateTime?
   image         String?
+  displayName   String?
+  timezone      String?
+  preferences   Json?     
+  visibility    String?   @default("private")
+  bio           String?   @default("")
+  location      String?
+  socialLinks   String[]  @default([])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   documents     Document[]
   accounts      Account[]
   sessions      Session[]

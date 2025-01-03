@@ -131,7 +131,7 @@ export async function DELETE(
       }),
     ]);
 
-    return new NextResponse(null, { status: 204 });
+    return NextResponse.json({ signOut: true });
   } catch (error: any) {
     console.error('Error deleting user:', error);
     return new NextResponse(error.message || 'Internal Server Error', { status: 500 });

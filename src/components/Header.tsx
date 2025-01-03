@@ -16,6 +16,7 @@ export default function Header() {
     { href: "/dashboard", label: "Dashboard", protected: true },
     { href: "/travel", label: "Travel", protected: true },
     { href: "/documents", label: "Documents", protected: true },
+    { href: "/profile", label: "Profile", protected: true },
     { href: "/resources", label: "Resources", protected: false }
   ];
 

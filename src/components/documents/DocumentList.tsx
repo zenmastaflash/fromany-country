@@ -2,23 +2,23 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import DocumentForm from './DocumentForm';
+import ShareModal from './ShareModal';
 import { DocumentType } from '@prisma/client'; // Import DocumentType
 
 type Document = {
   id: string;
   fileName: string | null;
-  type: DocumentType; // Use DocumentType enum
+  type: DocumentType;
   fileUrl: string | null;
   number: string | null;
-  issueDate: Date | null; // Use Date type
-  expiryDate: Date | null; // Use Date type
+  issueDate: Date | null;
+  expiryDate: Date | null;
   issuingCountry: string | null;
   status: string;
   tags: string[];
+  sharedWith: string[];
   createdAt: Date;
   title: string | null;
-  sharedWith: string[];
-  sharedBy: string | null;
 };
 
 type DocumentListProps = {

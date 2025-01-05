@@ -31,6 +31,19 @@ export const authConfig: NextAuthOptions = {
     async signIn({ user, account, profile }) {
       try {
         console.log("SignIn Callback:", { user, account, profile });
+        if (account?.provider === 'google') {
+          // Only update the image if there isn't a custom uploaded one
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            select: { image: true }
+          });
+          if (!existingUser?.image) {
+            await prisma.user.update({
+              where: { email: user.email! },
+              data: { image: user.image }
+            });
+          }
+        }
         return true;
       } catch (error) {
         console.error("SignIn Error:", error);

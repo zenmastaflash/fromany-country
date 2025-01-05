@@ -41,6 +41,18 @@ export const authConfig: NextAuthOptions = {
       try {
         if (session?.user) {
           session.user.id = token.sub!;
+          // Get latest user data
+          const user = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: {
+              image: true,
+              displayName: true,
+            },
+          });
+          if (user) {
+            session.user.image = user.image || session.user.image;
+            session.user.name = user.displayName || session.user.name;
+          }
         }
         return session;
       } catch (error) {

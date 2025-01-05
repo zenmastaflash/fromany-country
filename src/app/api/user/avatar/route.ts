@@ -25,15 +25,16 @@ export async function POST(request: Request) {
     const key = `avatars/${session.user.id}/${Date.now()}-${file.name}`;
 
     await s3.send(new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: process.env.AWS_BUCKET_NAME!,
       Key: key,
       Body: buffer,
       ContentType: file.type,
+      ACL: 'public-read',
     }));
 
     const imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: { image: imageUrl },
     });

@@ -22,56 +22,27 @@ export async function POST(request: Request) {
     const file = formData.get('file') as File;
     if (!file) return new NextResponse('No file provided', { status: 400 });
 
-    // Get file buffer and metadata
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileType = file.type;
-    const fileExt = fileType.split('/')[1];
-    
-    // Create unique filename
-    const key = `avatars/${session.user.id}/${Date.now()}.${fileExt}`;
+    const key = `avatars/${session.user.id}/${Date.now()}-${file.name}`;
 
-    // Upload to S3
-    const command = new PutObjectCommand({
+    await s3.send(new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME!,
       Key: key,
       Body: buffer,
-      ContentType: fileType,
-    });
+      ContentType: file.type,
+    }));
 
-    await s3.send(command);
-
-    // Generate the URL
     const imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
-    // Update user in database
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
-      data: { 
-        image: imageUrl,
-        updatedAt: new Date()
-      },
+      data: { image: imageUrl },
       select: { image: true }
     });
 
-    return NextResponse.json({ 
-      imageUrl: updatedUser.image,
-      success: true 
-    });
-
+    return NextResponse.json({ imageUrl: updatedUser.image });
   } catch (error) {
     console.error('Error uploading avatar:', error);
-    return new NextResponse(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Failed to upload image',
-        success: false
-      }), 
-      { status: 500 }
-    );
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};

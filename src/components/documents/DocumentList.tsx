@@ -2,19 +2,21 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import DocumentForm from './DocumentForm';
+import ShareModal from './ShareModal';
 import { DocumentType } from '@prisma/client'; // Import DocumentType
 
 type Document = {
   id: string;
   fileName: string | null;
-  type: DocumentType; // Use DocumentType enum
+  type: DocumentType;
   fileUrl: string | null;
   number: string | null;
-  issueDate: Date | null; // Use Date type
-  expiryDate: Date | null; // Use Date type
+  issueDate: Date | null;
+  expiryDate: Date | null;
   issuingCountry: string | null;
   status: string;
   tags: string[];
+  sharedWith: string[];
   createdAt: Date;
   title: string | null;
 };
@@ -32,6 +34,8 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [selectedType, setSelectedType] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingDocumentId, setEditingDocumentId] = useState<string | null>(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
 
   const fetchDocuments = async () => {
     try {
@@ -107,6 +111,28 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
       setDocuments((prev) => prev.filter((doc) => doc.id !== id));
     } catch (error) {
       console.error('Error deleting document:', error);
+    }
+  };
+
+  const handleShare = async (documentId: string) => {
+    setSelectedDocumentId(documentId);
+    setShareModalOpen(true);
+  };
+
+  const handleShareSubmit = async (email: string) => {
+    if (!selectedDocumentId) return;
+
+    const response = await fetch('/api/documents/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        documentId: selectedDocumentId,
+        email
+      }),
+    });
+
+    if (response.ok) {
+      fetchDocuments(); // Refresh document list
     }
   };
 
@@ -301,6 +327,15 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                         <div className="flex space-x-2 mt-4">
                           <Button onClick={() => handleEdit(doc.id)} variant="secondary">Edit</Button>
                           <Button onClick={() => handleDelete(doc.id)} variant="accent">Delete</Button>
+                          <Button onClick={() => handleShare(doc.id)} variant="secondary">Share</Button>
+                          {shareModalOpen && selectedDocumentId === doc.id && (
+                            <ShareModal
+                              documentId={doc.id}
+                              onClose={() => setShareModalOpen(false)}
+                              onShare={handleShareSubmit}
+                              currentShares={doc.sharedWith}
+                            />
+                          )}
                         </div>
                         {editingDocumentId === doc.id && (
                           <DocumentForm

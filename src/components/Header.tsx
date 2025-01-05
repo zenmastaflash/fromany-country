@@ -64,12 +64,27 @@ export default function Header() {
               </Link>
             ))}
             {session ? (
-              <Button
-                variant="primary"
-                onClick={() => signOut({ callbackUrl: '/' })}
-              >
-                Sign Out
-              </Button>
+              <div className="flex items-center gap-4">
+                {session.user?.image ? (
+                  <img 
+                    src={session.user.image}
+                    alt={session.user.name || 'Profile'} 
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                    <span className="text-sm font-bold text-text">
+                      {session.user?.name?.[0]?.toUpperCase() || '?'}
+                    </span>
+                  </div>
+                )}
+                <Button
+                  variant="primary"
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                >
+                  Sign Out
+                </Button>
+              </div>
             ) : (
               <Button
                 variant="primary"

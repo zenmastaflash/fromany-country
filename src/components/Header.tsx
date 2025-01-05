@@ -12,7 +12,6 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: "/", label: "Home", protected: false },
     { href: "/dashboard", label: "Dashboard", protected: true },
     { href: "/travel", label: "Travel", protected: true },
     { href: "/documents", label: "Documents", protected: true },

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { prisma } from '@/lib/prisma';
 import { authConfig } from '@/lib/auth';
 
@@ -12,6 +13,15 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
+
+async function getPresignedUrl(key: string) {
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME!,
+    Key: key
+  });
+  
+  return getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour expiration
+}
 
 export async function POST(request: Request) {
   const session = await getServerSession(authConfig);
@@ -32,17 +42,45 @@ export async function POST(request: Request) {
       ContentType: file.type,
     }));
 
-    const imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    // Get a presigned URL for immediate use
+    const presignedUrl = await getPresignedUrl(key);
 
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
-      data: { image: imageUrl },
+      data: { 
+        image: key  // Store just the key, not the full URL
+      },
       select: { image: true }
     });
 
-    return NextResponse.json({ imageUrl: updatedUser.image });
+    return NextResponse.json({ imageUrl: presignedUrl });
   } catch (error) {
     console.error('Error uploading avatar:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
+}
+
+// Add GET endpoint for refreshing URLs
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authConfig);
+  if (!session?.user?.id) return new NextResponse('Unauthorized', { status: 401 });
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { image: true }
+    });
+
+    if (!user?.image) {
+      return NextResponse.json({ imageUrl: null });
+    }
+
+    const presignedUrl = await getPresignedUrl(user.image);
+    return NextResponse.json({ imageUrl: presignedUrl });
+  } catch (error) {
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

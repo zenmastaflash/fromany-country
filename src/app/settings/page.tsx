@@ -132,10 +132,9 @@ export default function ProfilePage() {
       
       if (response.ok) {
         const data = await response.json();
-        // Update both profile state and session image
+        // Remove the page reload and just update the profile
         setProfile(prev => ({ ...prev, image: data.imageUrl }));
-        // Force a session refresh
-        window.location.reload();
+        setIsDirty(true); // Enable save button
         showNotification('success', 'Profile photo updated');
       }
     } catch (error) {

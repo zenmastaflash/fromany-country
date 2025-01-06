@@ -180,3 +180,311 @@ export default function ProfilePage() {
   };
 
   if (status === 'loading') {
+    return <div className="flex justify-center items-center min-h-screen text-text">Loading...</div>;
+  }
+
+  if (status === 'unauthenticated') {
+    return <div className="flex justify-center items-center min-h-screen text-text">Please sign in to view your profile.</div>;
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Header with Edit/Save buttons */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-text">Profile Settings</h1>
+        <div className="flex gap-2">
+          {!isEditing ? (
+            <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
+              <Edit2 className="h-4 w-4" />
+              Edit Profile
+            </Button>
+          ) : (
+            <>
+              <Button onClick={() => {
+                setIsEditing(false);
+                setIsDirty(false);
+              }} variant="secondary" className="flex items-center gap-2">
+                <X className="h-4 w-4" />
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSubmit} 
+                className="flex items-center gap-2"
+                disabled={!isDirty}
+              >
+                <Save className="h-4 w-4" />
+                Save Changes
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Notification Toast */}
+      {notification && (
+        <div className={`fixed top-4 right-4 p-4 rounded-md shadow-lg ${
+          notification.type === 'success' ? 'bg-primary' : 'bg-red-500'
+        } text-white`}>
+          {notification.message}
+        </div>
+      )}
+
+      <div className="space-y-8">
+        {/* Profile Photo Card */}
+        <Card className="bg-secondary">
+          <CardHeader>
+            <CardTitle className="text-text">Profile Photo</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center space-x-4">
+            <div className="relative">
+              <ProfileImage />
+              {isEditing && (
+                <label className="absolute bottom-0 right-0 p-1 bg-primary rounded-full cursor-pointer">
+                  <Camera className="h-4 w-4 text-text" />
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                  />
+                </label>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Basic Information Card */}
+        <Card className="bg-secondary">
+          <CardHeader>
+            <CardTitle className="text-text">Basic Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-text">Display Name</div>
+              {isEditing ? (
+                <Input
+                  value={profile.displayName}
+                  onChange={(e) => {
+                    setProfile({ ...profile, displayName: e.target.value });
+                    setIsDirty(true);
+                  }}
+                  placeholder="How you want to be known"
+                  className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
+                />
+              ) : (
+                <div className="px-3 py-2 bg-background rounded-md text-text">
+                  {profile.displayName || 'Not set'}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-text">Bio</div>
+              {isEditing ? (
+                <Input
+                  value={profile.bio}
+                  onChange={(e) => {
+                    setProfile({ ...profile, bio: e.target.value });
+                    setIsDirty(true);
+                  }}
+                  placeholder="Tell us about yourself"
+                  className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
+                />
+              ) : (
+                <div className="px-3 py-2 bg-background rounded-md text-text">
+                  {profile.bio || 'No bio added'}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-text">Location</div>
+              {isEditing ? (
+                <Input
+                  value={profile.location}
+                  onChange={(e) => {
+                    setProfile({ ...profile, location: e.target.value });
+                    setIsDirty(true);
+                  }}
+                  placeholder="Current location"
+                  className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
+                />
+              ) : (
+                <div className="px-3 py-2 bg-background rounded-md text-text">
+                  {profile.location || 'No location set'}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-text">Profile Visibility</div>
+              {isEditing ? (
+                <select 
+                  value={profile.visibility}
+                  onChange={(e) => {
+                    setProfile({ ...profile, visibility: e.target.value as 'public' | 'private' });
+                    setIsDirty(true);
+                  }}
+                  className="rounded-md border-border bg-secondary text-text shadow-sm focus:border-primary focus:ring-primary w-full"
+                >
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
+                </select>
+              ) : (
+                <div className="px-3 py-2 bg-background rounded-md text-text capitalize">
+                  {profile.visibility}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Notification Preferences Card */}
+        <Card className="bg-secondary">
+          <CardHeader>
+            <CardTitle className="text-text">Notification Preferences</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {Object.entries(profile.notificationPreferences).map(([key, value]) => (
+              <div key={key} className="flex items-center justify-between">
+                <span className="text-text capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                {isEditing ? (
+                  <input
+                    type="checkbox"
+                    checked={value}
+                    onChange={(e) => {
+                      setProfile({
+                        ...profile,
+                        notificationPreferences: {
+                          ...profile.notificationPreferences,
+                          [key]: e.target.checked
+                        }
+                      });
+                      setIsDirty(true);
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                ) : (
+                  <span className={value ? 'text-primary' : 'text-gray-500'}>
+                    {value ? 'Enabled' : 'Disabled'}
+                  </span>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Emergency Contact Card */}
+        <Card className="bg-secondary">
+          <CardHeader>
+            <CardTitle className="text-text">Emergency Contact</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isEditing ? (
+              <>
+                <Input
+                  value={profile.emergencyContact?.name || ''}
+                  onChange={(e) => {
+                    setProfile({
+                      ...profile,
+                      emergencyContact: {
+                        ...profile.emergencyContact || {},
+                        name: e.target.value
+                      } as Profile['emergencyContact']
+                    });
+                    setIsDirty(true);
+                  }}
+                  placeholder="Contact Name"
+                  className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
+                />
+                <Input
+                  value={profile.emergencyContact?.phone || ''}
+                  onChange={(e) => {
+                    setProfile({
+                      ...profile,
+                      emergencyContact: {
+                        ...profile.emergencyContact || {},
+                        phone: e.target.value
+                      } as Profile['emergencyContact']
+                    });
+                    setIsDirty(true);
+                  }}
+                  placeholder="Phone Number"
+                  className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
+                />
+                <Input
+                  value={profile.emergencyContact?.email || ''}
+                  onChange={(e) => {
+                    setProfile({
+                      ...profile,
+                      emergencyContact: {
+                        ...profile.emergencyContact || {},
+                        email: e.target.value
+                      } as Profile['emergencyContact']
+                    });
+                    setIsDirty(true);
+                  }}
+                  placeholder="Email Address"
+                  className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
+                />
+                <Input
+                  value={profile.emergencyContact?.relationship || ''}
+                  onChange={(e) => {
+                    setProfile({
+                      ...profile,
+                      emergencyContact: {
+                        ...profile.emergencyContact || {},
+                        relationship: e.target.value
+                      } as Profile['emergencyContact']
+                    });
+                    setIsDirty(true);
+                  }}
+                  placeholder="Relationship"
+                  className="flex-1 rounded-md border-border bg-text text-background shadow-sm focus:border-primary focus:ring-primary placeholder-secondary"
+                />
+              </>
+            ) : (
+              profile.emergencyContact ? (
+                <div className="space-y-2">
+                  <div className="px-3 py-2 bg-background rounded-md text-text">
+                    <div>Name: {profile.emergencyContact.name}</div>
+                    <div>Phone: {profile.emergencyContact.phone}</div>
+                    <div>Email: {profile.emergencyContact.email}</div>
+                    <div>Relationship: {profile.emergencyContact.relationship}</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="px-3 py-2 bg-background rounded-md text-text">
+                  No emergency contact set
+                </div>
+              )
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Delete Account Section */}
+        <Card className="bg-secondary border-red-500">
+          <CardHeader>
+            <CardTitle className="text-red-500 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Danger Zone
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={handleDeleteAccount}
+              variant="primary"
+              className="w-full bg-red-500 hover:bg-red-600 text-white"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Account'}
+            </Button>
+            <p className="mt-2 text-sm text-gray-500">
+              This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

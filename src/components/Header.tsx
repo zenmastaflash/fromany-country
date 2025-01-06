@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Menu, X } from 'lucide-react';
+import ProfileImage from '@/components/ProfileImage';
 
 export default function Header() {
   const { data: session, status } = useSession();

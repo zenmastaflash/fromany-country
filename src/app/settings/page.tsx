@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { Edit2, Save, X, AlertTriangle, Camera } from 'lucide-react';
+import ProfileImage from '@/components/ProfileImage';
 
 // Types for our profile data
 type Profile = {

@@ -23,6 +23,11 @@ export default function ProfileImage({ size = 'md', className = '' }) {
     };
 
     fetchImageUrl();
+
+    // Add this event listener
+    const handleProfileUpdate = () => fetchImageUrl();
+    window.addEventListener('profile-image-update', handleProfileUpdate);
+    return () => window.removeEventListener('profile-image-update', handleProfileUpdate);
   }, [session?.user?.id]);
 
   const dimensions = size === 'sm' ? 'w-8 h-8' : 'w-24 h-24';

@@ -64,19 +64,7 @@ export default function Header() {
             ))}
             {session ? (
               <div className="flex items-center gap-4">
-                {session.user?.image ? (
-                  <img 
-                    src={session.user.image}
-                    alt={session.user.name || 'Profile'} 
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                    <span className="text-sm font-bold text-text">
-                      {session.user?.name?.[0]?.toUpperCase() || '?'}
-                    </span>
-                  </div>
-                )}
+                <ProfileImage size="sm" />
                 <Button
                   variant="primary"
                   onClick={() => signOut({ callbackUrl: '/' })}

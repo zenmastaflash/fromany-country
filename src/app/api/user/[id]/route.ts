@@ -15,11 +15,6 @@ export async function GET(
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  // Users can only access their own profile
-  if (session.user.id !== params.id) {
-    return new NextResponse('Forbidden', { status: 403 });
-  }
-
   try {
     const user = await prisma.user.findUnique({
       where: { id: params.id },
@@ -29,12 +24,12 @@ export async function GET(
         location: true,
         visibility: true,
         socialLinks: true,
+        image: true,
         notificationPreferences: true,
         primaryCurrency: true,
         taxResidency: true,
         emergencyContact: true,
         preferredLanguage: true,
-        image: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -44,23 +39,14 @@ export async function GET(
       return new NextResponse('User not found', { status: 404 });
     }
 
-    // If there's an image stored, get a presigned URL
+    // If there's an image stored, generate a presigned URL
     if (user.image) {
-      const s3 = new S3Client({
-        region: process.env.AWS_REGION!,
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-        },
-      });
-
       const command = new GetObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME!,
-        Key: user.image
+        Key: user.image // Use the key directly
       });
       
-      const presignedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-      user.image = presignedUrl;
+      user.image = await getSignedUrl(s3, command, { expiresIn: 3600 });
     }
 
     return NextResponse.json(user);

@@ -19,8 +19,7 @@ async function getPresignedUrl(key: string) {
     Bucket: process.env.AWS_BUCKET_NAME!,
     Key: key
   });
-  
-  return getSignedUrl(s3, command, { expiresIn: 3600 }); // 1 hour expiration
+  return getSignedUrl(s3, command, { expiresIn: 3600 });
 }
 
 export async function POST(request: Request) {
@@ -42,24 +41,18 @@ export async function POST(request: Request) {
       ContentType: file.type,
     }));
 
-    const imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-    const presignedUrl = await getSignedUrl(s3, new GetObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME!,
-      Key: key
-    }), { expiresIn: 3600 });
-
+    // Store only the key in the database, not the full URL
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: { 
-        image: imageUrl // Store the full URL
-      },
-      select: { image: true }
+        image: key  // Store only the key
+      }
     });
 
-    return NextResponse.json({ 
-      imageUrl: presignedUrl, // Return the presigned URL for immediate use
-      storedUrl: imageUrl // Store this in the profile state
-    });
+    // Generate a presigned URL for immediate use
+    const presignedUrl = await getPresignedUrl(key);
+    
+    return NextResponse.json({ imageUrl: presignedUrl });
   } catch (error) {
     console.error('Error uploading avatar:', error);
     return new NextResponse('Internal Server Error', { status: 500 });

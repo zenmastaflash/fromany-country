@@ -36,6 +36,21 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [editingDocumentId, setEditingDocumentId] = useState<string | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [documentUrls, setDocumentUrls] = useState<Record<string, string>>({});
+
+  const getDocumentUrl = async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/documents/view/${documentId}`);
+      if (!response.ok) {
+        throw new Error('Failed to get document URL');
+      }
+      const data = await response.json();
+      return data.url;
+    } catch (error) {
+      console.error('Error getting document URL:', error);
+      return '#';
+    }
+  };
 
   const fetchDocuments = async () => {
     try {
@@ -69,6 +84,20 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   useEffect(() => {
     fetchDocuments();
   }, [refreshKey]); // Re-fetch when refreshKey changes
+
+  useEffect(() => {
+    const loadDocumentUrls = async () => {
+      const urls: Record<string, string> = {};
+      for (const doc of documents) {
+        urls[doc.id] = await getDocumentUrl(doc.id);
+      }
+      setDocumentUrls(urls);
+    };
+
+    if (documents.length > 0) {
+      loadDocumentUrls();
+    }
+  }, [documents]);
 
   const filteredDocuments = documents.filter(doc => {
     const matchesType = selectedType ? doc.type === selectedType : true;
@@ -277,7 +306,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                           <div>
                             <h3 className="text-lg font-medium">
                               <a 
-                                href={doc.fileUrl || '#'} 
+                                href={documentUrls[doc.id] || '#'} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="link"

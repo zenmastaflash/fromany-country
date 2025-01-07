@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
 import { authConfig } from '@/lib/auth';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { s3Client } from '@/lib/s3';
 
 export async function GET(
   request: Request,
@@ -39,14 +40,20 @@ export async function GET(
       return new NextResponse('User not found', { status: 404 });
     }
 
-    // If there's an image stored, generate a presigned URL
+    // If there's an image stored, get a presigned URL
     if (user.image) {
       const command = new GetObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME!,
-        Key: user.image // Use the key directly
+        Key: user.image
       });
       
-      user.image = await getSignedUrl(s3, command, { expiresIn: 3600 });
+      try {
+        const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+        user.image = presignedUrl;
+      } catch (error) {
+        console.error('Error generating presigned URL:', error);
+        user.image = null; // Reset image if we can't generate URL
+      }
     }
 
     return NextResponse.json(user);

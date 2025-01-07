@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { Edit2, Save, X, AlertTriangle, Camera } from 'lucide-react';
+import ProfileImage from '@/components/ProfileImage';
 
 // Types for our profile data
 type Profile = {
@@ -132,13 +133,12 @@ export default function ProfilePage() {
       
       if (response.ok) {
         const data = await response.json();
-        // Update both profile state and session image
         setProfile(prev => ({ ...prev, image: data.imageUrl }));
-        if (session?.user) {
-          session.user.image = data.imageUrl;
-        }
         setIsDirty(true);
         showNotification('success', 'Profile photo updated');
+        
+        // Force a refresh of all ProfileImage components
+        window.dispatchEvent(new Event('profile-image-update'));
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -237,19 +237,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="flex items-center space-x-4">
             <div className="relative">
-              {profile.image ? (
-                <img 
-                  src={profile.image} 
-                  alt="Profile" 
-                  className="w-24 h-24 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-background flex items-center justify-center">
-                  <span className="text-4xl text-text">
-                    {profile.displayName?.[0]?.toUpperCase() || '?'}
-                  </span>
-                </div>
-              )}
+              <ProfileImage />
               {isEditing && (
                 <label className="absolute bottom-0 right-0 p-1 bg-primary rounded-full cursor-pointer">
                   <Camera className="h-4 w-4 text-text" />

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Menu, X } from 'lucide-react';
+import ProfileImage from '@/components/ProfileImage';
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -12,7 +13,6 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: "/", label: "Home", protected: false },
     { href: "/dashboard", label: "Dashboard", protected: true },
     { href: "/travel", label: "Travel", protected: true },
     { href: "/documents", label: "Documents", protected: true },
@@ -65,19 +65,7 @@ export default function Header() {
             ))}
             {session ? (
               <div className="flex items-center gap-4">
-                {session.user?.image ? (
-                  <img 
-                    src={session.user.image}
-                    alt={session.user.name || 'Profile'} 
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                    <span className="text-sm font-bold text-text">
-                      {session.user?.name?.[0]?.toUpperCase() || '?'}
-                    </span>
-                  </div>
-                )}
+                <ProfileImage size="sm" />
                 <Button
                   variant="primary"
                   onClick={() => signOut({ callbackUrl: '/' })}

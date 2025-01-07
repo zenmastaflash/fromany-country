@@ -31,6 +31,19 @@ export const authConfig: NextAuthOptions = {
     async signIn({ user, account, profile }) {
       try {
         console.log("SignIn Callback:", { user, account, profile });
+        if (account?.provider === 'google') {
+          // Only update the image if there isn't a custom uploaded one
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            select: { image: true }
+          });
+          if (!existingUser?.image) {
+            await prisma.user.update({
+              where: { email: user.email! },
+              data: { image: user.image }
+            });
+          }
+        }
         return true;
       } catch (error) {
         console.error("SignIn Error:", error);
@@ -41,6 +54,18 @@ export const authConfig: NextAuthOptions = {
       try {
         if (session?.user) {
           session.user.id = token.sub!;
+          // Get latest user data
+          const user = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: {
+              image: true,
+              displayName: true,
+            },
+          });
+          if (user) {
+            session.user.image = user.image || session.user.image;
+            session.user.name = user.displayName || session.user.name;
+          }
         }
         return session;
       } catch (error) {

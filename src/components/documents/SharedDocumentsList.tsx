@@ -37,7 +37,7 @@ export default function SharedDocumentList({ refreshKey = 0 }: SharedDocumentLis
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch('/api/documents/shared');
+      const response = await fetch('/documents/share');
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to fetch shared documents');

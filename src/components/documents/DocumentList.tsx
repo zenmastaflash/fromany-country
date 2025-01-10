@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import DocumentForm from './DocumentForm';
 import ShareModal from './ShareModal';
+import DocumentViewer from './DocumentViewer';
 import { DocumentType } from '@prisma/client'; // Import DocumentType
 
 type Document = {
@@ -308,7 +309,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                             <h3 className="text-lg font-medium">
                               <button 
                                 onClick={() => setViewingDocument(doc)}
-                                className="link hover:underline focus:outline-none"
+                                className="text-link hover:underline focus:outline-none"
                               >
                                 {doc.title || 'Untitled Document'}
                               </button>

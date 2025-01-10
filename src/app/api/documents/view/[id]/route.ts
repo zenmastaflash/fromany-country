@@ -47,7 +47,10 @@ export async function GET(
     const command = new GetObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME!,
       Key: key,
-      ResponseContentDisposition: `inline; filename="${document.fileName}"`, // This ensures the browser tries to display the file
+      ResponseContentDisposition: 'inline',
+      ResponseContentType: document.fileName?.toLowerCase().endsWith('.pdf') 
+        ? 'application/pdf' 
+        : 'image/jpeg', // Add more types as needed
     });
     
     const url = await getSignedUrl(s3, command, { 

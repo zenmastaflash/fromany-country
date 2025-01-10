@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        salisbury: ['var(--font-salisbury)'],
+        salisbury: ['var(--font-recoleta)'],
         inter: ['var(--font-inter)'],
       },
       colors: {

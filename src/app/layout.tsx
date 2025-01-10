@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
 import "./globals.css";
-import ClientLayout from "./ClientLayout"; // Import the client component
-
-const montserrat = Montserrat({ 
-  subsets: ["latin"],
-  weight: "200"
-});
+import ClientLayout from "./ClientLayout";
+import { salisbury, inter } from './fonts';
 
 export const metadata: Metadata = {
   title: "from any country",
@@ -20,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={montserrat.className}>
+      <body className={`${inter.variable} ${salisbury.variable} font-inter`}>
         <ClientLayout>
           {children}
         </ClientLayout>

@@ -3,8 +3,14 @@
 @tailwind utilities;
 
 @layer base {
+  /* Set default body font */
   body {
-    @apply bg-background text-text;
+    @apply bg-background text-text font-inter;
+  }
+  
+  /* Set all headings to use Recoleta by default */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-recoleta;
   }
 }
 
@@ -38,6 +44,7 @@
 }
 
 @layer utilities {
+  /* Keep these utility classes for when you need to override */
   .heading-font {
     @apply font-recoleta;
   }

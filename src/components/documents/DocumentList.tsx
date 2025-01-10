@@ -37,6 +37,7 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [documentUrls, setDocumentUrls] = useState<Record<string, string>>({});
+  const [viewingDocument, setViewingDocument] = useState<Document | null>(null);
 
   const getDocumentUrl = async (documentId: string) => {
     try {
@@ -305,14 +306,12 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="text-lg font-medium">
-                              <a 
-                                href={documentUrls[doc.id] || '#'} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="link"
+                              <button 
+                                onClick={() => setViewingDocument(doc)}
+                                className="link hover:underline focus:outline-none"
                               >
                                 {doc.title || 'Untitled Document'}
-                              </a>
+                              </button>
                             </h3>
                             <p className="text-sm text-link">
                               Type: {doc.type.replace('_', ' ')}
@@ -381,6 +380,13 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
             );
           })}
         </div>
+      )}
+      {viewingDocument && (
+        <DocumentViewer
+          documentId={viewingDocument.id}
+          title={viewingDocument.title || 'Untitled Document'}
+          onClose={() => setViewingDocument(null)}
+        />
       )}
     </div>
   );

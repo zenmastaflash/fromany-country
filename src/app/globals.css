@@ -37,6 +37,15 @@
   }
 }
 
+@layer utilities {
+  .heading-font {
+    @apply font-salisbury;
+  }
+  .body-font {
+    @apply font-inter;
+  }
+}
+
 /* Optional: Define CSS variables for use outside of Tailwind */
 :root {
   --color-background: #2E2E2E;

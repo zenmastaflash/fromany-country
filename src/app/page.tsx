@@ -59,10 +59,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-             <div>
-  <h1 className="font-recoleta text-3xl">This should be in Recoleta</h1>
-  <p className="font-inter">This should be in Inter</p>
-</div>
     </main>
   );
 }  

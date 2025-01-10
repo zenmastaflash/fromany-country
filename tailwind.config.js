@@ -8,8 +8,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        salisbury: ['var(--font-recoleta)'],
-        inter: ['var(--font-inter)'],
+        recoleta: ['var(--font-recoleta)', 'Georgia', 'serif'],
+        inter: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Your existing color configuration

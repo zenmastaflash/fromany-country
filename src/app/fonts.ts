@@ -1,7 +1,7 @@
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
 
-export const salisbury = localFont({
+export const recoleta = localFont({
   src: '../../public/fonts/recoleta-regulardemo.otf',
   variable: '--font-recoleta',
   display: 'swap',

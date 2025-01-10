@@ -39,7 +39,7 @@
 
 @layer utilities {
   .heading-font {
-    @apply font-salisbury;
+    @apply font-recoleta;
   }
   .body-font {
     @apply font-inter;

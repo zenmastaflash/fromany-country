@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${salisbury.variable} font-inter`}>
+      <body className={`${inter.variable} ${recoleta.variable} font-inter`}>
         <ClientLayout>
           {children}
         </ClientLayout>

@@ -37,21 +37,21 @@ export default function DocumentViewer({ documentId, title, onClose }: DocumentV
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-4xl h-[90vh] flex flex-col bg-background">
+      <Card className="w-full max-w-4xl h-[90vh] flex flex-col bg-secondary">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{title || 'Document Viewer'}</CardTitle>
-          <Button variant="ghost" onClick={onClose} size="icon">
+          <CardTitle className="text-text">{title || 'Document Viewer'}</CardTitle>
+          <Button variant="ghost" onClick={onClose} className="p-2">
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
-        <CardContent className="flex-1 overflow-hidden relative">
+        <CardContent className="flex-1 overflow-hidden relative bg-background">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-destructive">{error}</p>
+            <div className="flex items-center justify-center h-full text-link">
+              <p>{error}</p>
             </div>
           ) : url ? (
             <iframe 

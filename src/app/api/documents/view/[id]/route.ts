@@ -36,15 +36,34 @@ export async function GET(
       return new NextResponse('Document not found', { status: 404 });
     }
 
+    if (!document.fileUrl) {
+      return new NextResponse('Document file not found', { status: 404 });
+    }
+
+    // Extract the key from the full URL
+    const urlParts = document.fileUrl.split('.amazonaws.com/');
+    if (urlParts.length !== 2) {
+      return new NextResponse('Invalid file URL', { status: 400 });
+    }
+    const key = urlParts[1];
+
     // Generate presigned URL
     const command = new GetObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME!,
-      Key: document.fileUrl!, // Assuming fileUrl stores the S3 key
+      Key: key,
+      ResponseContentDisposition: `inline; filename="${document.fileName}"`,
+      ResponseContentType: document.fileName?.toLowerCase().endsWith('.pdf') 
+        ? 'application/pdf' 
+        : 'image/jpeg',
     });
     
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    const url = await getSignedUrl(s3, command, { 
+      expiresIn: 3600 
+    });
+
     return NextResponse.json({ url });
   } catch (error) {
+    console.error('Error generating document URL:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

@@ -19,7 +19,7 @@ A comprehensive platform for digital nomads to manage their global lifestyle—t
 - #2E2E2E (Dark Grey)
 
 **Font**
-#F0F0F0 (Light Grey)
+#FFFDD0 (Creamy White)
 
 **Primary Colors**
 - #003135

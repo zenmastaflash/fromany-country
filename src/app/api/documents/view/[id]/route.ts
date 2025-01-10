@@ -36,25 +36,29 @@ export async function GET(
       return new NextResponse('Document not found', { status: 404 });
     }
 
-    if (!document.fileName) {
+    if (!document.fileUrl) {
       return new NextResponse('Document file not found', { status: 404 });
     }
 
-    // Format the S3 key correctly based on your example URL pattern
-    const key = `documents/${params.id}/${document.fileName}`;
+    // Extract the key from the full URL
+    const urlParts = document.fileUrl.split('.amazonaws.com/');
+    if (urlParts.length !== 2) {
+      return new NextResponse('Invalid file URL', { status: 400 });
+    }
+    const key = urlParts[1];
 
     // Generate presigned URL
     const command = new GetObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME!,
       Key: key,
-      ResponseContentDisposition: 'inline',
+      ResponseContentDisposition: `inline; filename="${document.fileName}"`,
       ResponseContentType: document.fileName?.toLowerCase().endsWith('.pdf') 
         ? 'application/pdf' 
-        : 'image/jpeg', // Add more types as needed
+        : 'image/jpeg',
     });
     
     const url = await getSignedUrl(s3, command, { 
-      expiresIn: 3600,
+      expiresIn: 3600 
     });
 
     return NextResponse.json({ url });

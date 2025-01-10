@@ -53,13 +53,13 @@ export function getTextColor(backgroundColor: string): string {
   if (!rgb) return '#F0F0F0'; // Default to light text if invalid hex
 
   const backgroundLuminance = getLuminance(rgb.r, rgb.g, rgb.b);
-  const whiteLuminance = getLuminance(240, 240, 240); // #F0F0F0
+  const whiteLuminance = getLuminance(255, 253, 208); // #FFFDD0
   const blackLuminance = getLuminance(0, 0, 0);
 
   const whiteContrast = getContrastRatio(backgroundLuminance, whiteLuminance);
   const blackContrast = getContrastRatio(backgroundLuminance, blackLuminance);
 
-  return whiteContrast > blackContrast ? '#F0F0F0' : '#000000';
+  return whiteContrast > blackContrast ? '#FFFDD0' : '#000000';
 }
 
 export function useDynamicTextColor(backgroundColor: string) {

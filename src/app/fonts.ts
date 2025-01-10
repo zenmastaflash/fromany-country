@@ -5,6 +5,12 @@ export const recoleta = localFont({
   src: '../../public/fonts/recoleta-regulardemo.otf',
   variable: '--font-recoleta',
   display: 'swap',
+  declarations: [
+    {
+      prop: 'font-family',
+      value: 'Recoleta DEMO'
+    }
+  ]
 })
 
 export const inter = Inter({

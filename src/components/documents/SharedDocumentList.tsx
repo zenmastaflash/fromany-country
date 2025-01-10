@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { DocumentType } from '@prisma/client';
+import DocumentViewer from './DocumentViewer';
 
 type SharedDocument = {
   id: string;
@@ -32,6 +33,7 @@ export default function SharedDocumentList({ refreshKey = 0 }: SharedDocumentLis
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewingDocument, setViewingDocument] = useState<SharedDocument | null>(null);
 
   const fetchDocuments = async () => {
     try {
@@ -105,14 +107,12 @@ export default function SharedDocumentList({ refreshKey = 0 }: SharedDocumentLis
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="text-lg font-medium">
-                    <a 
-                      href={doc.fileUrl || '#'} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="link"
+                    <button 
+                      onClick={() => setViewingDocument(doc)}
+                      className="text-link hover:underline focus:outline-none"
                     >
                       {doc.title || 'Untitled Document'}
-                    </a>
+                    </button>
                   </h3>
                   <p className="text-sm text-link">
                     Shared by: {doc.user.name || doc.user.email}
@@ -148,6 +148,13 @@ export default function SharedDocumentList({ refreshKey = 0 }: SharedDocumentLis
             </div>
           ))}
         </div>
+      )}
+      {viewingDocument && (
+        <DocumentViewer
+          documentId={viewingDocument.id}
+          title={viewingDocument.title || 'Untitled Document'}
+          onClose={() => setViewingDocument(null)}
+        />
       )}
     </div>
   );

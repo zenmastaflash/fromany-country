@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ClientLayout from "./ClientLayout";
-import { salisbury, inter } from './fonts';
+import { recoleta, inter } from './fonts';
 
 export const metadata: Metadata = {
   title: "from any country",

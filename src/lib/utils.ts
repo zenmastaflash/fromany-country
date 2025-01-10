@@ -35,16 +35,16 @@ function getContrastRatio(l1: number, l2: number): number {
 // Get appropriate text color (black or white) based on background
 export function getTextColor(backgroundColor: string): string {
   const rgb = hexToRgb(backgroundColor);
-  if (!rgb) return '#F0F0F0'; // Default to light text if invalid hex
+  if (!rgb) return '#fffdd0'; // Default to light text if invalid hex
 
   const backgroundLuminance = getLuminance(rgb.r, rgb.g, rgb.b);
-  const whiteLuminance = getLuminance(240, 240, 240); // #F0F0F0
+  const whiteLuminance = getLuminance(255, 253, 208); // #fffdd0
   const blackLuminance = getLuminance(0, 0, 0);
 
   const whiteContrast = getContrastRatio(backgroundLuminance, whiteLuminance);
   const blackContrast = getContrastRatio(backgroundLuminance, blackLuminance);
 
-  return whiteContrast > blackContrast ? '#F0F0F0' : '#000000';
+  return whiteContrast > blackContrast ? '#fffdd0' : '#000000';
 }
 
 // Custom hook for dynamic text color

@@ -1,10 +1,14 @@
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/input';
+import BackgroundTest from './BackgroundTest';
 
 export default function UITest() {
   return (
-    <div className="space-y-12 p-8 bg-background">
+    <div className="space-y-12 p-8">
+      {/* Background Tests */}
+      <BackgroundTest />
+
       {/* Color Palette */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-text">Color Palette</h2>

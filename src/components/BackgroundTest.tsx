@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card } from './ui/card';
-import { Button } from './ui/button';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 const BackgroundTest = () => {
   return (
@@ -8,7 +8,7 @@ const BackgroundTest = () => {
       <h2 className="text-2xl font-bold text-text">Background Animation Tests</h2>
       
       {/* Test 1: Basic Animation */}
-      <Card className="relative overflow-hidden h-96">
+      <Card className="relative overflow-hidden h-96 bg-transparent">
         <div className="absolute inset-0">
           {/* Cloud 1 - Secondary Color */}
           <div className="absolute w-64 h-32 bg-secondary/70 rounded-full blur-xl animate-float-slow" 

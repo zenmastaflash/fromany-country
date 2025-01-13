@@ -12,23 +12,22 @@ module.exports = {
         inter: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Your existing color configuration
         background: '#2E2E2E',
-        text: '#FFFDD0',
+        text: '#FFFDD0',  // Updated cream color
         primary: {
-          DEFAULT: '#0FA4AF',
-          hover: '#AFDDE5',
+          DEFAULT: '#964734',  // Using accent color as primary
+          hover: '#FFFDD0',    // Using cream color for hover
         },
         secondary: {
           DEFAULT: '#024950',
           dark: '#003135',
         },
         accent: {
-          DEFAULT: '#964734',
+          DEFAULT: '#0FA4AF',  // Former primary color now as accent
         },
         link: {
-          DEFAULT: '#AFDDE5',
-          hover: '#0FA4AF',
+          DEFAULT: '#FFFDD0',  // Updated to cream color
+          hover: '#964734',    // Using primary color for hover
         },
         border: '#024950',
       },

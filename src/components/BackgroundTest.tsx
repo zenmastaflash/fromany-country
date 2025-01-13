@@ -2,7 +2,13 @@ import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
-const CloudShape = ({ className, style, color }) => (
+interface CloudShapeProps {
+  className?: string;
+  style?: React.CSSProperties;
+  color: string;
+}
+
+const CloudShape: React.FC<CloudShapeProps> = ({ className, style, color }) => (
   <div className={`absolute ${className}`} style={style}>
     {/* Main cloud body */}
     <div className={`absolute rounded-full ${color} w-32 h-32`} />
@@ -12,7 +18,7 @@ const CloudShape = ({ className, style, color }) => (
   </div>
 );
 
-const BackgroundTest = () => {
+const BackgroundTest: React.FC = () => {
   return (
     <div className="p-8 space-y-8">
       <h2 className="text-2xl font-bold text-text">Background Animation Tests</h2>

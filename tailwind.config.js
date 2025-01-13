@@ -14,7 +14,7 @@ module.exports = {
       colors: {
   // Base colors
   background: '#2E2E2E',
-  text: '#FFFDD0',
+  text: '#fcfbdc',
   
   // Semantic colors
   primary: {
@@ -30,7 +30,7 @@ module.exports = {
   },
   link: {
     DEFAULT: '#964734',  
-    hover: '#FFFDD0',    
+    hover: '#fcfbdc',    
   },
   border: '#024950',
 },

@@ -11,7 +11,13 @@ module.exports = {
         recoleta: ['var(--font-recoleta)', 'Georgia', 'serif'],
         inter: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
-      animation: { // Test animation
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '50%': { transform: 'translate(30px, -30px) scale(1.1)' },
+        },
+      },
+      animation: {
         'float-slow': 'float 20s ease-in-out infinite',
         'float-slower': 'float 25s ease-in-out infinite',
         'float-slowest': 'float 30s ease-in-out infinite',

@@ -30,7 +30,7 @@ export default function Home() {
                 <span 
                   key={word} 
                   className="animated-word text-4xl md:text-6xl font-bold font-recoleta"
-                  style={{ color: '#964734' }}
+                  style={{ color: '#fcfbdc' }}
                 >
                   {word}
                 </span>

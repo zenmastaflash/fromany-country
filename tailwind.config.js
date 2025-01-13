@@ -11,6 +11,11 @@ module.exports = {
         recoleta: ['var(--font-recoleta)', 'Georgia', 'serif'],
         inter: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
+      animation: { // Test animation
+        'float-slow': 'float 20s ease-in-out infinite',
+        'float-slower': 'float 25s ease-in-out infinite',
+        'float-slowest': 'float 30s ease-in-out infinite',
+      },
       colors: {
   // Base colors
   background: '#2E2E2E',

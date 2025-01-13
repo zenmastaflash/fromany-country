@@ -40,13 +40,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           .circle {
             position: absolute;
             border-radius: 50%;
-            width: 100vw;  /* All circles start at the same size */
+            width: 100vw;
             height: 100vw;
             right: -50vw;
             bottom: -50vw;
             transform-origin: center center;
             opacity: 0;
-            animation: appear 0.5s ease-out forwards;
           }
 
           .circle-1 { animation: ripple1 8s cubic-bezier(0.4, 0.0, 0.2, 1) forwards; }
@@ -57,55 +56,44 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           .circle-6 { animation: ripple6 10s cubic-bezier(0.4, 0.0, 0.2, 1) forwards; }
           .circle-7 { animation: ripple7 10.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards; }
 
-          @keyframes appear {
-            0% {
-              opacity: 0;
-              transform: scale(0.8);
-            }
-            100% {
-              opacity: 1;
-              transform: scale(0.8);
-            }
-          }
-
           @keyframes ripple1 {
-            0% { transform: scale(0.8); opacity: 1; }
+            0% { transform: scale(0); opacity: 1; }
             75% { transform: scale(1.3); opacity: 0.7; }
             100% { transform: scale(1.4); opacity: 0; }
           }
 
           @keyframes ripple2 {
-            0% { transform: scale(0.8); opacity: 1; }
+            0% { transform: scale(0); opacity: 1; }
             75% { transform: scale(1.5); opacity: 0.7; }
             100% { transform: scale(1.6); opacity: 0; }
           }
 
           @keyframes ripple3 {
-            0% { transform: scale(0.8); opacity: 1; }
+            0% { transform: scale(0); opacity: 1; }
             75% { transform: scale(1.7); opacity: 0.7; }
             100% { transform: scale(1.8); opacity: 0; }
           }
 
           @keyframes ripple4 {
-            0% { transform: scale(0.8); opacity: 1; }
+            0% { transform: scale(0); opacity: 1; }
             75% { transform: scale(1.9); opacity: 0.7; }
             100% { transform: scale(2.0); opacity: 0; }
           }
 
           @keyframes ripple5 {
-            0% { transform: scale(0.8); opacity: 1; }
+            0% { transform: scale(0); opacity: 1; }
             75% { transform: scale(2.1); opacity: 0.7; }
             100% { transform: scale(2.2); opacity: 0; }
           }
 
           @keyframes ripple6 {
-            0% { transform: scale(0.8); opacity: 1; }
+            0% { transform: scale(0); opacity: 1; }
             75% { transform: scale(2.3); opacity: 0.7; }
             100% { transform: scale(2.4); opacity: 0; }
           }
 
           @keyframes ripple7 {
-            0% { transform: scale(0.8); opacity: 1; }
+            0% { transform: scale(0); opacity: 1; }
             75% { transform: scale(2.5); opacity: 0.7; }
             100% { transform: scale(2.6); opacity: 0; }
           }

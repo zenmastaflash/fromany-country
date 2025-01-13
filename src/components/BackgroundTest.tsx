@@ -2,6 +2,16 @@ import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
+const CloudShape = ({ className, style, color }) => (
+  <div className={`absolute ${className}`} style={style}>
+    {/* Main cloud body */}
+    <div className={`absolute rounded-full ${color} w-32 h-32`} />
+    <div className={`absolute rounded-full ${color} w-24 h-24`} style={{ left: '50%', top: '-25%' }} />
+    <div className={`absolute rounded-full ${color} w-20 h-20`} style={{ left: '75%', top: '0%' }} />
+    <div className={`absolute rounded-full ${color} w-28 h-28`} style={{ left: '25%', top: '10%' }} />
+  </div>
+);
+
 const BackgroundTest = () => {
   return (
     <div className="p-8 space-y-8">
@@ -11,49 +21,47 @@ const BackgroundTest = () => {
       <Card className="relative overflow-hidden h-96 bg-transparent">
         <div className="absolute inset-0">
           {/* Cloud 1 - Secondary Color */}
-          <div className="absolute w-64 h-32 bg-secondary/70 rounded-full blur-xl animate-float-slow" 
-               style={{
-                 left: '10%',
-                 top: '20%',
-                 animation: 'float 20s ease-in-out infinite'
-               }}
+          <CloudShape 
+            color="bg-secondary/70"
+            className="animate-float-slow"
+            style={{
+              left: '10%',
+              top: '20%',
+              transform: 'scale(1.2)',
+              animationDelay: '0s'
+            }}
           />
           
           {/* Cloud 2 - Primary Color */}
-          <div className="absolute w-64 h-32 bg-primary/40 rounded-full blur-xl animate-float-slower"
-               style={{
-                 left: '40%',
-                 top: '40%',
-                 animation: 'float 25s ease-in-out infinite 2s'
-               }}
+          <CloudShape 
+            color="bg-primary/40"
+            className="animate-float-slower"
+            style={{
+              left: '40%',
+              top: '40%',
+              transform: 'scale(0.8) rotate(45deg)',
+              animationDelay: '2s'
+            }}
           />
           
           {/* Cloud 3 - Accent Color */}
-          <div className="absolute w-64 h-32 bg-accent/60 rounded-full blur-xl animate-float-slowest"
-               style={{
-                 left: '60%',
-                 top: '60%',
-                 animation: 'float 30s ease-in-out infinite 4s'
-               }}
+          <CloudShape 
+            color="bg-accent/60"
+            className="animate-float-slowest"
+            style={{
+              left: '60%',
+              top: '10%',
+              transform: 'scale(1.4) rotate(-15deg)',
+              animationDelay: '4s'
+            }}
           />
         </div>
         
         <div className="relative z-10 p-6">
-          <h3 className="text-lg font-semibold text-text">Basic Cloud Animation</h3>
-          <p className="text-link mt-2">Floating clouds with your color scheme</p>
+          <h3 className="text-lg font-semibold text-text">Cloud-like Shapes Animation</h3>
+          <p className="text-link mt-2">More natural cloud shapes with your color scheme</p>
         </div>
       </Card>
-      
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(30px, -30px) scale(1.1);
-          }
-        }
-      `}</style>
     </div>
   );
 };

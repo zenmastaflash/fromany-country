@@ -4,7 +4,12 @@
 
 @layer base {
   body {
-    @apply bg-background text-text;
+    @apply bg-background text-text font-inter;
+  }
+  
+  /* Set all headings to use Recoleta by default */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-recoleta;
   }
 }
 
@@ -12,7 +17,7 @@
   /* Primary Button */
   .btn-primary {
     @apply bg-primary text-text px-4 py-2 rounded-md 
-           hover:bg-primary-hover transition-colors duration-200;
+           hover:bg-link transition-colors duration-200;
   }
 
   /* Secondary Button */
@@ -23,24 +28,28 @@
 
   /* Links */
   .link {
-    @apply text-link hover:text-link-hover transition-colors duration-200;
+    @apply text-link hover:text-primary transition-colors duration-200;
   }
 
   /* Cards/Sections */
   .card {
     @apply bg-secondary-dark border border-border rounded-lg p-4;
   }
+}
 
-  /* Alert/Notification */
-  .alert {
-    @apply bg-accent text-text px-4 py-2 rounded-md;
+@layer utilities {
+  .heading-font {
+    @apply font-recoleta;
+  }
+  .body-font {
+    @apply font-inter;
   }
 }
 
 /* Optional: Define CSS variables for use outside of Tailwind */
 :root {
   --color-background: #2E2E2E;
-  --color-text: #F0F0F0;
+  --color-text: #fcfbdc;
   --color-primary: #0FA4AF;
   --color-secondary: #024950;
   --color-accent: #964734;

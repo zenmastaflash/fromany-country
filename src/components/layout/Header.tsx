@@ -14,9 +14,9 @@ export default function Header() {
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold text-gray-900">
-              fromany.country
-            </Link>
+              <Link href="/" className="text-2xl font-bold text-text font-recoleta">
+                from any country
+              </Link>
           </div>
           <div className="ml-10 space-x-4">
             {session ? (

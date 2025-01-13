@@ -1,6 +1,6 @@
 export const buttonVariants = {
   // Primary - bright teal
-  primary: "bg-primary hover:bg-primary-hover text-text focus:ring-primary",
+  primary: "bg-primary hover:bg-link text-text focus:ring-primary",
   
   // Secondary - darker teal
   secondary: "bg-secondary hover:bg-secondary-dark text-text focus:ring-secondary",
@@ -27,7 +27,7 @@ export const inputVariants = {
 };
 
 export const linkVariants = {
-  default: "text-link hover:text-primary underline",
-  nav: "text-link hover:text-text",
-  button: "inline-flex items-center justify-center px-4 py-2 bg-primary text-text rounded-md hover:bg-primary-hover"
+  default: "text-link hover:text-primary",
+  nav: "text-link hover:text-primary",
+  button: "inline-flex items-center justify-center px-4 py-2 bg-primary text-text rounded-md hover:bg-link"
 };

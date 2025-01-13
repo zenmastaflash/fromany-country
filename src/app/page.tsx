@@ -29,7 +29,7 @@ export default function Home() {
               index === currentWord && currentWord < words.length && (
                 <span 
                   key={word} 
-                  className="animated-word text-4xl md:text-6xl font-bold"
+                  className="animated-word text-4xl md:text-6xl font-bold font-recoleta"
                   style={{ color: '#964734' }}
                 >
                   {word}
@@ -37,25 +37,25 @@ export default function Home() {
               )
             ))}
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-text">
+          <h1 className="text-4xl md:text-6xl font-bold text-text font-recoleta">
             from any country
           </h1>
         </div>
-        <p className="text-xl md:text-2xl text-link mb-8">
+        <p className="text-xl md:text-2xl text-link mb-8 font-inter">
           Live Anywhere. Belong Everywhere.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
           <div className="p-6 bg-secondary rounded-lg">
-            <h2 className="text-xl font-bold text-primary mb-2">Document Management</h2>
-            <p className="text-link">Securely store and manage your important documents in one place.</p>
+            <h2 className="text-xl font-bold text-primary mb-2 font-recoleta">Document Management</h2>
+            <p className="text-link font-inter">Securely store and manage your important documents in one place.</p>
           </div>
           <div className="p-6 bg-secondary rounded-lg">
-            <h2 className="text-xl font-bold text-primary mb-2">Travel Planning</h2>
-            <p className="text-link">Track your travels and stay compliant with visa requirements.</p>
+            <h2 className="text-xl font-bold text-primary mb-2 font-recoleta">Travel Planning</h2>
+            <p className="text-link font-inter">Track your travels and stay compliant with visa requirements.</p>
           </div>
           <div className="p-6 bg-secondary rounded-lg">
-            <h2 className="text-xl font-bold text-primary mb-2">Resource Center</h2>
-            <p className="text-link">Access guides and tools for successful global living.</p>
+            <h2 className="text-xl font-bold text-primary mb-2 font-recoleta">Resource Center</h2>
+            <p className="text-link font-inter">Access guides and tools for successful global living.</p>
           </div>
         </div>
       </div>

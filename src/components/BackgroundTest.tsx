@@ -9,12 +9,12 @@ const BackgroundTest: React.FC = () => {
       <Card className="relative overflow-hidden h-[80vh] bg-transparent">
         {/* Ripple circles */}
         <div className="absolute w-full h-full">
-          {/* Extra large circles */}
-          <div className="circle xxxlarge shade1 bg-accent/20" />
-          <div className="circle xxlarge shade2 bg-accent/30" />
-          <div className="circle xlarge shade3 bg-secondary/40" />
-          <div className="circle large shade4 bg-secondary/50" />
-          <div className="circle medium shade5 bg-secondary/60" />
+          {/* Largest to smallest, from secondary to accent */}
+          <div className="circle xxxlarge shade1 bg-secondary" />
+          <div className="circle xxlarge shade2 bg-secondary" />
+          <div className="circle xlarge shade3 bg-primary" />
+          <div className="circle large shade4 bg-primary" />
+          <div className="circle medium shade5 bg-accent" />
         </div>
         
         <div className="relative z-10 p-6">
@@ -30,49 +30,49 @@ const BackgroundTest: React.FC = () => {
           }
 
           .medium {
-            width: 600px;
-            height: 600px;
-            right: -200px;
-            bottom: -200px;
+            width: 1200px;
+            height: 1200px;
+            right: -300px;
+            bottom: -300px;
             animation-delay: 0s;
           }
 
           .large {
-            width: 800px;
-            height: 800px;
-            right: -300px;
-            bottom: -300px;
+            width: 1600px;
+            height: 1600px;
+            right: -400px;
+            bottom: -400px;
             animation-delay: 0.3s;
           }
 
           .xlarge {
-            width: 1000px;
-            height: 1000px;
-            right: -400px;
-            bottom: -400px;
+            width: 2000px;
+            height: 2000px;
+            right: -500px;
+            bottom: -500px;
             animation-delay: 0.6s;
           }
 
           .xxlarge {
-            width: 1200px;
-            height: 1200px;
-            right: -500px;
-            bottom: -500px;
+            width: 2400px;
+            height: 2400px;
+            right: -600px;
+            bottom: -600px;
             animation-delay: 0.9s;
           }
 
           .xxxlarge {
-            width: 1400px;
-            height: 1400px;
-            right: -600px;
-            bottom: -600px;
+            width: 2800px;
+            height: 2800px;
+            right: -700px;
+            bottom: -700px;
             animation-delay: 1.2s;
           }
 
-          .shade1 { opacity: 0.1; }
-          .shade2 { opacity: 0.2; }
-          .shade3 { opacity: 0.3; }
-          .shade4 { opacity: 0.4; }
+          .shade1 { opacity: 0.9; }
+          .shade2 { opacity: 0.8; }
+          .shade3 { opacity: 0.7; }
+          .shade4 { opacity: 0.6; }
           .shade5 { opacity: 0.5; }
 
           @keyframes ripple {
@@ -81,7 +81,7 @@ const BackgroundTest: React.FC = () => {
             }
             
             50% {
-              transform: scale(1.2);
+              transform: scale(1.3);
             }
             
             100% {

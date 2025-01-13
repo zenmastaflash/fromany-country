@@ -50,16 +50,16 @@ function getContrastRatio(l1: number, l2: number): number {
 
 export function getTextColor(backgroundColor: string): string {
   const rgb = hexToRgb(backgroundColor);
-  if (!rgb) return '#F0F0F0'; // Default to light text if invalid hex
+  if (!rgb) return '#fcfbdc'; // Default to light text if invalid hex
 
   const backgroundLuminance = getLuminance(rgb.r, rgb.g, rgb.b);
-  const whiteLuminance = getLuminance(255, 253, 208); // #FFFDD0
+  const whiteLuminance = getLuminance(252, 251, 220); // #fcfbdc
   const blackLuminance = getLuminance(0, 0, 0);
 
   const whiteContrast = getContrastRatio(backgroundLuminance, whiteLuminance);
   const blackContrast = getContrastRatio(backgroundLuminance, blackLuminance);
 
-  return whiteContrast > blackContrast ? '#FFFDD0' : '#000000';
+  return whiteContrast > blackContrast ? '#fcfbdc' : '#000000';
 }
 
 export function useDynamicTextColor(backgroundColor: string) {

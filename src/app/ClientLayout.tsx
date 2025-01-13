@@ -37,7 +37,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           .circle {
             position: absolute;
             border-radius: 50%;
-            animation: ripple 15s infinite;
+            animation: ripple 8s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
             transform-origin: center center;
             pointer-events: none;
           }
@@ -55,7 +55,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             height: 120vw;
             right: -60vw;
             bottom: -60vw;
-            animation-delay: 0.2s;
+            animation-delay: 0.15s;
           }
 
           .circle-3 {
@@ -63,7 +63,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             height: 140vw;
             right: -70vw;
             bottom: -70vw;
-            animation-delay: 0.4s;
+            animation-delay: 0.3s;
           }
 
           .circle-4 {
@@ -71,7 +71,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             height: 160vw;
             right: -80vw;
             bottom: -80vw;
-            animation-delay: 0.6s;
+            animation-delay: 0.45s;
           }
 
           .circle-5 {
@@ -79,7 +79,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             height: 180vw;
             right: -90vw;
             bottom: -90vw;
-            animation-delay: 0.8s;
+            animation-delay: 0.6s;
           }
 
           .circle-6 {
@@ -87,7 +87,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             height: 200vw;
             right: -100vw;
             bottom: -100vw;
-            animation-delay: 1.0s;
+            animation-delay: 0.75s;
           }
 
           .circle-7 {
@@ -95,7 +95,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             height: 220vw;
             right: -110vw;
             bottom: -110vw;
-            animation-delay: 1.2s;
+            animation-delay: 0.9s;
           }
 
           @keyframes ripple {
@@ -104,13 +104,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               opacity: 1;
             }
             
-            50% {
+            70% {
               transform: scale(1.3);
-              opacity: 0.5;
+              opacity: 0.7;
             }
             
             100% {
-              transform: scale(0.8);
+              transform: scale(1.5);
               opacity: 0;
             }
           }

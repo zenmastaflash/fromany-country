@@ -19,7 +19,7 @@ A comprehensive platform for digital nomads to manage their global lifestyle—t
 - #2E2E2E (Dark Grey)
 
 **Font**
-#FFFDD0 (Creamy White)
+#fcfbdc (Creamy White)
 
 **Primary Colors**
 - #003135
@@ -56,7 +56,7 @@ While dark mode offers these benefits, it's important to note that it may not be
   - ✅ Document categorization
   - ✅ Metadata tracking
   - ✅ Expiration system
-  - Document sharing
+  - ✅ Document sharing
   - Version control
 
 - **Document Intelligence**
@@ -82,9 +82,9 @@ While dark mode offers these benefits, it's important to note that it may not be
   - ✅ Display name, bio, current location
   - Profile Visibility - Complete, but currently not active
   - Notification Preferences - Complete but currently not active
-  - Emergency Contact - created, but doesn't stick on refresh
+  - ✅ Emergency Contact - created, but no actions (SOS button)
   - SOS button (sends info to emergency contact with last known wheereabouts. Considering integration with a tool like internationalSOS or other)
-  - Account Deletion - Button added, functionality not there yet.
+  - ✅ Account Deletion.
 
 - **Resource Center**
   - ✅ Coliving
@@ -96,7 +96,6 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Next Steps
 
-- Finish Profile Page and ensure all functions work as expected
 - Travel Integration
 - Create a dashboard for tax residency, liability, and other useful insights
 

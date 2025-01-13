@@ -5,7 +5,7 @@ export const theme = {
     accent: '#964734',
     primary: '#0FA4AF',
     light: '#AFDDE5',
-    text: '#FFFDD0',
+    text: '##fcfbdc',
   }
 } as const;
 
@@ -16,5 +16,5 @@ export const rgbValues = {
   accent: '150, 71, 52',
   primary: '15, 164, 175',
   light: '175, 221, 229',
-  text: '255, 253, 208',
+  text: '252, 251, 220',
 } as const;

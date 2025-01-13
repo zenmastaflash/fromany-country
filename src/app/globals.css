@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  /* Set default body font */
   body {
     @apply bg-background text-text font-inter;
   }
@@ -18,7 +17,7 @@
   /* Primary Button */
   .btn-primary {
     @apply bg-primary text-text px-4 py-2 rounded-md 
-           hover:bg-primary-hover transition-colors duration-200;
+           hover:bg-link transition-colors duration-200;
   }
 
   /* Secondary Button */
@@ -29,22 +28,16 @@
 
   /* Links */
   .link {
-    @apply text-link hover:text-link-hover transition-colors duration-200;
+    @apply text-link hover:text-primary transition-colors duration-200;
   }
 
   /* Cards/Sections */
   .card {
     @apply bg-secondary-dark border border-border rounded-lg p-4;
   }
-
-  /* Alert/Notification */
-  .alert {
-    @apply bg-accent text-text px-4 py-2 rounded-md;
-  }
 }
 
 @layer utilities {
-  /* Keep these utility classes for when you need to override */
   .heading-font {
     @apply font-recoleta;
   }

@@ -6,7 +6,7 @@ import { SessionProvider } from "next-auth/react";
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-<div className="min-h-screen bg-gradient-to-br from-secondary/70 via-primary/50 to-accent/60">
+<div className="min-h-screen bg-gradient-to-br from-secondary/70 via-primary/40 to-accent/60">
   <Header />
         <main>
           {children}

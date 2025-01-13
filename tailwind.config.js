@@ -13,8 +13,10 @@ module.exports = {
       },
       keyframes: {
         float: {
-          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
-          '50%': { transform: 'translate(30px, -30px) scale(1.1)' },
+          '0%': { transform: 'translate(0, 0) scale(1) rotate(0deg)' },
+          '33%': { transform: 'translate(50px, -20px) scale(1.1) rotate(5deg)' },
+          '66%': { transform: 'translate(-20px, 30px) scale(0.9) rotate(-5deg)' },
+          '100%': { transform: 'translate(0, 0) scale(1) rotate(0deg)' }
         },
       },
       animation: {

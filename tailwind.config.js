@@ -29,7 +29,7 @@ module.exports = {
     DEFAULT: '#964734',  
   },
   link: {
-    DEFAULT: '#964734',  
+    DEFAULT: '#AFDDE5',  
     hover: '#fcfbdc',    
   },
   border: '#024950',

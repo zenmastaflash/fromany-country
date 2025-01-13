@@ -9,12 +9,12 @@ const BackgroundTest: React.FC = () => {
       <Card className="relative overflow-hidden h-[80vh] bg-transparent">
         {/* Ripple circles */}
         <div className="absolute w-full h-full">
-          {/* Largest to smallest, from secondary to accent */}
-          <div className="circle xxxlarge shade1 bg-secondary" />
-          <div className="circle xxlarge shade2 bg-secondary" />
-          <div className="circle xlarge shade3 bg-primary" />
-          <div className="circle large shade4 bg-primary" />
-          <div className="circle medium shade5 bg-accent" />
+          {/* Largest to smallest, secondary -> primary -> accent */}
+          <div className="circle circle-5 bg-secondary/90" />
+          <div className="circle circle-4 bg-secondary/80" />
+          <div className="circle circle-3 bg-primary/70" />
+          <div className="circle circle-2 bg-primary/60" />
+          <div className="circle circle-1 bg-accent" /> {/* Accent at full opacity */}
         </div>
         
         <div className="relative z-10 p-6">
@@ -29,51 +29,45 @@ const BackgroundTest: React.FC = () => {
             animation: ripple 15s infinite;
           }
 
-          .medium {
-            width: 1200px;
-            height: 1200px;
-            right: -300px;
-            bottom: -300px;
+          .circle-1 {
+            width: 100vw;
+            height: 100vw;
+            right: -20vw;
+            bottom: -20vw;
             animation-delay: 0s;
           }
 
-          .large {
-            width: 1600px;
-            height: 1600px;
-            right: -400px;
-            bottom: -400px;
+          .circle-2 {
+            width: 120vw;
+            height: 120vw;
+            right: -25vw;
+            bottom: -25vw;
             animation-delay: 0.3s;
           }
 
-          .xlarge {
-            width: 2000px;
-            height: 2000px;
-            right: -500px;
-            bottom: -500px;
+          .circle-3 {
+            width: 140vw;
+            height: 140vw;
+            right: -30vw;
+            bottom: -30vw;
             animation-delay: 0.6s;
           }
 
-          .xxlarge {
-            width: 2400px;
-            height: 2400px;
-            right: -600px;
-            bottom: -600px;
+          .circle-4 {
+            width: 160vw;
+            height: 160vw;
+            right: -35vw;
+            bottom: -35vw;
             animation-delay: 0.9s;
           }
 
-          .xxxlarge {
-            width: 2800px;
-            height: 2800px;
-            right: -700px;
-            bottom: -700px;
+          .circle-5 {
+            width: 180vw;
+            height: 180vw;
+            right: -40vw;
+            bottom: -40vw;
             animation-delay: 1.2s;
           }
-
-          .shade1 { opacity: 0.9; }
-          .shade2 { opacity: 0.8; }
-          .shade3 { opacity: 0.7; }
-          .shade4 { opacity: 0.6; }
-          .shade5 { opacity: 0.5; }
 
           @keyframes ripple {
             0% {

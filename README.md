@@ -72,6 +72,7 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Tax day calculations
   - Visa requirement warnings
   - Entry/exit tracking
+  - Travel Planning - plan ahead to reduce tax liability
 
 - **Community Building**
   - Links to partner communities (e.g., coliving spaces)
@@ -92,6 +93,7 @@ While dark mode offers these benefits, it's important to note that it may not be
   - ✅ Tax liability
   - ✅ Legal resources
   - ✅ Nomad visas
+  - "Explore" function that helps you see at a glance what any given country's tax liability is
   - Other tools
 
 ### Next Steps

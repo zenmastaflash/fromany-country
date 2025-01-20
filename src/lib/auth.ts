@@ -50,8 +50,7 @@ export const authConfig: NextAuthOptions = {
           await prisma.user.update({
             where: { email: user.email! },
             data: {
-              image: existingUser?.image || user.image,
-              // For new users, we'll set terms_accepted_at on the terms page
+              image: existingUser?.image || user.image
             }
           });
         }

@@ -1,3 +1,4 @@
+// src/app/api/auth/accept-terms/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
@@ -12,8 +13,10 @@ export async function POST(request: Request) {
       );
     }
 
-    await prisma.user.update({
-      where: { email },
+    const updatedUser = await prisma.user.update({
+      where: { 
+        email 
+      },
       data: {
         terms_accepted_at: new Date(),
       },

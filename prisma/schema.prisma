@@ -37,11 +37,14 @@ model User {
   taxResidency           String?
   emergencyContact       Json?
   preferredLanguage      String?   @default("en")
+  terms_accepted_at      DateTime?
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
   documents              Document[]
   accounts               Account[]
   sessions               Session[]
+  user_tax_status        UserTaxStatus[]
+  trip_scenarios         TripScenarios[]
 }
 
 model Document {
@@ -95,4 +98,56 @@ model VerificationToken {
   token      String   @unique
   expires    DateTime
   @@unique([identifier, token])
+}
+
+model CountryTaxRules {
+  id                 String    @id @default(cuid())
+  country_code       String    @unique
+  name              String
+  tax_year_start    String    // MM-DD format
+  day_counting_method String
+  residency_threshold Int
+  special_rules     Json?
+  tax_treaties      Json?
+  version           Int       @default(1)
+  effective_from    DateTime
+  effective_to      DateTime?
+  last_verified_date DateTime?
+  source_url        String?
+  source_type       String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  user_tax_status   UserTaxStatus[]
+}
+
+model UserTaxStatus {
+  id                String    @id @default(cuid())
+  user_id          String
+  country_code     String
+  tax_year         Int
+  days_present     Int       @default(0)
+  last_calculated_at DateTime?
+  tax_liability_risk String?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  user             User      @relation(fields: [user_id], references: [id])
+  country          CountryTaxRules @relation(fields: [country_code], references: [country_code])
+
+  @@unique([user_id, country_code, tax_year])
+}
+
+model TripScenarios {
+  id                String    @id @default(cuid())
+  user_id          String
+  name             String
+  start_date       DateTime
+  end_date         DateTime
+  countries        Json      // Array of countries with durations
+  tax_implications Json?
+  visa_requirements Json?
+  total_cost_estimate Decimal?
+  currency         String    @default("USD")
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  user             User      @relation(fields: [user_id], references: [id])
 }

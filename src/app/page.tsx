@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 export default function Home() {
   const words = ['work', 'live', 'thrive'];
   const [currentWord, setCurrentWord] = useState(0);
+  const [showSlogan, setShowSlogan] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -12,6 +13,12 @@ export default function Home() {
         setCurrentWord(currentWord + 1);
       }, 2000);
       return () => clearTimeout(timeout);
+    } else {
+      // Show slogan after the last word disappears
+      const sloganTimeout = setTimeout(() => {
+        setShowSlogan(true);
+      }, 500); // Delay before showing slogan
+      return () => clearTimeout(sloganTimeout);
     }
   }, [currentWord, words.length]);
 
@@ -24,13 +31,13 @@ export default function Home() {
       <div className="relative z-10 max-w-4xl w-full text-center space-y-8">
         <div className="relative flex flex-col items-center justify-center">
           {/* Fixed height container for animations */}
-          <div className="h-[72px] md:h-[96px] flex items-center justify-center mb-2">
+          <div className="h-[72px] md:h-[96px] flex items-center justify-center mb-0">
             {words.map((word, index) => (
               index === currentWord && currentWord < words.length && (
                 <span 
                   key={word} 
                   className="animated-word text-4xl md:text-6xl font-bold font-recoleta"
-                  style={{ color: '#964734' }}
+                  style={{ color: '#fcfbdc' }}
                 >
                   {word}
                 </span>
@@ -41,7 +48,7 @@ export default function Home() {
             from any country
           </h1>
         </div>
-        <p className="text-xl md:text-2xl text-link mb-8 font-inter">
+        <p className={`text-xl md:text-2xl text-link mb-8 font-inter transition-opacity duration-1000 ${showSlogan ? 'opacity-100' : 'opacity-0'}`}>
           Live Anywhere. Belong Everywhere.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
@@ -61,4 +68,4 @@ export default function Home() {
       </div>
     </main>
   );
-}  
+}

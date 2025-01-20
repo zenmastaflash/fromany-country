@@ -32,17 +32,28 @@ export const authConfig: NextAuthOptions = {
       try {
         console.log("SignIn Callback:", { user, account, profile });
         if (account?.provider === 'google') {
-          // Only update the image if there isn't a custom uploaded one
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
-            select: { image: true }
+            select: { 
+              image: true,
+              terms_accepted_at: true
+            }
           });
-          if (!existingUser?.image) {
-            await prisma.user.update({
-              where: { email: user.email! },
-              data: { image: user.image }
-            });
+
+          // If user exists but hasn't accepted terms
+          if (existingUser && !existingUser.terms_accepted_at) {
+            // Store the session info temporarily and redirect to terms
+            return '/auth/terms?email=' + encodeURIComponent(user.email!);
           }
+
+          // For new users or updating existing ones
+          await prisma.user.update({
+            where: { email: user.email! },
+            data: {
+              image: existingUser?.image || user.image,
+              // For new users, we'll set terms_accepted_at on the terms page
+            }
+          });
         }
         return true;
       } catch (error) {

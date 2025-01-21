@@ -2,9 +2,15 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 interface TravelFormData {
   country: string;
+  city: string;
   startDate: string;
   endDate?: string;
   purpose: string;
@@ -12,10 +18,30 @@ interface TravelFormData {
   notes?: string;
 }
 
-export default function TravelForm() {
+const PURPOSES = [
+  { value: 'tourism', label: 'Tourism' },
+  { value: 'business', label: 'Business' },
+  { value: 'remote_work', label: 'Remote Work' },
+  { value: 'relocation', label: 'Relocation' },
+  { value: 'visa_run', label: 'Visa Run' },
+  { value: 'medical', label: 'Medical' },
+  { value: 'other', label: 'Other' }
+];
+
+export default function TravelForm({ 
+  preselectedDates,
+  onSuccess,
+  onCancel 
+}: { 
+  preselectedDates?: { start: Date; end?: Date };
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}) {
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
-    startDate: '',
+    city: '',
+    startDate: preselectedDates?.start.toISOString().split('T')[0] || '',
+    endDate: preselectedDates?.end?.toISOString().split('T')[0],
     purpose: '',
   });
 
@@ -35,106 +61,110 @@ export default function TravelForm() {
         throw new Error('Failed to add travel');
       }
 
-      // Reset form
-      setFormData({
-        country: '',
-        startDate: '',
-        purpose: '',
-      });
+      onSuccess?.();
     } catch (error) {
       console.error('Error adding travel:', error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-          Country
-        </label>
-        <input
-          type="text"
-          id="country"
-          value={formData.country}
-          onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          required
-        />
-      </div>
+    <Card>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="country">Country</Label>
+              <Input
+                id="country"
+                value={formData.country}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                required
+              />
+            </div>
 
-      <div>
-        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
-          Start Date
-        </label>
-        <input
-          type="date"
-          id="startDate"
-          value={formData.startDate}
-          onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          required
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                required
+              />
+            </div>
+          </div>
 
-      <div>
-        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-          End Date
-        </label>
-        <input
-          type="date"
-          id="endDate"
-          value={formData.endDate}
-          onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-        />
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                type="date"
+                id="startDate"
+                value={formData.startDate}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                required
+              />
+            </div>
 
-      <div>
-        <label htmlFor="purpose" className="block text-sm font-medium text-gray-700">
-          Purpose
-        </label>
-        <select
-          id="purpose"
-          value={formData.purpose}
-          onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          required
-        >
-          <option value="">Select purpose</option>
-          <option value="tourism">Tourism</option>
-          <option value="business">Business</option>
-          <option value="remote_work">Remote Work</option>
-          <option value="relocation">Relocation</option>
-        </select>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                type="date"
+                id="endDate"
+                value={formData.endDate}
+                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+              />
+            </div>
+          </div>
 
-      <div>
-        <label htmlFor="visaType" className="block text-sm font-medium text-gray-700">
-          Visa Type
-        </label>
-        <input
-          type="text"
-          id="visaType"
-          value={formData.visaType}
-          onChange={(e) => setFormData({ ...formData, visaType: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="purpose">Purpose</Label>
+            <Select 
+              value={formData.purpose}
+              onValueChange={(value) => setFormData({ ...formData, purpose: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select purpose" />
+              </SelectTrigger>
+              <SelectContent>
+                {PURPOSES.map(purpose => (
+                  <SelectItem key={purpose.value} value={purpose.value}>
+                    {purpose.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-          Notes
-        </label>
-        <textarea
-          id="notes"
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          rows={3}
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="visaType">Visa Type</Label>
+            <Input
+              id="visaType"
+              value={formData.visaType}
+              onChange={(e) => setFormData({ ...formData, visaType: e.target.value })}
+              placeholder="e.g., Tourist, Business, Digital Nomad"
+            />
+          </div>
 
-      <Button type="submit">Add Travel</Button>
-    </form>
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              rows={3}
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            {onCancel && (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+            )}
+            <Button type="submit">Add Travel</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

@@ -105,19 +105,21 @@ export default function TravelForm({
 
           <div className="space-y-2">
             <Label htmlFor="purpose">Purpose</Label>
-            <Input
-              as="select"
+            <select
               id="purpose"
               value={formData.purpose}
               onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
               required
+              className="w-full rounded-md border-border bg-text text-background px-3 py-2 
+                         placeholder-secondary focus:outline-none focus:ring-2 
+                         focus:ring-primary focus:border-primary disabled:opacity-50"
             >
               <option value="">Select purpose</option>
               <option value="tourism">Tourism</option>
               <option value="business">Business</option>
               <option value="remote_work">Remote Work</option>
               <option value="relocation">Relocation</option>
-            </Input>
+            </select>
           </div>
 
           <div className="flex justify-end space-x-2">

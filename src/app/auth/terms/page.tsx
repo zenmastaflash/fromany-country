@@ -42,18 +42,18 @@ function TermsContent() {
         <div className="prose prose-sm max-w-none">
           <h2 className="text-xl font-semibold">Welcome to fromany.country</h2>
           
-          <p>By using this service, you agree to:</p>
+          <p>Please read these terms carefully before using our service:</p>
           
           <ul className="list-disc pl-5 space-y-2">
-            <li>Provide accurate information about your travel and documents</li>
-            <li>Use this service in compliance with all applicable laws and regulations</li>
-            <li>Understand that tax information provided is for guidance only and should be verified with a professional</li>
-            <li>Take responsibility for your own travel and visa compliance</li>
-            <li>Not share your account access with others</li>
+            <li>fromany.country is a tool designed to help you manage your global mobility. While we strive for accuracy, we cannot guarantee the completeness or accuracy of any information provided.</li>
+            <li>The tax calculations and residency assessments provided are for informational purposes only. You should consult with qualified professionals for advice specific to your situation.</li>
+            <li>You are responsible for maintaining the confidentiality of your account and all activities that occur under it.</li>
+            <li>We store and process your data as outlined in our Privacy Policy to provide and improve our services.</li>
+            <li>We may update these terms as our services evolve. Continued use of the service after changes constitutes acceptance of the updated terms.</li>
           </ul>
 
           <p className="mt-4 text-sm text-gray-600">
-            This service is intended to help digital nomads and global citizens manage their travel and stay compliant with various regulations. However, you should always verify critical information with relevant authorities or professional advisors.
+            By clicking "I Accept", you acknowledge that you have read and understood these terms, and agree to be bound by them. If you do not agree to these terms, you should not use this service.
           </p>
         </div>
 

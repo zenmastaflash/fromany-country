@@ -10,6 +10,7 @@ import TravelForm from '@/components/travel/TravelForm';
 
 export default function TravelPage() {
   const [showForm, setShowForm] = useState(false);
+  const [refresh, setRefresh] = useState(0);
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -25,12 +26,18 @@ export default function TravelPage() {
               <CardTitle>Add Travel</CardTitle>
             </CardHeader>
             <CardContent>
-              <TravelForm onSuccess={() => setShowForm(false)} onCancel={() => setShowForm(false)} />
+              <TravelForm 
+                onSuccess={() => {
+                  setShowForm(false);
+                  setRefresh(prev => prev + 1);
+                }} 
+                onCancel={() => setShowForm(false)} 
+              />
             </CardContent>
           </Card>
         )}
         
-        <TravelCalendar />
+        <TravelCalendar key={refresh} />
 
         <Card>
           <CardHeader>

@@ -11,16 +11,17 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
+    console.log('Received data:', data);  // Debug log
     
     const travel = await prisma.travel.create({
       data: {
         user_id: session.user.id,
         country: data.country,
         city: data.city,
-        entry_date: new Date(data.startDate),
-        exit_date: data.endDate ? new Date(data.endDate) : null,
+        entry_date: new Date(data.entry_date),
+        exit_date: data.exit_date ? new Date(data.exit_date) : null,
         purpose: data.purpose,
-        visa_type: data.visaType,
+        visa_type: data.visa_type,
         notes: data.notes,
         status: 'active'
       },

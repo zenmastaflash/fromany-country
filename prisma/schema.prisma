@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -45,6 +47,7 @@ model User {
   sessions               Session[]
   user_tax_status        UserTaxStatus[]
   trip_scenarios         TripScenarios[]
+  travel                Travel[]
 }
 
 model Document {
@@ -150,4 +153,20 @@ model TripScenarios {
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
   user             User      @relation(fields: [user_id], references: [id])
+}
+
+model Travel {
+  id          String    @id @default(cuid())
+  user_id     String
+  country     String
+  city        String?
+  entry_date  DateTime
+  exit_date   DateTime?
+  purpose     String
+  visa_type   String?
+  notes       String?
+  status      String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  user        User      @relation(fields: [user_id], references: [id])
 }

@@ -2,27 +2,33 @@
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { config } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession();
-    if (!session?.user?.id) {
+    const session = await getServerSession(config);
+    console.log('Session:', session); // Debug log
+    
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 401 });
+    }
+
     const data = await request.json();
-    console.log('Received data:', data);  // Debug log
     
     const travel = await prisma.travel.create({
       data: {
-        user_id: session.user.id,
-        country: data.country,
-        city: data.city,
+        user_id: user.id,
+        ...data,
         entry_date: new Date(data.entry_date),
         exit_date: data.exit_date ? new Date(data.exit_date) : null,
-        purpose: data.purpose,
-        visa_type: data.visa_type,
-        notes: data.notes,
         status: 'active'
       },
     });
@@ -30,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json(travel);
   } catch (error) {
     console.error('Error creating travel:', error);
-    return NextResponse.json({ error: 'Failed to create travel entry' }, { status: 500 });
+    return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }
 

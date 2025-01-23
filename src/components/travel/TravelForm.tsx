@@ -1,7 +1,7 @@
 // src/components/travel/TravelForm.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,7 @@ export default function TravelForm({
   onSuccess?: () => void;
   onCancel?: () => void;
 }) {
+  const [countries, setCountries] = useState<string[]>([]);
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
     city: '',
@@ -33,6 +34,13 @@ export default function TravelForm({
     endDate: preselectedDates?.end?.toISOString().split('T')[0],
     purpose: '',
   });
+
+  useEffect(() => {
+    fetch('/api/countries')
+      .then(res => res.json())
+      .then(data => setCountries(data.countries))
+      .catch(err => console.error('Error fetching countries:', err));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +58,7 @@ export default function TravelForm({
         throw new Error('Failed to add travel');
       }
 
+      // Trigger parent update for calendar and cards
       onSuccess?.();
     } catch (error) {
       console.error('Error adding travel:', error);
@@ -66,8 +75,14 @@ export default function TravelForm({
               id="country"
               value={formData.country}
               onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+              list="countries"
               required
             />
+            <datalist id="countries">
+              {countries.map(country => (
+                <option key={country} value={country} />
+              ))}
+            </datalist>
           </div>
 
           <div className="space-y-2">
@@ -115,6 +130,7 @@ export default function TravelForm({
                          focus:ring-primary focus:border-primary disabled:opacity-50"
             >
               <option value="">Select purpose</option>
+              <option value="home_base">Home Base</option>
               <option value="tourism">Tourism</option>
               <option value="business">Business</option>
               <option value="remote_work">Remote Work</option>

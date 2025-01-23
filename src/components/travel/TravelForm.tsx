@@ -9,12 +9,13 @@ import { Card, CardContent } from '@/components/ui/Card';
 
 interface TravelFormData {
   country: string;
-  city: string;
-  startDate: string;
-  endDate?: string;
+  city?: string;
+  entry_date: string;
+  exit_date?: string;
   purpose: string;
-  visaType?: string;
+  visa_type?: string;
   notes?: string;
+  status?: string;
 }
 
 export default function TravelForm({
@@ -30,8 +31,8 @@ export default function TravelForm({
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
     city: '',
-    startDate: preselectedDates?.start.toISOString().split('T')[0] || '',
-    endDate: preselectedDates?.end?.toISOString().split('T')[0],
+    entry_date: preselectedDates?.start.toISOString().split('T')[0] || '',
+    exit_date: preselectedDates?.end?.toISOString().split('T')[0],
     purpose: '',
   });
 
@@ -91,29 +92,28 @@ export default function TravelForm({
               id="city"
               value={formData.city}
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
+              <Label htmlFor="entry_date">Entry Date</Label>
               <Input
                 type="date"
-                id="startDate"
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                id="entry_date"
+                value={formData.entry_date}
+                onChange={(e) => setFormData({ ...formData, entry_date: e.target.value })}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="endDate">End Date</Label>
+              <Label htmlFor="exit_date">Exit Date</Label>
               <Input
                 type="date"
-                id="endDate"
-                value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                id="exit_date"
+                value={formData.exit_date}
+                onChange={(e) => setFormData({ ...formData, exit_date: e.target.value })}
               />
             </div>
           </div>

@@ -1,34 +1,26 @@
 // src/app/api/travel/route.ts
-import { getServerSession } from 'next-auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { config } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(config);
-    console.log('Session:', session); // Debug log
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 401 });
-    }
-
     const data = await request.json();
-    
     const travel = await prisma.travel.create({
       data: {
-        user_id: user.id,
-        ...data,
+        user_id: session.user.id,
+        country: data.country,
+        city: data.city,
         entry_date: new Date(data.entry_date),
         exit_date: data.exit_date ? new Date(data.exit_date) : null,
+        purpose: data.purpose,
+        visa_type: data.visa_type,
+        notes: data.notes,
         status: 'active'
       },
     });
@@ -40,13 +32,13 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
-  try {
-    const session = await getServerSession();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
+  try {
     const travels = await prisma.travel.findMany({
       where: { user_id: session.user.id },
       orderBy: { entry_date: 'desc' },
@@ -55,6 +47,6 @@ export async function GET(request: Request) {
     return NextResponse.json(travels);
   } catch (error) {
     console.error('Error fetching travel:', error);
-    return NextResponse.json({ error: 'Failed to fetch travel entries' }, { status: 500 });
+    return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }

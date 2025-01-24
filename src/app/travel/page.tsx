@@ -20,7 +20,7 @@ interface Travel {
 export default function TravelPage() {
   const [showForm, setShowForm] = useState(false);
   const [travels, setTravels] = useState<Travel[]>([]);
-  const [editTravel, setEditTravel] = useState<Travel | null>(null);
+  const [selectedDates, setSelectedDates] = useState<{ start: Date; end?: Date } | undefined>();
 
   useEffect(() => {
     fetchTravels();
@@ -51,11 +51,6 @@ export default function TravelPage() {
     }
   };
 
-  const handleEdit = (travel: Travel) => {
-    setEditTravel(travel);
-    setShowForm(true);
-  };
-
   const getCurrentLocation = () => {
     const now = new Date();
     return travels.find(t => 
@@ -71,7 +66,7 @@ export default function TravelPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">Travel Timeline</h1>
         <Button onClick={() => {
-          setEditTravel(null);
+          setSelectedDates(undefined);
           setShowForm(true);
         }}>Add Travel</Button>
       </div>
@@ -80,30 +75,26 @@ export default function TravelPage() {
         {showForm && (
           <Card>
             <CardHeader>
-              <CardTitle>{editTravel ? 'Edit Travel' : 'Add Travel'}</CardTitle>
+              <CardTitle>Add Travel</CardTitle>
             </CardHeader>
             <CardContent>
               <TravelForm 
-                initialData={editTravel}
+                preselectedDates={selectedDates}
                 onSuccess={() => {
                   setShowForm(false);
-                  setEditTravel(null);
+                  setSelectedDates(undefined);
                   fetchTravels();
                 }} 
                 onCancel={() => {
                   setShowForm(false);
-                  setEditTravel(null);
+                  setSelectedDates(undefined);
                 }} 
               />
             </CardContent>
           </Card>
         )}
         
-        <TravelCalendar 
-          travels={travels} 
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <TravelCalendar travels={travels} onDelete={handleDelete} />
 
         <Card>
           <CardHeader>
@@ -145,7 +136,13 @@ export default function TravelPage() {
                     <div className="space-x-2">
                       <Button 
                         variant="secondary" 
-                        onClick={() => handleEdit(travel)}
+                        onClick={() => {
+                          setSelectedDates({
+                            start: new Date(travel.entry_date),
+                            end: travel.exit_date ? new Date(travel.exit_date) : undefined
+                          });
+                          setShowForm(true);
+                        }}
                       >
                         Edit
                       </Button>

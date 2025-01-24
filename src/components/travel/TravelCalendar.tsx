@@ -11,8 +11,8 @@ interface Travel {
   id: string;
   country: string;
   city: string;
-  startDate: string;
-  endDate?: string;
+  entry_date: string;
+  exit_date?: string;
   purpose: string;
 }
 
@@ -41,8 +41,8 @@ export default function TravelCalendar() {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
-        start: travel.startDate,
-        end: travel.endDate,
+        start: travel.entry_date,
+        end: travel.exit_date,
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc'
       }));

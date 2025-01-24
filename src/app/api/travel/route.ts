@@ -1,10 +1,11 @@
 // src/app/api/travel/route.ts
-import { auth } from '@/lib/auth';
+import { authConfig } from '@/lib/auth';
+import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const session = await auth();
+  const session = await getServerSession(authConfig);
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -32,8 +33,8 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
-  const session = await auth();
+export async function GET(request: Request) {
+  const session = await getServerSession(authConfig);
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

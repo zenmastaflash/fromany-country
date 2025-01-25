@@ -14,6 +14,7 @@ interface Travel {
   entry_date: string;
   exit_date?: string;
   purpose: string;
+  notes?: string;
 }
 
 interface CalendarEvent {
@@ -23,6 +24,9 @@ interface CalendarEvent {
   end?: string;
   backgroundColor?: string;
   textColor?: string;
+  extendedProps?: {
+    notes?: string;
+  };
 }
 
 interface Props {
@@ -48,7 +52,10 @@ export default function TravelCalendar({ onDelete }: Props) {
         start: travel.entry_date,
         end: travel.exit_date,
         backgroundColor: getPurposeColor(travel.purpose),
-        textColor: '#fcfbdc'
+        textColor: '#fcfbdc',
+        extendedProps: {
+          notes: travel.notes
+        }
       }));
       
       setEvents(calendarEvents);
@@ -115,6 +122,16 @@ export default function TravelCalendar({ onDelete }: Props) {
           left: 'prev,next today',
           center: 'title',
           right: 'dayGridMonth,timeGridWeek'
+        }}
+        eventDidMount={(info) => {
+          if (info.event.extendedProps?.notes) {
+            const tooltip = new Tooltip(info.el, {
+              title: info.event.extendedProps.notes,
+              placement: 'top',
+              trigger: 'hover',
+              container: 'body'
+            });
+          }
         }}
       />
     </div>

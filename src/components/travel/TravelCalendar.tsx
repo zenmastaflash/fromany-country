@@ -79,6 +79,24 @@ export default function TravelCalendar({ onDelete }: Props) {
     }
   };
 
+  const handleEventDrop = async (info: any) => {
+    try {
+      const response = await fetch(`/api/travel/${info.event.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          entry_date: info.event.start,
+          exit_date: info.event.end
+        })
+      });
+      if (!response.ok) throw new Error('Failed to update travel');
+      fetchTravelData();
+    } catch (error) {
+      console.error('Error updating travel:', error);
+      info.revert();
+    }
+  };
+
   return (
     <div className="h-[800px] bg-secondary rounded-lg p-4">
       <FullCalendar
@@ -91,6 +109,7 @@ export default function TravelCalendar({ onDelete }: Props) {
         events={events}
         select={handleDateSelect}
         eventClick={handleEventClick}
+        eventDrop={handleEventDrop}
         height="100%"
         headerToolbar={{
           left: 'prev,next today',

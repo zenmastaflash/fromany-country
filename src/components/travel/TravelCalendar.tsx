@@ -26,7 +26,7 @@ interface CalendarEvent {
 }
 
 interface Props {
-  onDelete?: (id: string) => void;
+  onDelete?: (id: string) => Promise<void>;
 }
 
 export default function TravelCalendar({ onDelete }: Props) {
@@ -74,7 +74,7 @@ export default function TravelCalendar({ onDelete }: Props) {
   };
 
   const handleEventClick = (info: any) => {
-    if (onDelete && window.confirm('Delete this travel entry?')) {
+    if (onDelete && window.confirm('Are you sure you want to delete this travel?')) {
       onDelete(info.event.id);
     }
   };

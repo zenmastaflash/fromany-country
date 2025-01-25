@@ -25,7 +25,11 @@ interface CalendarEvent {
   textColor?: string;
 }
 
-export default function TravelCalendar() {
+interface Props {
+  onDelete?: (id: string) => void;
+}
+
+export default function TravelCalendar({ onDelete }: Props) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
@@ -69,6 +73,12 @@ export default function TravelCalendar() {
     console.log('Selected dates:', selectInfo.startStr, selectInfo.endStr);
   };
 
+  const handleEventClick = (info: any) => {
+    if (onDelete && window.confirm('Delete this travel entry?')) {
+      onDelete(info.event.id);
+    }
+  };
+
   return (
     <div className="h-[800px] bg-secondary rounded-lg p-4">
       <FullCalendar
@@ -80,6 +90,7 @@ export default function TravelCalendar() {
         weekends={true}
         events={events}
         select={handleDateSelect}
+        eventClick={handleEventClick}
         height="100%"
         headerToolbar={{
           left: 'prev,next today',

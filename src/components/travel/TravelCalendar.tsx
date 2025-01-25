@@ -6,7 +6,9 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { DateSelectArg } from '@fullcalendar/core';
-import * as Tooltip from '@radix-ui/react-tooltip';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light.css';
 
 interface Travel {
   id: string;
@@ -118,27 +120,14 @@ export default function TravelCalendar({ onDelete }: Props) {
           center: 'title',
           right: 'dayGridMonth,timeGridWeek'
         }}
-        eventContent={(arg) => {
-          const notes = arg.event.extendedProps?.notes;
-          return (
-            <Tooltip.Provider>
-              <Tooltip.Root>
-                <Tooltip.Trigger asChild>
-                  <div className="fc-event-main-frame">
-                    <div className="fc-event-title">{arg.event.title}</div>
-                  </div>
-                </Tooltip.Trigger>
-                {notes && (
-                  <Tooltip.Portal>
-                    <Tooltip.Content className="bg-secondary p-2 rounded text-sm">
-                      {notes}
-                      <Tooltip.Arrow className="fill-secondary" />
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                )}
-              </Tooltip.Root>
-            </Tooltip.Provider>
-          );
+        eventDidMount={(info) => {
+          if (info.event.extendedProps?.notes) {
+            tippy(info.el, {
+              content: info.event.extendedProps.notes,
+              theme: 'light',
+              placement: 'top',
+            });
+          }
         }}
       />
     </div>

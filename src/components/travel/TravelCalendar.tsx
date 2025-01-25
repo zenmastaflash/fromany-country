@@ -6,6 +6,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { DateSelectArg } from '@fullcalendar/core';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 interface Travel {
   id: string;
@@ -14,7 +15,6 @@ interface Travel {
   entry_date: string;
   exit_date?: string;
   purpose: string;
-  notes?: string;
 }
 
 interface CalendarEvent {
@@ -24,9 +24,7 @@ interface CalendarEvent {
   end?: string;
   backgroundColor?: string;
   textColor?: string;
-  extendedProps?: {
-    notes?: string;
-  };
+  notes?: string;
 }
 
 interface Props {
@@ -52,10 +50,7 @@ export default function TravelCalendar({ onDelete }: Props) {
         start: travel.entry_date,
         end: travel.exit_date,
         backgroundColor: getPurposeColor(travel.purpose),
-        textColor: '#fcfbdc',
-        extendedProps: {
-          notes: travel.notes
-        }
+        textColor: '#fcfbdc'
       }));
       
       setEvents(calendarEvents);
@@ -123,15 +118,27 @@ export default function TravelCalendar({ onDelete }: Props) {
           center: 'title',
           right: 'dayGridMonth,timeGridWeek'
         }}
-        eventDidMount={(info) => {
-          if (info.event.extendedProps?.notes) {
-            const tooltip = new Tooltip(info.el, {
-              title: info.event.extendedProps.notes,
-              placement: 'top',
-              trigger: 'hover',
-              container: 'body'
-            });
-          }
+        eventContent={(arg) => {
+          const notes = arg.event.extendedProps?.notes;
+          return (
+            <Tooltip.Provider>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <div className="fc-event-main-frame">
+                    <div className="fc-event-title">{arg.event.title}</div>
+                  </div>
+                </Tooltip.Trigger>
+                {notes && (
+                  <Tooltip.Portal>
+                    <Tooltip.Content className="bg-secondary p-2 rounded text-sm">
+                      {notes}
+                      <Tooltip.Arrow className="fill-secondary" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                )}
+              </Tooltip.Root>
+            </Tooltip.Provider>
+          );
         }}
       />
     </div>

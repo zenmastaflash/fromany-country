@@ -38,6 +38,21 @@ export default function TravelPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this travel entry?')) return;
+    
+    try {
+      const response = await fetch(`/api/travel/${id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        fetchTravels();
+      }
+    } catch (error) {
+      console.error('Error deleting travel:', error);
+    }
+  };
+
   const getCurrentLocation = () => {
     const now = new Date();
     return travels.find(t => 
@@ -81,7 +96,7 @@ export default function TravelPage() {
           </Card>
         )}
         
-        <TravelCalendar />
+        <TravelCalendar onDelete={handleDelete} />
 
         <Card>
           <CardHeader>
@@ -120,6 +135,13 @@ export default function TravelPage() {
                       </p>
                       <p className="text-xs italic capitalize">{travel.purpose.replace('_', ' ')}</p>
                     </div>
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => handleDelete(travel.id)}
+                      className="text-sm"
+                    >
+                      Delete
+                    </Button>
                   </div>
                 ))
               ) : (

@@ -138,6 +138,17 @@ export default function TravelForm({
             </select>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              className="w-full rounded-md border-border bg-text text-background px-3 py-2"
+              rows={3}
+            />
+          </div>
+
           <div className="flex justify-end space-x-2">
             {onCancel && (
               <Button variant="secondary" onClick={onCancel}>

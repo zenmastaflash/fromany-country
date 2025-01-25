@@ -36,7 +36,8 @@
     "react-dom": "^18.2.0",
     "resend": "^2.1.0",
     "lucide-react": "^0.263.1",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "tippy.js": "^6.3.7"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -17,6 +17,7 @@ interface Travel {
   entry_date: string;
   exit_date?: string;
   purpose: string;
+  notes?: string;
 }
 
 interface CalendarEvent {
@@ -27,13 +28,20 @@ interface CalendarEvent {
   backgroundColor?: string;
   textColor?: string;
   notes?: string;
+  extendedProps?: {
+    country: string;
+    city: string;
+    purpose: string;
+    notes?: string;
+  };
 }
 
 interface Props {
   onDelete?: (id: string) => Promise<void>;
+  onEdit?: (travel: Travel) => void;
 }
 
-export default function TravelCalendar({ onDelete }: Props) {
+export default function TravelCalendar({ onDelete, onEdit }: Props) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
@@ -52,7 +60,13 @@ export default function TravelCalendar({ onDelete }: Props) {
         start: travel.entry_date,
         end: travel.exit_date,
         backgroundColor: getPurposeColor(travel.purpose),
-        textColor: '#fcfbdc'
+        textColor: '#fcfbdc',
+        extendedProps: {
+          country: travel.country,
+          city: travel.city,
+          purpose: travel.purpose,
+          notes: travel.notes
+        }
       }));
       
       setEvents(calendarEvents);
@@ -78,9 +92,16 @@ export default function TravelCalendar({ onDelete }: Props) {
   };
 
   const handleEventClick = (info: any) => {
-    if (onDelete && window.confirm('Are you sure you want to delete this travel?')) {
-      onDelete(info.event.id);
-    }
+    const travel = {
+      id: info.event.id,
+      country: info.event.extendedProps.country,
+      city: info.event.extendedProps.city,
+      entry_date: info.event.start,
+      exit_date: info.event.end,
+      purpose: info.event.extendedProps.purpose,
+      notes: info.event.extendedProps.notes
+    };
+    onEdit?.(travel);
   };
 
   const handleEventDrop = async (info: any) => {

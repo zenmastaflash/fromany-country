@@ -14,6 +14,11 @@
     "@aws-sdk/s3-request-presigner": "^3.485.0",
     "@aws-sdk/s3-presigned-post": "^3.485.0",
     "@aws-sdk/lib-storage": "^3.485.0",
+    "@fullcalendar/core": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@prisma/client": "^5.7.1",
@@ -27,11 +32,14 @@
     "next": "14.1.4",
     "next-auth": "^4.24.5",
     "@next-auth/prisma-adapter": "latest",
+    "papaparse": "^5.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "resend": "^2.1.0",
     "lucide-react": "^0.263.1",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "tippy.js": "^6.3.7",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^20",

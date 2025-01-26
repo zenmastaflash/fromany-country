@@ -1,16 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-declare module 'papaparse' {
-  const Papa: any;
-  export default Papa;
-}
-
-declare module 'xlsx' {
-  export const utils: any;
-  export const writeFile: any;
-}
-
 // Function to merge Tailwind classes
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

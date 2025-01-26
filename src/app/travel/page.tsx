@@ -27,7 +27,7 @@ export default function TravelPage() {
 
   useEffect(() => {
     fetchTravels();
-  }, []);
+  }, [showEventModal, showForm]); // Re-fetch after modal/form closes
 
   const fetchTravels = async () => {
     try {

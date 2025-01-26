@@ -46,7 +46,7 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
 
   useEffect(() => {
     fetchTravelData();
-  }, []);
+  }, [showEventModal]); // Re-fetch when modal closes
 
   const fetchTravelData = async () => {
     try {
@@ -134,6 +134,7 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         events={events}
         select={handleDateSelect}
         eventClick={handleEventClick}
+        editable={true}
         eventDrop={handleEventDrop}
         height="100%"
         headerToolbar={{

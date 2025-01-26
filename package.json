@@ -39,7 +39,7 @@
     "lucide-react": "^0.263.1",
     "tailwind-merge": "^2.6.0",
     "tippy.js": "^6.3.7",
-    "xlsx": "^0.20.3"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -71,6 +71,30 @@ export default function TravelPage() {
 
   const currentLocation = getCurrentLocation();
 
+  const exportCSV = () => {
+    const csvData = travels.map(t => ({
+      country: t.country,
+      city: t.city,
+      entry_date: t.entry_date,
+      exit_date: t.exit_date || '',
+      purpose: t.purpose,
+      notes: t.notes || ''
+    }));
+    const csvString = Papa.unparse(csvData);
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'travel_data.csv';
+    link.click();
+  };
+
+  const exportExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(travels);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Travel Data");
+    XLSX.writeFile(wb, "travel_data.xlsx");
+  };
+
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">

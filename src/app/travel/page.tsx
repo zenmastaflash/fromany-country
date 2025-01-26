@@ -15,12 +15,15 @@ interface Travel {
   purpose: string;
   visa_type?: string;
   status?: string;
+  notes?: string;
 }
 
 export default function TravelPage() {
   const [showForm, setShowForm] = useState(false);
   const [travels, setTravels] = useState<Travel[]>([]);
   const [selectedDates, setSelectedDates] = useState<{ start: Date; end?: Date } | undefined>();
+  const [selectedTravel, setSelectedTravel] = useState<Travel | null>(null);
+  const [showEventModal, setShowEventModal] = useState(false);
 
   useEffect(() => {
     fetchTravels();
@@ -51,6 +54,11 @@ export default function TravelPage() {
     } catch (error) {
       console.error('Error deleting travel:', error);
     }
+  };
+
+  const handleEventEdit = (travel: Travel) => {
+    setSelectedTravel(travel);
+    setShowEventModal(true);
   };
 
   const getCurrentLocation = () => {
@@ -96,7 +104,53 @@ export default function TravelPage() {
           </Card>
         )}
         
-        <TravelCalendar onDelete={handleDelete} />
+        {showEventModal && selectedTravel && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Travel Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-lg">{selectedTravel.city}, {selectedTravel.country}</p>
+                <p className="text-sm text-link">
+                  {new Date(selectedTravel.entry_date).toLocaleDateString()}
+                  {selectedTravel.exit_date && ` - ${new Date(selectedTravel.exit_date).toLocaleDateString()}`}
+                </p>
+                <p className="text-sm italic capitalize">{selectedTravel.purpose.replace('_', ' ')}</p>
+                {selectedTravel.notes && (
+                  <p className="text-sm">{selectedTravel.notes}</p>
+                )}
+                <div className="flex justify-end space-x-2 mt-4">
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => {
+                      setSelectedDates({
+                        start: new Date(selectedTravel.entry_date),
+                        end: selectedTravel.exit_date ? new Date(selectedTravel.exit_date) : undefined
+                      });
+                      setShowForm(true);
+                      setShowEventModal(false);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => {
+                      handleDelete(selectedTravel.id);
+                      setShowEventModal(false);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                  <Button onClick={() => setShowEventModal(false)}>Close</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        <TravelCalendar onEdit={handleEventEdit} />
 
         <Card>
           <CardHeader>
@@ -104,13 +158,32 @@ export default function TravelPage() {
           </CardHeader>
           <CardContent>
             {currentLocation ? (
-              <div className="space-y-1">
-                <p className="text-lg">{currentLocation.city}, {currentLocation.country}</p>
-                <p className="text-sm text-link">Since: {new Date(currentLocation.entry_date).toLocaleDateString()}</p>
-                {currentLocation.exit_date && (
-                  <p className="text-sm text-link">Until: {new Date(currentLocation.exit_date).toLocaleDateString()}</p>
-                )}
-                <p className="text-sm italic capitalize">{currentLocation.purpose.replace('_', ' ')}</p>
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <p className="text-lg">{currentLocation.city}, {currentLocation.country}</p>
+                  <p className="text-sm text-link">Since: {new Date(currentLocation.entry_date).toLocaleDateString()}</p>
+                  {currentLocation.exit_date && (
+                    <p className="text-sm text-link">Until: {new Date(currentLocation.exit_date).toLocaleDateString()}</p>
+                  )}
+                  <p className="text-sm italic capitalize">{currentLocation.purpose.replace('_', ' ')}</p>
+                  {currentLocation.notes && (
+                    <p className="text-sm mt-2">{currentLocation.notes}</p>
+                  )}
+                </div>
+                <div className="space-x-2">
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => handleEventEdit(currentLocation)}
+                  >
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => handleDelete(currentLocation.id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             ) : (
               <p>No current location set</p>
@@ -134,14 +207,26 @@ export default function TravelPage() {
                         {travel.exit_date && ` - ${new Date(travel.exit_date).toLocaleDateString()}`}
                       </p>
                       <p className="text-xs italic capitalize">{travel.purpose.replace('_', ' ')}</p>
+                      {travel.notes && (
+                        <p className="text-sm mt-1">{travel.notes}</p>
+                      )}
                     </div>
-                    <Button 
-                      variant="secondary" 
-                      onClick={() => handleDelete(travel.id)}
-                      className="text-sm"
-                    >
-                      Delete
-                    </Button>
+                    <div className="space-x-2">
+                      <Button 
+                        variant="secondary"
+                        onClick={() => handleEventEdit(travel)}
+                        className="text-sm"
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        onClick={() => handleDelete(travel.id)}
+                        className="text-sm"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 ))
               ) : (

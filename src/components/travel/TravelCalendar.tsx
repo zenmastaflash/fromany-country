@@ -46,7 +46,7 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
 
   useEffect(() => {
     fetchTravelData();
-  }, [showEventModal]); // Re-fetch when modal closes
+  }, []); // Fetch only on mount
 
   const fetchTravelData = async () => {
     try {

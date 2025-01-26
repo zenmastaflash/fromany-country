@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import TravelCalendar from '@/components/travel/TravelCalendar';
 import TravelForm from '@/components/travel/TravelForm';
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 interface Travel {
   id: string;
@@ -24,6 +26,7 @@ export default function TravelPage() {
   const [selectedDates, setSelectedDates] = useState<{ start: Date; end?: Date } | undefined>();
   const [selectedTravel, setSelectedTravel] = useState<Travel | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [calendarKey, setCalendarKey] = useState(0);
 
   useEffect(() => {
     fetchTravels();
@@ -49,6 +52,7 @@ export default function TravelPage() {
         method: 'DELETE',
       });
       if (response.ok) {
+        setCalendarKey(prev => prev + 1);
         fetchTravels();
       }
     } catch (error) {
@@ -174,7 +178,10 @@ export default function TravelPage() {
           </Card>
         )}
         
-        <TravelCalendar onEdit={handleEventEdit} />
+        <TravelCalendar 
+          key={calendarKey}
+          onEdit={handleEventEdit} 
+        />
 
         <Card>
           <CardHeader>

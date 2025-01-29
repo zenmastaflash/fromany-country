@@ -1,4 +1,4 @@
-import { Travel } from '@/types/travel';
+import { Travel } from '@prisma/client';
 
 interface CountryStay {
   startDate: Date;

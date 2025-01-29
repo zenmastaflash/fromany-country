@@ -8,9 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Travel, Prisma } from '@prisma/client';
 
-type TravelFormData = Omit<Prisma.TravelUncheckedCreateInput, 'id' | 'created_at' | 'updated_at' | 'user_id'> & {
-  entry_date: string;  // String for form input
-  exit_date?: string | null;  // String for form input
+type TravelFormData = {
+  country: string;
+  city: string;  // Make this a required string
+  entry_date: string;
+  exit_date?: string | null;
+  purpose: string;
+  visa_type: string | null;
+  notes: string | null;
+  status: string | null;
 };
 
 interface Props {
@@ -30,7 +36,7 @@ export default function TravelForm({
   const [cities, setCities] = useState<string[]>([]);
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
-    city: '',
+    city: '',  // Initialize as empty string
     entry_date: preselectedDates?.start.toISOString().split('T')[0] || '',
     exit_date: preselectedDates?.end?.toISOString().split('T')[0] || null,
     purpose: '',
@@ -61,9 +67,9 @@ export default function TravelForm({
     if (editTravel) {
       setFormData({
         country: editTravel.country,
-        city: editTravel.city || '',
+        city: editTravel.city || '',  // Ensure empty string if null
         entry_date: new Date(editTravel.entry_date).toISOString().split('T')[0],
-        exit_date: editTravel.exit_date ? new Date(editTravel.exit_date).toISOString().split('T')[0] : undefined,
+        exit_date: editTravel.exit_date ? new Date(editTravel.exit_date).toISOString().split('T')[0] : null,
         purpose: editTravel.purpose,
         visa_type: editTravel.visa_type,
         notes: editTravel.notes || '',

@@ -117,19 +117,22 @@ export default function TravelPage() {
         {showForm && (
           <Card>
             <CardHeader>
-              <CardTitle>Add Travel</CardTitle>
+              <CardTitle>{selectedTravel ? 'Edit Travel' : 'Add Travel'}</CardTitle>
             </CardHeader>
             <CardContent>
               <TravelForm 
                 preselectedDates={selectedDates}
+                editTravel={selectedTravel}
                 onSuccess={() => {
                   setShowForm(false);
                   setSelectedDates(undefined);
+                  setSelectedTravel(null);
                   fetchTravels();
                 }} 
                 onCancel={() => {
                   setShowForm(false);
                   setSelectedDates(undefined);
+                  setSelectedTravel(null);
                 }} 
               />
             </CardContent>

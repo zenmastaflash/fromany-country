@@ -6,21 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/Card';
-
-interface TravelFormData {
-  country: string;
-  city?: string;
-  entry_date: string;
-  exit_date?: string;
-  purpose: string;
-  visa_type?: string;
-  notes?: string;
-  status?: string;
-}
-
-interface Travel extends TravelFormData {
-  id: string;
-}
+import { Travel } from '@prisma/client';
 
 interface Props {
   preselectedDates?: { start: Date; end?: Date };
@@ -36,7 +22,7 @@ export default function TravelForm({
   editTravel
 }: Props) {
   const [countries, setCountries] = useState<string[]>([]);
-  const [formData, setFormData] = useState<TravelFormData>({
+  const [formData, setFormData] = useState<Omit<Travel, 'id'>>({
     country: '',
     city: '',
     entry_date: preselectedDates?.start.toISOString().split('T')[0] || '',

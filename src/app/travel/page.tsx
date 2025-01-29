@@ -103,10 +103,14 @@ export default function TravelPage() {
     <main className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">Travel Timeline</h1>
-        <Button onClick={() => {
-          setSelectedDates(undefined);
-          setShowForm(true);
-        }}>Add Travel</Button>
+        <div className="space-x-2">
+          <Button onClick={exportCSV}>Export CSV</Button>
+          <Button onClick={exportExcel}>Export Excel</Button>
+          <Button onClick={() => {
+            setSelectedDates(undefined);
+            setShowForm(true);
+          }}>Add Travel</Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6">

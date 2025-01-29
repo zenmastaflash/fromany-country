@@ -48,15 +48,15 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
-        start: travel.entry_date,
-        end: travel.exit_date,
+        start: new Date(travel.entry_date).toISOString(),
+        end: travel.exit_date ? new Date(travel.exit_date).toISOString() : undefined,
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
         extendedProps: {
           country: travel.country,
-          city: travel.city,
+          city: travel.city || '',
           purpose: travel.purpose,
-          notes: travel.notes
+          notes: travel.notes || undefined
         }
       }));
       

@@ -10,9 +10,9 @@ import { Travel, Prisma } from '@prisma/client';
 
 type TravelFormData = {
   country: string;
-  city: string;  // Make this a required string
+  city: string;
   entry_date: string;
-  exit_date?: string | null;
+  exit_date: string | undefined;  // Changed from string | null to string | undefined
   purpose: string;
   visa_type: string | null;
   notes: string | null;
@@ -36,9 +36,9 @@ export default function TravelForm({
   const [cities, setCities] = useState<string[]>([]);
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
-    city: '',  // Initialize as empty string
+    city: '',
     entry_date: preselectedDates?.start.toISOString().split('T')[0] || '',
-    exit_date: preselectedDates?.end?.toISOString().split('T')[0] || null,
+    exit_date: preselectedDates?.end?.toISOString().split('T')[0] || undefined,  // Use undefined instead of null
     purpose: '',
     visa_type: null,
     notes: null,
@@ -67,9 +67,11 @@ export default function TravelForm({
     if (editTravel) {
       setFormData({
         country: editTravel.country,
-        city: editTravel.city || '',  // Ensure empty string if null
+        city: editTravel.city || '',
         entry_date: new Date(editTravel.entry_date).toISOString().split('T')[0],
-        exit_date: editTravel.exit_date ? new Date(editTravel.exit_date).toISOString().split('T')[0] : null,
+        exit_date: editTravel.exit_date 
+          ? new Date(editTravel.exit_date).toISOString().split('T')[0] 
+          : undefined,  // Use undefined instead of null
         purpose: editTravel.purpose,
         visa_type: editTravel.visa_type,
         notes: editTravel.notes || '',
@@ -85,7 +87,7 @@ export default function TravelForm({
       const dataForApi = {
         ...formData,
         entry_date: new Date(formData.entry_date),
-        exit_date: formData.exit_date ? new Date(formData.exit_date) : null
+        exit_date: formData.exit_date ? new Date(formData.exit_date) : null  // Convert undefined to null for API
       };
 
       const url = editTravel 

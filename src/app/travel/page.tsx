@@ -25,7 +25,7 @@ export default function TravelPage() {
     try {
       const response = await fetch('/api/travel');
       if (response.ok) {
-        const data = await response.json();
+        const data: Travel[] = await response.json();
         setTravels(data);
       }
     } catch (error) {

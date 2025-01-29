@@ -7,18 +7,7 @@ import TravelCalendar from '@/components/travel/TravelCalendar';
 import TravelForm from '@/components/travel/TravelForm';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
-
-interface Travel {
-  id: string;
-  country: string;
-  city?: string;
-  entry_date: string;
-  exit_date?: string;
-  purpose: string;
-  visa_type?: string;
-  status?: string;
-  notes?: string;
-}
+import { Travel } from '@prisma/client';
 
 export default function TravelPage() {
   const [showForm, setShowForm] = useState(false);

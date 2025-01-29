@@ -26,7 +26,7 @@ interface Props {
   preselectedDates?: { start: Date; end?: Date };
   onSuccess?: () => void;
   onCancel?: () => void;
-  editTravel?: Travel;
+  editTravel?: Travel | null;
 }
 
 export default function TravelForm({

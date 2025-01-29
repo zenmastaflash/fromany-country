@@ -18,15 +18,19 @@ interface TravelFormData {
   status?: string;
 }
 
-export default function TravelForm({
-  preselectedDates,
-  onSuccess,
-  onCancel
-}: {
+interface Props {
   preselectedDates?: { start: Date; end?: Date };
   onSuccess?: () => void;
   onCancel?: () => void;
-}) {
+  editTravel?: Travel;
+}
+
+export default function TravelForm({
+  preselectedDates,
+  onSuccess,
+  onCancel,
+  editTravel
+}: Props) {
   const [countries, setCountries] = useState<string[]>([]);
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
@@ -47,8 +51,14 @@ export default function TravelForm({
     e.preventDefault();
 
     try {
-      const response = await fetch('/api/travel', {
-        method: 'POST',
+      const url = editTravel 
+        ? `/api/travel/${editTravel.id}` 
+        : '/api/travel';
+      
+      const method = editTravel ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -56,13 +66,12 @@ export default function TravelForm({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add travel');
+        throw new Error('Failed to save travel');
       }
 
-      // Trigger parent update for calendar and cards
       onSuccess?.();
     } catch (error) {
-      console.error('Error adding travel:', error);
+      console.error('Error saving travel:', error);
     }
   };
 

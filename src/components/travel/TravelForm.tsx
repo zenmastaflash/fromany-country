@@ -6,7 +6,15 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Travel } from '@prisma/client';
+import { Travel, Prisma } from '@prisma/client';
+
+type TravelFormData = Omit<
+  Prisma.TravelUncheckedCreateInput,
+  'id' | 'created_at' | 'updated_at' | 'entry_date' | 'exit_date'
+> & {
+  entry_date: string;
+  exit_date?: string | null;
+};
 
 interface Props {
   preselectedDates?: { start: Date; end?: Date };
@@ -22,12 +30,16 @@ export default function TravelForm({
   editTravel
 }: Props) {
   const [countries, setCountries] = useState<string[]>([]);
-  const [formData, setFormData] = useState<Omit<Travel, 'id'>>({
+  const [formData, setFormData] = useState<TravelFormData>({
     country: '',
     city: '',
     entry_date: preselectedDates?.start.toISOString().split('T')[0] || '',
-    exit_date: preselectedDates?.end?.toISOString().split('T')[0],
+    exit_date: preselectedDates?.end?.toISOString().split('T')[0] || null,
     purpose: '',
+    status: null,
+    visa_type: null,
+    notes: null,
+    user_id: ''  // This will be set by the API
   });
 
   useEffect(() => {
@@ -56,6 +68,12 @@ export default function TravelForm({
     e.preventDefault();
 
     try {
+      const dataForApi = {
+        ...formData,
+        entry_date: new Date(formData.entry_date),
+        exit_date: formData.exit_date ? new Date(formData.exit_date) : null
+      };
+
       const url = editTravel 
         ? `/api/travel/${editTravel.id}` 
         : '/api/travel';
@@ -67,7 +85,7 @@ export default function TravelForm({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataForApi),
       });
 
       if (!response.ok) {

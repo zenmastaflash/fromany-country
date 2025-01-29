@@ -3,6 +3,11 @@ import { authConfig } from '@/lib/auth';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
+
+interface TravelRequestData extends Omit<Prisma.TravelUncheckedCreateInput, 'id' | 'created_at' | 'updated_at'> {
+  user_id?: string;
+}
 
 export async function POST(request: Request) {
   const session = await getServerSession(authConfig);
@@ -11,7 +16,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const data = await request.json();
+    const data = (await request.json()) as TravelRequestData;
     const travel = await prisma.travel.create({
       data: {
         user_id: session.user.id,

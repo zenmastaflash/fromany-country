@@ -84,9 +84,12 @@ export const authConfig: NextAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
+      // After successful sign in, redirect to dashboard
+      if (url === `${baseUrl}/auth/signin`) {
+        return `${baseUrl}/dashboard`
+      }
+      // For all other cases, follow existing logic
       if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl
     }

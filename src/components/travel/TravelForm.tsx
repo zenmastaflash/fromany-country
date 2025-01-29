@@ -18,15 +18,23 @@ interface TravelFormData {
   status?: string;
 }
 
-export default function TravelForm({
-  preselectedDates,
-  onSuccess,
-  onCancel
-}: {
+interface Travel extends TravelFormData {
+  id: string;
+}
+
+interface Props {
   preselectedDates?: { start: Date; end?: Date };
   onSuccess?: () => void;
   onCancel?: () => void;
-}) {
+  editTravel?: Travel | null;
+}
+
+export default function TravelForm({
+  preselectedDates,
+  onSuccess,
+  onCancel,
+  editTravel
+}: Props) {
   const [countries, setCountries] = useState<string[]>([]);
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
@@ -43,12 +51,33 @@ export default function TravelForm({
       .catch(err => console.error('Error fetching countries:', err));
   }, []);
 
+  useEffect(() => {
+    if (editTravel) {
+      setFormData({
+        country: editTravel.country,
+        city: editTravel.city || '',
+        entry_date: new Date(editTravel.entry_date).toISOString().split('T')[0],
+        exit_date: editTravel.exit_date ? new Date(editTravel.exit_date).toISOString().split('T')[0] : undefined,
+        purpose: editTravel.purpose,
+        visa_type: editTravel.visa_type,
+        notes: editTravel.notes || '',
+        status: editTravel.status
+      });
+    }
+  }, [editTravel]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('/api/travel', {
-        method: 'POST',
+      const url = editTravel 
+        ? `/api/travel/${editTravel.id}` 
+        : '/api/travel';
+      
+      const method = editTravel ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -56,13 +85,12 @@ export default function TravelForm({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add travel');
+        throw new Error('Failed to save travel');
       }
 
-      // Trigger parent update for calendar and cards
       onSuccess?.();
     } catch (error) {
-      console.error('Error adding travel:', error);
+      console.error('Error saving travel:', error);
     }
   };
 
@@ -155,7 +183,7 @@ export default function TravelForm({
                 Cancel
               </Button>
             )}
-            <Button type="submit">Add Travel</Button>
+            <Button type="submit">{editTravel ? 'Save Changes' : 'Add Travel'}</Button>
           </div>
         </form>
       </CardContent>

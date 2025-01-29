@@ -1,11 +1,21 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const { data: session } = useSession();
+  const router = useRouter();
   const words = ['work', 'live', 'thrive'];
   const [currentWord, setCurrentWord] = useState(0);
   const [showSlogan, setShowSlogan] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (session) {
+      router.push('/dashboard');
+    }
+  }, [session, router]);
 
   useEffect(() => {
     if (currentWord <= words.length - 1) {

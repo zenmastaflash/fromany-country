@@ -101,9 +101,9 @@ export default function TravelPage() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-8 flex-col sm:flex-row gap-4 sm:gap-0">
         <h1 className="text-4xl font-bold">Travel Timeline</h1>
-        <div className="space-x-2">
+        <div className="flex flex-wrap gap-2">
           <Button onClick={exportCSV}>Export CSV</Button>
           <Button onClick={exportExcel}>Export Excel</Button>
           <Button onClick={() => {
@@ -193,19 +193,19 @@ export default function TravelPage() {
           </CardHeader>
           <CardContent>
             {currentLocation ? (
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <p className="text-lg">{currentLocation.city}, {currentLocation.country}</p>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                <div className="space-y-1 flex-grow">
+                  <p className="text-lg break-words">{currentLocation.city}, {currentLocation.country}</p>
                   <p className="text-sm text-link">Since: {new Date(currentLocation.entry_date).toLocaleDateString()}</p>
                   {currentLocation.exit_date && (
                     <p className="text-sm text-link">Until: {new Date(currentLocation.exit_date).toLocaleDateString()}</p>
                   )}
                   <p className="text-sm italic capitalize">{currentLocation.purpose.replace('_', ' ')}</p>
                   {currentLocation.notes && (
-                    <p className="text-sm mt-2">{currentLocation.notes}</p>
+                    <p className="text-sm mt-2 break-words">{currentLocation.notes}</p>
                   )}
                 </div>
-                <div className="space-x-2">
+                <div className="flex gap-2">
                   <Button 
                     variant="secondary" 
                     onClick={() => handleEventEdit(currentLocation)}
@@ -234,19 +234,19 @@ export default function TravelPage() {
             <div className="space-y-4">
               {travels.length > 0 ? (
                 travels.map(travel => (
-                  <div key={travel.id} className="flex justify-between items-start border-b border-border pb-2">
-                    <div>
-                      <p className="text-lg">{travel.city}, {travel.country}</p>
+                  <div key={travel.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 border-b border-border pb-2">
+                    <div className="space-y-1 flex-grow">
+                      <p className="text-lg break-words">{travel.city}, {travel.country}</p>
                       <p className="text-sm text-link">
                         {new Date(travel.entry_date).toLocaleDateString()}
                         {travel.exit_date && ` - ${new Date(travel.exit_date).toLocaleDateString()}`}
                       </p>
                       <p className="text-xs italic capitalize">{travel.purpose.replace('_', ' ')}</p>
                       {travel.notes && (
-                        <p className="text-sm mt-1">{travel.notes}</p>
+                        <p className="text-sm mt-1 break-words">{travel.notes}</p>
                       )}
                     </div>
-                    <div className="space-x-2">
+                    <div className="flex gap-2">
                       <Button 
                         variant="secondary"
                         onClick={() => handleEventEdit(travel)}

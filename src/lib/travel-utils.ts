@@ -1,6 +1,6 @@
 // src/lib/travel-utils.ts
 
-import { Travel } from '@/types/travel';
+import { Travel } from '@prisma/client';
 
 export function getCurrentLocation(travels: Travel[]) {
   const now = new Date();

@@ -8,12 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Travel, Prisma } from '@prisma/client';
 
-type TravelFormData = Omit<
-  Prisma.TravelUncheckedCreateInput,
-  'id' | 'created_at' | 'updated_at' | 'entry_date' | 'exit_date'
-> & {
-  entry_date: string;
-  exit_date?: string | null;
+type TravelFormData = Omit<Prisma.TravelUncheckedCreateInput, 'id' | 'created_at' | 'updated_at' | 'user_id'> & {
+  entry_date: string;  // String for form input
+  exit_date?: string | null;  // String for form input
 };
 
 interface Props {
@@ -36,10 +33,9 @@ export default function TravelForm({
     entry_date: preselectedDates?.start.toISOString().split('T')[0] || '',
     exit_date: preselectedDates?.end?.toISOString().split('T')[0] || null,
     purpose: '',
-    status: null,
     visa_type: null,
     notes: null,
-    user_id: ''  // This will be set by the API
+    status: null
   });
 
   useEffect(() => {

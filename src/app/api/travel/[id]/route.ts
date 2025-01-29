@@ -3,6 +3,9 @@ import { authConfig } from '@/lib/auth';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
+
+interface TravelUpdateData extends Partial<Omit<Prisma.TravelUncheckedUpdateInput, 'id' | 'user_id'>> {}
 
 export async function PUT(
   request: Request,
@@ -14,7 +17,7 @@ export async function PUT(
   }
 
   try {
-    const data = await request.json();
+    const data = (await request.json()) as TravelUpdateData;
     const travel = await prisma.travel.update({
       where: { 
         id: params.id,
@@ -23,7 +26,7 @@ export async function PUT(
       data: {
         country: data.country,
         city: data.city,
-        entry_date: new Date(data.entry_date),
+        entry_date: data.entry_date ? new Date(data.entry_date) : undefined,
         exit_date: data.exit_date ? new Date(data.exit_date) : null,
         purpose: data.purpose,
         visa_type: data.visa_type,

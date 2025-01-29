@@ -48,15 +48,15 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
-        start: new Date(travel.entry_date).toISOString(),
-        end: travel.exit_date ? new Date(travel.exit_date).toISOString() : undefined,
+        start: travel.entry_date,
+        end: travel.exit_date,
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
         extendedProps: {
           country: travel.country,
-          city: travel.city || '',
+          city: travel.city,
           purpose: travel.purpose,
-          notes: travel.notes || undefined
+          notes: travel.notes
         }
       }));
       
@@ -83,14 +83,19 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
   };
 
   const handleEventClick = (info: any) => {
-    const travel = {
+    const travel: Travel = {
       id: info.event.id,
       country: info.event.extendedProps.country,
       city: info.event.extendedProps.city,
-      entry_date: info.event.start,
-      exit_date: info.event.end,
+      entry_date: new Date(info.event.start),
+      exit_date: info.event.end ? new Date(info.event.end) : null,
       purpose: info.event.extendedProps.purpose,
-      notes: info.event.extendedProps.notes
+      notes: info.event.extendedProps.notes || null,
+      status: null,  // Add missing required fields
+      user_id: '',   // This will be handled by the backend
+      visa_type: null,
+      created_at: new Date(),  // These will be overwritten by the backend
+      updated_at: new Date()   // These will be overwritten by the backend
     };
     onEdit?.(travel);
   };

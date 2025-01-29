@@ -1,7 +1,17 @@
+import { Travel } from '@/types/travel';
+
 interface CountryStay {
   startDate: Date;
   endDate?: Date;
   country: string;
+}
+
+function travelToCountryStay(travel: Travel): CountryStay {
+  return {
+    startDate: new Date(travel.entry_date),
+    endDate: travel.exit_date ? new Date(travel.exit_date) : undefined,
+    country: travel.country
+  };
 }
 
 export function calculateDaysInCountry(stays: CountryStay[], country: string): number {
@@ -33,6 +43,11 @@ export function calculateTaxResidenceRisk(stays: CountryStay[]): {
     days,
     risk: days > 180 ? 'high' : days > 90 ? 'medium' : 'low'
   }));
+}
+
+export function calculateTaxResidenceRiskFromTravels(travels: Travel[]) {
+  const stays = travels.map(travelToCountryStay);
+  return calculateTaxResidenceRisk(stays);
 }
 
 export function calculateTaxYear(date: Date = new Date()): {

@@ -9,16 +9,7 @@ import { DateSelectArg } from '@fullcalendar/core';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
-
-interface Travel {
-  id: string;
-  country: string;
-  city: string;
-  entry_date: string;
-  exit_date?: string;
-  purpose: string;
-  notes?: string;
-}
+import { Travel } from '@prisma/client';
 
 interface CalendarEvent {
   id: string;

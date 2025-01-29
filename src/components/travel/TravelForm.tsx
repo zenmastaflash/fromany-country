@@ -12,11 +12,11 @@ type TravelFormData = {
   country: string;
   city: string;
   entry_date: string;
-  exit_date: string | undefined;  // Changed from string | null to string | undefined
+  exit_date: string | undefined;
   purpose: string;
-  visa_type: string | null;
-  notes: string | null;
-  status: string | null;
+  visa_type: string;  // Changed from string | null
+  notes: string;
+  status: string;  // Changed from string | null
 };
 
 interface Props {
@@ -34,15 +34,16 @@ export default function TravelForm({
 }: Props) {
   const [countries, setCountries] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
+  
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
     city: '',
     entry_date: preselectedDates?.start.toISOString().split('T')[0] || '',
-    exit_date: preselectedDates?.end?.toISOString().split('T')[0] || undefined,  // Use undefined instead of null
+    exit_date: preselectedDates?.end?.toISOString().split('T')[0] || undefined,
     purpose: '',
-    visa_type: null,
-    notes: null,
-    status: null
+    visa_type: '',  // Initialize as empty string
+    notes: '',
+    status: ''  // Initialize as empty string
   });
 
   useEffect(() => {
@@ -71,11 +72,11 @@ export default function TravelForm({
         entry_date: new Date(editTravel.entry_date).toISOString().split('T')[0],
         exit_date: editTravel.exit_date 
           ? new Date(editTravel.exit_date).toISOString().split('T')[0] 
-          : undefined,  // Use undefined instead of null
+          : undefined,
         purpose: editTravel.purpose,
-        visa_type: editTravel.visa_type,
+        visa_type: editTravel.visa_type || '',  // Ensure string
         notes: editTravel.notes || '',
-        status: editTravel.status
+        status: editTravel.status || ''  // Ensure string
       });
     }
   }, [editTravel]);
@@ -87,7 +88,10 @@ export default function TravelForm({
       const dataForApi = {
         ...formData,
         entry_date: new Date(formData.entry_date),
-        exit_date: formData.exit_date ? new Date(formData.exit_date) : null  // Convert undefined to null for API
+        exit_date: formData.exit_date ? new Date(formData.exit_date) : null,
+        visa_type: formData.visa_type || null,  // Convert empty string to null
+        notes: formData.notes || null,  // Convert empty string to null
+        status: formData.status || null  // Convert empty string to null
       };
 
       const url = editTravel 
@@ -118,6 +122,7 @@ export default function TravelForm({
     <Card>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Country Input */}
           <div className="space-y-2">
             <Label htmlFor="country">Country</Label>
             <Input
@@ -134,6 +139,7 @@ export default function TravelForm({
             </datalist>
           </div>
 
+          {/* City Input */}
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
             <Input
@@ -141,6 +147,7 @@ export default function TravelForm({
               value={formData.city}
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               list="cities"
+              required
             />
             <datalist id="cities">
               {cities.map(city => (
@@ -149,6 +156,7 @@ export default function TravelForm({
             </datalist>
           </div>
 
+          {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="entry_date">Entry Date</Label>
@@ -172,6 +180,7 @@ export default function TravelForm({
             </div>
           </div>
 
+          {/* Purpose Select */}
           <div className="space-y-2">
             <Label htmlFor="purpose">Purpose</Label>
             <select
@@ -179,9 +188,7 @@ export default function TravelForm({
               value={formData.purpose}
               onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
               required
-              className="w-full rounded-md border-border bg-text text-background px-3 py-2 
-                         placeholder-secondary focus:outline-none focus:ring-2 
-                         focus:ring-primary focus:border-primary disabled:opacity-50"
+              className="w-full rounded-md border-border bg-text text-background px-3 py-2"
             >
               <option value="">Select purpose</option>
               <option value="home_base">Home Base</option>
@@ -192,6 +199,7 @@ export default function TravelForm({
             </select>
           </div>
 
+          {/* Notes Textarea */}
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
             <textarea
@@ -203,6 +211,7 @@ export default function TravelForm({
             />
           </div>
 
+          {/* Form Buttons */}
           <div className="flex justify-end space-x-2">
             {onCancel && (
               <Button variant="secondary" onClick={onCancel}>

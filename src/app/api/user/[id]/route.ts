@@ -5,6 +5,10 @@ import { authConfig } from '@/lib/auth';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3Client } from '@/lib/s3';
+import type { Prisma } from '@prisma/client';
+
+// Use Prisma's update type
+type UserUpdateInput = Omit<Prisma.UserUpdateInput, 'accounts' | 'sessions' | 'documents'>;
 
 export async function GET(
   request: Request,
@@ -79,23 +83,13 @@ export async function PATCH(
   }
 
   try {
-    const body = await request.json();
-    console.log('Update request body:', body); // Debug log
+    const body: UserUpdateInput = await request.json();
 
     // Update the user profile with all fields
     const updatedUser = await prisma.user.update({
       where: { id: params.id },
       data: {
-        displayName: body.displayName,
-        bio: body.bio,
-        location: body.location,
-        visibility: body.visibility,
-        socialLinks: body.socialLinks,
-        notificationPreferences: body.notificationPreferences,
-        primaryCurrency: body.primaryCurrency,
-        taxResidency: body.taxResidency,
-        emergencyContact: body.emergencyContact,
-        preferredLanguage: body.preferredLanguage,
+        ...body,
         updatedAt: new Date(),
       },
     });

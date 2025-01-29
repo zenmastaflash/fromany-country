@@ -5,27 +5,22 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { DateSelectArg } from '@fullcalendar/core';
+import { DateSelectArg, EventInput } from '@fullcalendar/core';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
 import { Travel } from '@prisma/client';
 
-interface CalendarEvent {
-  id: string;
-  title: string;
-  start: string;
-  end?: string;
-  backgroundColor?: string;
-  textColor?: string;
-  notes?: string;
-  extendedProps?: {
-    country: string;
-    city: string;
-    purpose: string;
-    notes?: string;
-  };
+interface ExtendedProps {
+  country: string;
+  city: string | null;
+  purpose: string;
+  notes?: string | null;
 }
+
+type CalendarEvent = EventInput & {
+  extendedProps?: ExtendedProps;
+};
 
 interface Props {
   onDelete?: (id: string) => Promise<void>;
@@ -48,8 +43,8 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
-        start: travel.entry_date,
-        end: travel.exit_date,
+        start: travel.entry_date.toISOString(),
+        end: travel.exit_date?.toISOString(),
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
         extendedProps: {

@@ -27,6 +27,7 @@ export default function TravelForm({
   editTravel
 }: Props) {
   const [countries, setCountries] = useState<string[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
   const [formData, setFormData] = useState<TravelFormData>({
     country: '',
     city: '',
@@ -44,6 +45,17 @@ export default function TravelForm({
       .then(data => setCountries(data.countries))
       .catch(err => console.error('Error fetching countries:', err));
   }, []);
+
+  useEffect(() => {
+    if (formData.country) {
+      fetch(`/api/cities?country=${encodeURIComponent(formData.country)}`)
+        .then(res => res.json())
+        .then(data => setCities(data.cities))
+        .catch(err => console.error('Error fetching cities:', err));
+    } else {
+      setCities([]);
+    }
+  }, [formData.country]);
 
   useEffect(() => {
     if (editTravel) {
@@ -120,7 +132,13 @@ export default function TravelForm({
               id="city"
               value={formData.city}
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              list="cities"
             />
+            <datalist id="cities">
+              {cities.map(city => (
+                <option key={city} value={city} />
+              ))}
+            </datalist>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

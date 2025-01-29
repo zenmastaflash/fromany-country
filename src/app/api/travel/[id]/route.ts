@@ -17,7 +17,7 @@ export async function PUT(
   }
 
   try {
-    const data = (await request.json()) as TravelUpdateData;
+    const data = await request.json();
     const travel = await prisma.travel.update({
       where: { 
         id: params.id,
@@ -26,8 +26,12 @@ export async function PUT(
       data: {
         country: data.country,
         city: data.city,
-        entry_date: data.entry_date ? new Date(data.entry_date) : undefined,
-        exit_date: data.exit_date ? new Date(data.exit_date) : null,
+        entry_date: data.entry_date ? {
+          set: new Date(data.entry_date)
+        } : undefined,
+        exit_date: data.exit_date ? {
+          set: new Date(data.exit_date)
+        } : { set: null },
         purpose: data.purpose,
         visa_type: data.visa_type,
         notes: data.notes,

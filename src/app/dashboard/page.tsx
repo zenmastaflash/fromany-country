@@ -1,3 +1,14 @@
+import { getServerSession } from 'next-auth/next';
+import { config as authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { getCurrentLocation } from '@/lib/travel-utils';
+import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
+import { generateComplianceAlerts } from '@/lib/dashboard-utils';
+import TaxLiabilityCard from '@/components/dashboard/TaxLiabilityCard';
+import CriticalDatesCard from '@/components/dashboard/CriticalDatesCard';
+import ComplianceAlertsCard from '@/components/dashboard/ComplianceAlertsCard';
+
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 

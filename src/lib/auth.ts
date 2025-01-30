@@ -83,15 +83,15 @@ export const authConfig: NextAuthOptions = {
         return session;
       }
     },
-    async redirect({ url, baseUrl }) {
-      // After successful sign in, redirect to dashboard
-      if (url === `${baseUrl}/auth/signin`) {
-        return `${baseUrl}/dashboard`
+    async redirect({ url, baseUrl, session }) {
+      // If user hasn't accepted terms, redirect them to terms page
+      if (url.includes('/dashboard') && !session?.user?.terms_accepted_at) {
+        return `${baseUrl}/auth/terms`;
       }
-      // For all other cases, follow existing logic
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
+      // For other URLs, follow existing logic
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     }
   },
   pages: {

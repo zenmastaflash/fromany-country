@@ -1,69 +1,54 @@
-import { getServerSession } from 'next-auth/next';
-import { config as authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-import TaxLiabilityCard from '@/components/dashboard/TaxLiabilityCard';
-import CriticalDatesCard from '@/components/dashboard/CriticalDatesCard';
-import ComplianceAlertsCard from '@/components/dashboard/ComplianceAlertsCard';
-
-// Temporary mock data - replace with actual data fetching
-const mockData = {
-  currentLocation: {
-    country: 'Thailand',
-    entryDate: '2024-01-01',
-    timezone: 'Asia/Bangkok',
-  },
-  countryStatuses: [
-    { country: 'Thailand', daysPresent: 45, threshold: 183, lastEntry: '2024-01-01' },
-    { country: 'Malaysia', daysPresent: 120, threshold: 183, lastEntry: '2023-08-15' },
-    { country: 'Singapore', daysPresent: 30, threshold: 90, lastEntry: '2023-11-01' },
-  ],
-  criticalDates: [
-    {
-      type: 'visa' as const,
-      title: 'Thai Visa Expiration',
-      date: '2024-03-01',
-      description: 'Tourist visa expires',
-      urgency: 'high' as const,
-    },
-    {
-      type: 'tax' as const,
-      title: 'US Tax Filing Deadline',
-      date: '2024-04-15',
-      description: 'Federal tax return due',
-      urgency: 'medium' as const,
-    },
-    {
-      type: 'document' as const,
-      title: 'Passport Expiration',
-      date: '2024-12-31',
-      description: 'Renewal recommended 6 months before expiry',
-      urgency: 'low' as const,
-    },
-  ],
-  complianceAlerts: [
-    {
-      type: 'tax' as const,
-      title: 'Approaching Tax Liability in Malaysia',
-      description: 'You are nearing the 183-day threshold for tax residency',
-      severity: 'high' as const,
-      actionRequired: 'Plan departure before March 15, 2024 to avoid tax liability',
-    },
-    {
-      type: 'visa' as const,
-      title: 'Visa Extension Required',
-      description: 'Current visa expires in 15 days',
-      severity: 'medium' as const,
-      actionRequired: 'Apply for visa extension or plan departure',
-    },
-  ],
-};
-
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect('/api/auth/signin');
   }
+
+  // Fetch travel data
+  const travels = await prisma.travel.findMany({
+    where: { user_id: session.user.id },
+    orderBy: { entry_date: 'desc' }
+  });
+
+  // TODO: Fetch document data for critical dates
+  const documents = await prisma.document.findMany({
+    where: { userId: session.user.id }
+  });
+
+  // Use our utils to get dashboard data
+  const currentLocation = getCurrentLocation(travels);
+  const taxRisks = calculateTaxResidenceRiskFromTravels(travels);
+  const complianceAlerts = generateComplianceAlerts(travels);
+
+  // Format data for components
+  const formattedLocation = currentLocation ? {
+    country: currentLocation.country,
+    entryDate: currentLocation.entry_date,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  } : null;
+
+  const countryStatuses = taxRisks.map(risk => ({
+    country: risk.country,
+    daysPresent: risk.days,
+    threshold: 183,  // TODO: Make dynamic based on country
+    lastEntry: travels.find(t => t.country === risk.country)?.entry_date || ''
+  }));
+
+  // Generate critical dates from travel and documents
+  const criticalDates = [
+    // Document expiry dates
+    ...documents
+      .filter(doc => doc.expiryDate)
+      .map(doc => ({
+        type: doc.type.toLowerCase() as 'visa' | 'document',
+        title: `${doc.title} Expiration`,
+        date: doc.expiryDate!.toISOString(),
+        description: doc.title,
+        urgency: getUrgencyFromDate(doc.expiryDate!) // TODO: Implement this function
+      })),
+    // Add tax filing deadlines if needed
+  ];
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -76,14 +61,26 @@ export default async function DashboardPage() {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TaxLiabilityCard 
-          currentLocation={mockData.currentLocation}
-          countryStatuses={mockData.countryStatuses}
+          currentLocation={formattedLocation || { 
+            country: 'Not Set',
+            entryDate: new Date().toISOString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          }}
+          countryStatuses={countryStatuses}
         />
-        <CriticalDatesCard dates={mockData.criticalDates} />
+        <CriticalDatesCard dates={criticalDates} />
         <div className="lg:col-span-2">
-          <ComplianceAlertsCard alerts={mockData.complianceAlerts} />
+          <ComplianceAlertsCard alerts={complianceAlerts} />
         </div>
       </div>
     </main>
   );
+}
+
+// Helper function for document urgency
+function getUrgencyFromDate(date: Date): 'high' | 'medium' | 'low' {
+  const daysUntil = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+  if (daysUntil <= 30) return 'high';
+  if (daysUntil <= 90) return 'medium';
+  return 'low';
 }

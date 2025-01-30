@@ -1,7 +1,7 @@
 // src/app/api/auth/complete-signup/route.ts
-import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
+import { prisma } from '@/lib/prisma';
 import { authConfig } from '@/lib/auth';
 
 export async function POST(req: Request) {
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(user);
   } catch (error) {
-    console.error(error);
+    console.error('Complete signup error:', error);
     return new NextResponse(null, { status: 500 });
   }
 }

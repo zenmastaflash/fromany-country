@@ -69,3 +69,8 @@ export function calculateTaxYear(date: Date = new Date()): {
     daysRemaining
   };
 }
+
+export function getCountryTaxThreshold(countryCode: string): number {
+  // This could be expanded with a proper lookup table or API
+  return 183;  // Default 183 days for most countries
+}

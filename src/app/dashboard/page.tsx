@@ -35,7 +35,7 @@ export default async function DashboardPage() {
   // Format data for components
   const formattedLocation = currentLocation ? {
     country: currentLocation.country,
-    entryDate: currentLocation.entry_date,
+    entryDate: currentLocation.entry_date.toISOString(),
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
   } : null;
 
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
     country: risk.country,
     daysPresent: risk.days,
     threshold: 183,  // TODO: Make dynamic based on country
-    lastEntry: travels.find(t => t.country === risk.country)?.entry_date || ''
+    lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || ''
   }));
 
   // Generate critical dates from travel and documents

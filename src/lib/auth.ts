@@ -40,9 +40,9 @@ export const authConfig: NextAuthOptions = {
             }
           });
 
-          // If this is a new user
+          // For new users
           if (!existingUser) {
-            // Create user with minimal info
+            // Create user first
             await prisma.user.create({
               data: {
                 email: user.email!,
@@ -50,12 +50,13 @@ export const authConfig: NextAuthOptions = {
                 image: user.image
               }
             });
-            return '/auth/signup?email=' + encodeURIComponent(user.email!);
+            // Allow sign in but redirect will handle the signup flow
+            return true;
           }
 
-          // If user exists but hasn't accepted terms
+          // Check terms for existing users
           if (!existingUser.terms_accepted_at) {
-            return '/auth/terms?email=' + encodeURIComponent(user.email!);
+            return true;  // Allow sign in, redirect will handle terms
           }
 
           return true;
@@ -90,17 +91,29 @@ export const authConfig: NextAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }) {
-      // Handle custom routes for signup and terms
-      if (url.includes('/auth/signup') || url.includes('/auth/terms')) {
-        return url;
+      const redirectUrl = new URL(url, baseUrl);
+      const email = redirectUrl.searchParams.get('email');
+
+      // Check if user needs to complete signup
+      if (email) {
+        const user = await prisma.user.findUnique({
+          where: { email },
+          select: { 
+            displayName: true, 
+            terms_accepted_at: true 
+          }
+        });
+
+        if (!user?.displayName) {
+          return `${baseUrl}/auth/signup?email=${encodeURIComponent(email)}`;
+        }
+        
+        if (!user?.terms_accepted_at) {
+          return `${baseUrl}/auth/terms?email=${encodeURIComponent(email)}`;
+        }
       }
-      
-      // After successful sign in, redirect to dashboard
-      if (url === `${baseUrl}/auth/signin`) {
-        return `${baseUrl}/dashboard`;
-      }
-      
-      // For all other cases, follow existing logic
+
+      // Default redirects
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       else if (new URL(url).origin === baseUrl) return url;
       return baseUrl;

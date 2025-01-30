@@ -15,7 +15,7 @@ export default function SignUp() {
   const [isPending, startTransition] = useTransition();
   const [formData, setFormData] = useState({
     displayName: '',
-    country: ''
+    country: '' // This will be mapped to taxResidency in the API
   });
 
   const handleSubmit = async (e: React.FormEvent) => {

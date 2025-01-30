@@ -17,8 +17,8 @@ export async function POST(req: Request) {
       where: { email: session.user.email },
       data: { 
         displayName,
-        taxResidency: country,
-        updated_at: new Date()
+        location: country,
+        updatedAt: new Date()
       },
     });
 

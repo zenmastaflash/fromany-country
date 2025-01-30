@@ -53,10 +53,10 @@ export default async function DashboardPage() {
       .filter(doc => doc.expiryDate)
       .map(doc => ({
         type: doc.type.toLowerCase() as 'visa' | 'document',
-        title: `${doc.title} Expiration`,
+        title: `${doc.title || 'Document'} Expiration`,
         date: doc.expiryDate!.toISOString(),
-        description: doc.title,
-        urgency: getUrgencyFromDate(doc.expiryDate!) // TODO: Implement this function
+        description: doc.title || 'Document expiring',
+        urgency: getUrgencyFromDate(doc.expiryDate!)
       })),
     // Add tax filing deadlines if needed
   ];

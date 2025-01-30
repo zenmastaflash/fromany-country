@@ -30,29 +30,35 @@ export const authConfig: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
-        console.log("SignIn Callback:", { user, account, profile });
         if (account?.provider === 'google') {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
             select: { 
-              image: true,
-              terms_accepted_at: true
+              id: true,
+              terms_accepted_at: true,
+              displayName: true
             }
           });
 
+          // If this is a new user
+          if (!existingUser) {
+            // Create user with minimal info
+            await prisma.user.create({
+              data: {
+                email: user.email!,
+                name: user.name,
+                image: user.image
+              }
+            });
+            return '/auth/signup?email=' + encodeURIComponent(user.email!);
+          }
+
           // If user exists but hasn't accepted terms
-          if (existingUser && !existingUser.terms_accepted_at) {
-            // Store the session info temporarily and redirect to terms
+          if (!existingUser.terms_accepted_at) {
             return '/auth/terms?email=' + encodeURIComponent(user.email!);
           }
 
-          // For new users or updating existing ones
-          await prisma.user.update({
-            where: { email: user.email! },
-            data: {
-              image: existingUser?.image || user.image
-            }
-          });
+          return true;
         }
         return true;
       } catch (error) {
@@ -83,15 +89,15 @@ export const authConfig: NextAuthOptions = {
         return session;
       }
     },
-    async redirect({ url, baseUrl, session }) {
-      // If user hasn't accepted terms, redirect them to terms page
-      if (url.includes('/dashboard') && !session?.user?.terms_accepted_at) {
-        return `${baseUrl}/auth/terms`;
+    async redirect({ url, baseUrl }) {
+      // After successful sign in, redirect to dashboard
+      if (url === `${baseUrl}/auth/signin`) {
+        return `${baseUrl}/dashboard`
       }
-      // For other URLs, follow existing logic
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
+      // For all other cases, follow existing logic
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     }
   },
   pages: {

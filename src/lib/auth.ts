@@ -28,44 +28,8 @@ export const authConfig: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      try {
-        if (account?.provider === 'google') {
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
-            select: { 
-              id: true,
-              terms_accepted_at: true,
-              displayName: true
-            }
-          });
-
-          // For new users
-          if (!existingUser) {
-            // Create user first
-            await prisma.user.create({
-              data: {
-                email: user.email!,
-                name: user.name,
-                image: user.image
-              }
-            });
-            // Allow sign in but redirect will handle the signup flow
-            return true;
-          }
-
-          // Check terms for existing users
-          if (!existingUser.terms_accepted_at) {
-            return true;  // Allow sign in, redirect will handle terms
-          }
-
-          return true;
-        }
-        return true;
-      } catch (error) {
-        console.error("SignIn Error:", error);
-        return false;
-      }
+    async signIn({ user, account }) {
+      return true;  // Allow sign in, let middleware handle profile completion
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       try {

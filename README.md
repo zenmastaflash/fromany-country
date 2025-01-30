@@ -51,6 +51,11 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Core Features
 
+- **Dashboard
+  - ✅ Shows tax liability
+  - ✅ Critical dates (currently only document expiration, but looking to add important filing dates as well)
+  - ✅ Compliance Alerts
+
 - **Document Management**
   - ✅ Upload & storage using Supabase and AWS S3 
   - ✅ Document categorization
@@ -66,7 +71,7 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Authenticity validation
 
 - **Travel Integration**
-  - Calendar integration
+  - ✅ Calendar integration
   - Flight data API connection
   - Day-by-day location tracking
   - Tax day calculations

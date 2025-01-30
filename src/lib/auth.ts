@@ -29,13 +29,12 @@ export const authConfig: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account }) {
-      return true;  // Allow sign in, let middleware handle profile completion
+      return true;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       try {
         if (session?.user) {
           session.user.id = token.sub!;
-          // Get latest user data
           const user = await prisma.user.findUnique({
             where: { id: token.sub },
             select: {
@@ -55,29 +54,6 @@ export const authConfig: NextAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }) {
-      const redirectUrl = new URL(url, baseUrl);
-      const email = redirectUrl.searchParams.get('email');
-
-      // Check if user needs to complete signup
-      if (email) {
-        const user = await prisma.user.findUnique({
-          where: { email },
-          select: { 
-            displayName: true, 
-            terms_accepted_at: true 
-          }
-        });
-
-        if (!user?.displayName) {
-          return `${baseUrl}/auth/signup?email=${encodeURIComponent(email)}`;
-        }
-        
-        if (!user?.terms_accepted_at) {
-          return `${baseUrl}/auth/terms?email=${encodeURIComponent(email)}`;
-        }
-      }
-
-      // Default redirects
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       else if (new URL(url).origin === baseUrl) return url;
       return baseUrl;

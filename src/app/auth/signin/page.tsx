@@ -8,7 +8,7 @@ export default function SignIn() {
     e.preventDefault();
     try {
       await signIn('google', {
-        callbackUrl: 'https://fromany.country',
+        callbackUrl: '/auth/terms',
       });
     } catch (error) {
       console.error('Sign in error:', error);

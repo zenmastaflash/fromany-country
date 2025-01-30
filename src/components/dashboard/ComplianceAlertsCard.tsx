@@ -13,9 +13,9 @@ interface ComplianceAlert {
 export default function ComplianceAlertsCard({ alerts }: { alerts: ComplianceAlert[] }) {
   const getSeverityStyles = (severity: string) => {
     switch (severity) {
-      case 'high': return 'border-red-500 bg-red-50';
-      case 'medium': return 'border-yellow-500 bg-yellow-50';
-      default: return 'border-blue-500 bg-blue-50';
+      case 'high': return 'border-red-500 bg-red-50 text-red-800';
+      case 'medium': return 'border-yellow-500 bg-yellow-50 text-yellow-800';
+      default: return 'border-blue-500 bg-blue-50 text-blue-800';
     }
   };
 

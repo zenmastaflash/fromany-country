@@ -44,8 +44,9 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
+        // Keep ISO format from Prisma
         start: travel.entry_date,
-        end: travel.exit_date,
+        end: travel.exit_date ?? undefined,  // Use nullish coalescing to convert null to undefined
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
         extendedProps: {
@@ -56,6 +57,7 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         }
       }));
       
+      console.log('Calendar events:', calendarEvents); // Debug
       setEvents(calendarEvents);
     } catch (error) {
       console.error('Error fetching travel data:', error);
@@ -102,8 +104,9 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          entry_date: info.event.start,
-          exit_date: info.event.end
+          // Keep ISO format for Prisma
+          entry_date: info.event.start.toISOString(),
+          exit_date: info.event.end?.toISOString() ?? null  // Convert undefined back to null for Prisma
         })
       });
       if (!response.ok) throw new Error('Failed to update travel');

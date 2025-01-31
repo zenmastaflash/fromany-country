@@ -1,3 +1,4 @@
+// src/components/travel/TravelCalendar.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -32,7 +33,7 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
 
   useEffect(() => {
     fetchTravelData();
-  }, []); // Fetch only on mount
+  }, []); 
 
   const fetchTravelData = async () => {
     try {
@@ -43,8 +44,8 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
-        start: travel.entry_date.toISOString(),
-        end: travel.exit_date?.toISOString(),
+        start: travel.entry_date,
+        end: travel.exit_date,
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
         extendedProps: {
@@ -86,11 +87,11 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       exit_date: info.event.end ? new Date(info.event.end) : null,
       purpose: info.event.extendedProps.purpose,
       notes: info.event.extendedProps.notes || null,
-      status: null,  // Add missing required fields
-      user_id: '',   // This will be handled by the backend
+      user_id: '',   // Will be handled by backend
+      status: null,  
       visa_type: null,
-      created_at: new Date(),  // These will be overwritten by the backend
-      updated_at: new Date()   // These will be overwritten by the backend
+      created_at: new Date(), // Will be handled by backend
+      updated_at: new Date()  // Will be handled by backend
     };
     onEdit?.(travel);
   };

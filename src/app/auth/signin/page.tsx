@@ -16,22 +16,26 @@ export default function SignIn() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
+    <main className="flex min-h-screen items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-2xl font-bold">Sign in to your account</CardTitle>
+            <CardTitle className="text-center heading-font text-2xl">
+              Welcome to fromany.country
+            </CardTitle>
+            <p className="text-center text-sm text-link mt-2">
+              Your global life, simplified. Sign in to manage your travels, documents, and more.
+            </p>
           </CardHeader>
           <CardContent>
-            <div className="mt-2 grid gap-3">
+            <div className="space-y-4">
               <button
                 onClick={handleGoogleSignIn}
-                className="group relative flex w-full justify-center items-center gap-3 rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="flex w-full items-center justify-center gap-3 rounded-lg bg-primary p-3 text-text hover:bg-accent transition-colors duration-200"
               >
                 <svg
                   className="h-5 w-5"
                   aria-hidden="true"
-                  fill="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path

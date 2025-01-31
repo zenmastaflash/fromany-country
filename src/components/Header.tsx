@@ -2,12 +2,13 @@
 import { useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Menu, X } from 'lucide-react';
 import ProfileImage from '@/components/ProfileImage';
 
 export default function Header() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -76,7 +77,7 @@ export default function Header() {
             ) : (
               <Button
                 variant="primary"
-                onClick={() => signIn('google')}
+                onClick={() => router.push('/auth/signin')}
               >
                 Sign In
               </Button>
@@ -129,7 +130,7 @@ export default function Header() {
                 variant="primary"
                 onClick={() => {
                   setIsMenuOpen(false);
-                  signIn('google');
+                  router.push('/auth/signin');
                 }}
                 className="w-full mt-4"
               >

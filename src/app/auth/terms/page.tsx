@@ -36,13 +36,13 @@ function TermsContent() {
   return (
     <Card className="max-w-2xl w-full">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Terms of Service</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">Create Account & Accept Terms</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="prose prose-sm max-w-none">
           <h2 className="text-xl font-semibold">Welcome to fromany.country</h2>
           
-          <p>Please read these terms carefully before using our service:</p>
+          <p>Please read these terms carefully. By accepting, you will create an account with fromany.country and agree to our terms of service:</p>
           
           <ul className="list-disc pl-5 space-y-2">
             <li>fromany.country is a tool designed to help you manage your global mobility. While we strive for accuracy, we cannot guarantee the completeness or accuracy of any information provided.</li>
@@ -53,7 +53,7 @@ function TermsContent() {
           </ul>
 
           <p className="mt-4 text-sm text-gray-600">
-            By clicking "I Accept", you acknowledge that you have read and understood these terms, and agree to be bound by them. If you do not agree to these terms, you should not use this service.
+            By clicking "Create Account & Accept", you acknowledge that you have read and understood these terms, agree to create an account with fromany.country, and agree to be bound by these terms. If you do not agree to these terms, you should not create an account or use this service.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ function TermsContent() {
           className="w-full"
           disabled={isAccepting}
         >
-          {isAccepting ? 'Accepting...' : 'I Accept'}
+          {isAccepting ? 'Creating Account...' : 'Create Account & Accept'}
         </Button>
       </CardContent>
     </Card>

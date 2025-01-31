@@ -1,3 +1,4 @@
+// src/components/travel/TravelCalendar.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,36 +6,22 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { DateSelectArg } from '@fullcalendar/core';
+import { DateSelectArg, EventInput } from '@fullcalendar/core';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
+import { Travel } from '@prisma/client';
 
-interface Travel {
-  id: string;
+interface ExtendedProps {
   country: string;
-  city: string;
-  entry_date: string;
-  exit_date?: string;
+  city: string | null;
   purpose: string;
-  notes?: string;
+  notes?: string | null;
 }
 
-interface CalendarEvent {
-  id: string;
-  title: string;
-  start: string;
-  end?: string;
-  backgroundColor?: string;
-  textColor?: string;
-  notes?: string;
-  extendedProps?: {
-    country: string;
-    city: string;
-    purpose: string;
-    notes?: string;
-  };
-}
+type CalendarEvent = EventInput & {
+  extendedProps?: ExtendedProps;
+};
 
 interface Props {
   onDelete?: (id: string) => Promise<void>;
@@ -46,7 +33,7 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
 
   useEffect(() => {
     fetchTravelData();
-  }, []); // Fetch only on mount
+  }, []); 
 
   const fetchTravelData = async () => {
     try {
@@ -57,8 +44,9 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
+        // Keep ISO format from Prisma
         start: travel.entry_date,
-        end: travel.exit_date,
+        end: travel.exit_date ?? undefined,  // Use nullish coalescing to convert null to undefined
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
         extendedProps: {
@@ -69,6 +57,7 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         }
       }));
       
+      console.log('Calendar events:', calendarEvents); // Debug
       setEvents(calendarEvents);
     } catch (error) {
       console.error('Error fetching travel data:', error);
@@ -92,14 +81,19 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
   };
 
   const handleEventClick = (info: any) => {
-    const travel = {
+    const travel: Travel = {
       id: info.event.id,
       country: info.event.extendedProps.country,
       city: info.event.extendedProps.city,
-      entry_date: info.event.start,
-      exit_date: info.event.end,
+      entry_date: new Date(info.event.start),
+      exit_date: info.event.end ? new Date(info.event.end) : null,
       purpose: info.event.extendedProps.purpose,
-      notes: info.event.extendedProps.notes
+      notes: info.event.extendedProps.notes || null,
+      user_id: '',   // Will be handled by backend
+      status: null,  
+      visa_type: null,
+      created_at: new Date(), // Will be handled by backend
+      updated_at: new Date()  // Will be handled by backend
     };
     onEdit?.(travel);
   };
@@ -110,8 +104,9 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          entry_date: info.event.start,
-          exit_date: info.event.end
+          // Keep ISO format for Prisma
+          entry_date: info.event.start.toISOString(),
+          exit_date: info.event.end?.toISOString() ?? null  // Convert undefined back to null for Prisma
         })
       });
       if (!response.ok) throw new Error('Failed to update travel');

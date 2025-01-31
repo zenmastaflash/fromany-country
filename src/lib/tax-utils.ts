@@ -1,7 +1,17 @@
+import { Travel } from '@prisma/client';
+
 interface CountryStay {
   startDate: Date;
   endDate?: Date;
   country: string;
+}
+
+function travelToCountryStay(travel: Travel): CountryStay {
+  return {
+    startDate: new Date(travel.entry_date),
+    endDate: travel.exit_date ? new Date(travel.exit_date) : undefined,
+    country: travel.country
+  };
 }
 
 export function calculateDaysInCountry(stays: CountryStay[], country: string): number {
@@ -35,6 +45,11 @@ export function calculateTaxResidenceRisk(stays: CountryStay[]): {
   }));
 }
 
+export function calculateTaxResidenceRiskFromTravels(travels: Travel[]) {
+  const stays = travels.map(travelToCountryStay);
+  return calculateTaxResidenceRisk(stays);
+}
+
 export function calculateTaxYear(date: Date = new Date()): {
   start: Date;
   end: Date;
@@ -53,4 +68,9 @@ export function calculateTaxYear(date: Date = new Date()): {
     daysElapsed,
     daysRemaining
   };
+}
+
+export function getCountryTaxThreshold(countryCode: string): number {
+  // This could be expanded with a proper lookup table or API
+  return 183;  // Default 183 days for most countries
 }

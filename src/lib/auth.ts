@@ -28,43 +28,13 @@ export const authConfig: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      try {
-        console.log("SignIn Callback:", { user, account, profile });
-        if (account?.provider === 'google') {
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
-            select: { 
-              image: true,
-              terms_accepted_at: true
-            }
-          });
-
-          // If user exists but hasn't accepted terms
-          if (existingUser && !existingUser.terms_accepted_at) {
-            // Store the session info temporarily and redirect to terms
-            return '/auth/terms?email=' + encodeURIComponent(user.email!);
-          }
-
-          // For new users or updating existing ones
-          await prisma.user.update({
-            where: { email: user.email! },
-            data: {
-              image: existingUser?.image || user.image
-            }
-          });
-        }
-        return true;
-      } catch (error) {
-        console.error("SignIn Error:", error);
-        return false;
-      }
+    async signIn({ user, account }) {
+      return true;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       try {
         if (session?.user) {
           session.user.id = token.sub!;
-          // Get latest user data
           const user = await prisma.user.findUnique({
             where: { id: token.sub },
             select: {
@@ -84,14 +54,9 @@ export const authConfig: NextAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }) {
-      // After successful sign in, redirect to dashboard
-      if (url === `${baseUrl}/auth/signin`) {
-        return `${baseUrl}/dashboard`
-      }
-      // For all other cases, follow existing logic
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     }
   },
   pages: {

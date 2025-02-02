@@ -21,6 +21,14 @@ enum DocumentType {
   OTHER
 }
 
+enum ResidencyStatus {
+  PERMANENT_RESIDENT
+  TEMPORARY_RESIDENT
+  NON_RESIDENT
+  TAX_RESIDENT
+  DIGITAL_NOMAD
+}
+
 model User {
   id                      String    @id @default(cuid())
   email                   String    @unique
@@ -136,7 +144,7 @@ model UserTaxStatus {
   document_id        String?
   residency_start_date DateTime? @db.Timestamptz
   required_presence   Int?
-  residency_status   String?
+  residency_status   ResidencyStatus?
   compliance_notes   String?
   alerts_sent        Json?     @db.JsonB
   user               User      @relation(fields: [user_id], references: [id])

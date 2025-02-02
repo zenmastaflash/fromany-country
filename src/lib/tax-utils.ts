@@ -1,4 +1,4 @@
-import { Travel } from '@prisma/client';
+import { Travel, Document, DocumentType, ResidencyStatus } from '@prisma/client';
 
 interface CountryStay {
   startDate: Date;
@@ -26,23 +26,88 @@ export function calculateDaysInCountry(stays: CountryStay[], country: string): n
   }, 0);
 }
 
-export function calculateTaxResidenceRisk(stays: CountryStay[]): {
+interface ResidencyAssessment {
   country: string;
   days: number;
   risk: 'low' | 'medium' | 'high';
-}[] {
-  const countryDays = new Map<string, number>();
+  status: ResidencyStatus | null;
+  documentBased: boolean;
+  validDocuments: Document[];
+}
+
+export async function calculateResidencyStatus(
+  stays: CountryStay[],
+  documents: Document[],
+  country: string
+): Promise<ResidencyAssessment> {
+  const days = calculateDaysInCountry(stays, country);
   
-  stays.forEach(stay => {
-    const days = calculateDaysInCountry([stay], stay.country);
-    countryDays.set(stay.country, (countryDays.get(stay.country) || 0) + days);
-  });
-  
-  return Array.from(countryDays.entries()).map(([country, days]) => ({
+  // Filter valid documents for this country
+  const validDocuments = documents.filter(doc => 
+    doc.issuingCountry === country && 
+    new Date(doc.expiryDate!) > new Date() &&
+    [DocumentType.RESIDENCY_PERMIT, DocumentType.VISA, DocumentType.TOURIST_VISA].includes(doc.type)
+  );
+
+  // Check for residency permit
+  const residencyPermit = validDocuments.find(
+    doc => doc.type === DocumentType.RESIDENCY_PERMIT
+  );
+
+  // Check for long-term visa
+  const longTermVisa = validDocuments.find(
+    doc => doc.type === DocumentType.VISA
+  );
+
+  // Check for tourist visa
+  const touristVisa = validDocuments.find(
+    doc => doc.type === DocumentType.TOURIST_VISA
+  );
+
+  // Determine status based on documents first
+  if (residencyPermit) {
+    return {
+      country,
+      days,
+      risk: 'low', // Residence permit holders have clear status
+      status: ResidencyStatus.PERMANENT_RESIDENT,
+      documentBased: true,
+      validDocuments: [residencyPermit]
+    };
+  }
+
+  if (longTermVisa) {
+    return {
+      country,
+      days,
+      risk: 'low',
+      status: ResidencyStatus.TEMPORARY_RESIDENT,
+      documentBased: true,
+      validDocuments: [longTermVisa]
+    };
+  }
+
+  if (touristVisa) {
+    const risk = days > (touristVisa.metadata?.maxStay || 90) ? 'high' : 'low';
+    return {
+      country,
+      days,
+      risk,
+      status: ResidencyStatus.NON_RESIDENT,
+      documentBased: true,
+      validDocuments: [touristVisa]
+    };
+  }
+
+  // If no valid documents, fall back to day counting
+  return {
     country,
     days,
-    risk: days > 180 ? 'high' : days > 90 ? 'medium' : 'low'
-  }));
+    risk: days > 180 ? 'high' : days > 90 ? 'medium' : 'low',
+    status: days > 180 ? ResidencyStatus.TAX_RESIDENT : ResidencyStatus.NON_RESIDENT,
+    documentBased: false,
+    validDocuments: []
+  };
 }
 
 export function calculateTaxResidenceRiskFromTravels(travels: Travel[]) {

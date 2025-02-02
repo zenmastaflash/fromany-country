@@ -1,5 +1,7 @@
-import { Travel } from '@prisma/client';
+import { Travel, Document } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+
+type ResidencyStatus = 'PERMANENT_RESIDENT' | 'TEMPORARY_RESIDENT' | 'NON_RESIDENT' | 'TAX_RESIDENT' | 'DIGITAL_NOMAD';
 
 interface CountryStay {
   startDate: Date;

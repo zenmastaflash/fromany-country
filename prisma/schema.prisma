@@ -13,6 +13,7 @@ datasource db {
 enum DocumentType {
   PASSPORT
   VISA
+  TOURIST_VISA
   TAX_RETURN
   DRIVERS_LICENSE
   RESIDENCY_PERMIT

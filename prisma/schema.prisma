@@ -124,17 +124,23 @@ model CountryTaxRules {
 }
 
 model UserTaxStatus {
-  id                String    @id @default(cuid())
-  user_id          String
-  country_code     String
-  tax_year         Int
-  days_present     Int       @default(0)
-  last_calculated_at DateTime?
+  id                  String    @id @default(cuid())
+  user_id            String
+  country_code       String
+  tax_year           Int
+  days_present       Int       @default(0)
+  last_calculated_at DateTime?  @db.Timestamptz
   tax_liability_risk String?
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
-  user             User      @relation(fields: [user_id], references: [id])
-  country          CountryTaxRules @relation(fields: [country_code], references: [country_code])
+  created_at         DateTime  @default(now()) @db.Timestamptz
+  updated_at         DateTime  @updatedAt @db.Timestamptz
+  document_id        String?
+  residency_start_date DateTime? @db.Timestamptz
+  required_presence   Int?
+  residency_status   String?
+  compliance_notes   String?
+  alerts_sent        Json?     @db.JsonB
+  user               User      @relation(fields: [user_id], references: [id])
+  country            CountryTaxRules @relation(fields: [country_code], references: [country_code])
 
   @@unique([user_id, country_code, tax_year])
 }

@@ -46,6 +46,17 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
   const [countries, setCountries] = useState<string[]>([]);
 
   const documentTypes = Object.values(DocumentType);
+  const documentTypeDisplay = {
+    [DocumentType.PASSPORT]: 'Passport',
+    [DocumentType.VISA]: 'Long-term Visa',
+    [DocumentType.TOURIST_VISA]: 'Tourist Visa',
+    [DocumentType.TAX_RETURN]: 'Tax Return',
+    [DocumentType.DRIVERS_LICENSE]: 'Driver\'s License',
+    [DocumentType.RESIDENCY_PERMIT]: 'Residency Permit',
+    [DocumentType.BANK_STATEMENT]: 'Bank Statement',
+    [DocumentType.INSURANCE]: 'Insurance',
+    [DocumentType.OTHER]: 'Other'
+  };
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -82,7 +93,7 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
         >
           {documentTypes.map((type) => (
             <option key={type} value={type}>
-              {type.replace('_', ' ')}
+              {documentTypeDisplay[type]}
             </option>
           ))}
         </select>

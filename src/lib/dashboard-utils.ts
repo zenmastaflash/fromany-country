@@ -1,5 +1,3 @@
-// src/lib/dashboard-utils.ts
-
 import { Travel } from '@prisma/client';
 import { calculateTaxResidenceRiskFromTravels } from './tax-utils';
 import { getCurrentLocation, getUpcomingDepartures } from './travel-utils';

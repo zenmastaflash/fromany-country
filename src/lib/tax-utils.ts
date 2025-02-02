@@ -38,11 +38,7 @@ export function calculateDaysInCountry(stays: CountryStay[], country: string): n
   }, 0);
 }
 
-export async function calculateTaxResidenceRisk(stays: CountryStay[]): Promise<{
-  country: string;
-  days: number;
-  risk: 'low' | 'medium' | 'high';
-}[]> {
+export async function calculateTaxResidenceRisk(stays: CountryStay[]): Promise<TaxRisk[]> {
   const countryDays = new Map<string, number>();
   
   stays.forEach(stay => {
@@ -54,10 +50,15 @@ export async function calculateTaxResidenceRisk(stays: CountryStay[]): Promise<{
   const results = await Promise.all(
     Array.from(countryDays.entries()).map(async ([country, days]) => {
       const threshold = await getCountryTaxThreshold(country);
+      const risk = days > threshold ? 'high' as const : days > (threshold * 0.5) ? 'medium' as const : 'low' as const;
+      
       return {
         country,
         days,
-        risk: days > threshold ? 'high' : days > (threshold * 0.5) ? 'medium' : 'low'
+        risk,
+        status: null,
+        documentBased: false,
+        validDocuments: []
       };
     })
   );

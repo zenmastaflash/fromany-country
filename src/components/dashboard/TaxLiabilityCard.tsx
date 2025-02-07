@@ -6,6 +6,8 @@ interface CountryStatus {
   daysPresent: number;
   threshold: number;
   lastEntry: string;
+  residencyStatus: ResidencyStatus | null;
+  documentBased: boolean;
 }
 
 export default function TaxLiabilityCard({ 
@@ -60,7 +62,16 @@ export default function TaxLiabilityCard({
                 <div key={status.country} className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span>{status.country}</span>
-                    <span>{status.daysPresent} / {status.threshold} days</span>
+                    <div className="flex items-center gap-2">
+                      {status.residencyStatus && (
+                        <span className={`px-2 py-0.5 text-xs rounded ${
+                          status.documentBased ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {status.residencyStatus.replace('_', ' ')}
+                        </span>
+                      )}
+                      <span>{status.daysPresent} / {status.threshold} days</span>
+                    </div>
                   </div>
                   <Progress 
                     value={(status.daysPresent / status.threshold) * 100} 

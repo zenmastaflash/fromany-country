@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/progress';
+import { ResidencyStatus } from '@prisma/client';
 
 interface CountryStatus {
   country: string;

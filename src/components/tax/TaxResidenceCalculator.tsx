@@ -12,31 +12,40 @@ interface Travel {
 
 export default function TaxResidenceCalculator() {
   const [travels, setTravels] = useState<Travel[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [residenceRisks, setResidenceRisks] = useState<Awaited<ReturnType<typeof calculateTaxResidenceRisk>>>([]);
 
   useEffect(() => {
-    const fetchTravels = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/travel');
-        if (!response.ok) throw new Error('Failed to fetch travels');
-        const data = await response.json();
-        setTravels(data);
+        // Fetch travels
+        const travelResponse = await fetch('/api/travel');
+        if (!travelResponse.ok) throw new Error('Failed to fetch travels');
+        const travelData = await travelResponse.json();
+        setTravels(travelData);
+
+        // Fetch documents
+        const docResponse = await fetch('/api/documents');
+        if (!docResponse.ok) throw new Error('Failed to fetch documents');
+        const docData = await docResponse.json();
+        setDocuments(docData);
 
         // Calculate tax residence risks
         const risks = await calculateTaxResidenceRisk(
-          data.map((t: Travel) => ({
+          travelData.map((t: Travel) => ({
             ...t,
             startDate: new Date(t.startDate),
             endDate: t.endDate ? new Date(t.endDate) : undefined
-          }))
+          })),
+          docData
         );
         setResidenceRisks(risks);
       } catch (error) {
-        console.error('Error fetching travels:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    fetchTravels();
+    fetchData();
   }, []);
 
   return (

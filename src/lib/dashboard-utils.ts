@@ -1,4 +1,4 @@
-import { Travel } from '@prisma/client';
+import { Travel, Document } from '@prisma/client';
 import { calculateTaxResidenceRiskFromTravels } from './tax-utils';
 import { getCurrentLocation, getUpcomingDepartures } from './travel-utils';
 

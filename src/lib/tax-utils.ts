@@ -50,7 +50,10 @@ export async function calculateTaxResidenceRisk(
   const results = await Promise.all(
     Array.from(countryDays.entries()).map(async ([country, days]) => {
       const rules = await prisma.countryTaxRules.findUnique({
-        where: { country_code: country }
+        where: { country_code: country },
+        include: {
+          user_tax_status: true
+        }
       });
       
       const validDocuments = documents.filter(doc => 
@@ -67,7 +70,7 @@ export async function calculateTaxResidenceRisk(
       
       if (hasResidencyDoc) {
         // For residency holders, risk is based on minimum required presence
-        const minDays = rules?.required_presence ?? 183;
+        const minDays = rules?.user_tax_status[0]?.required_presence ?? 183;
         risk = days < minDays ? 'high' : days < (minDays * 1.1) ? 'medium' : 'low';
       } else {
         // For non-residents, risk is based on maximum allowed presence

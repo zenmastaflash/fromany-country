@@ -1,9 +1,21 @@
-import { Travel } from '@prisma/client';
+import { Travel, Document } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+
+type ResidencyStatus = 'PERMANENT_RESIDENT' | 'TEMPORARY_RESIDENT' | 'NON_RESIDENT' | 'TAX_RESIDENT' | 'DIGITAL_NOMAD';
 
 interface CountryStay {
   startDate: Date;
   endDate?: Date;
   country: string;
+}
+
+interface TaxRisk {
+  country: string;
+  days: number;
+  risk: 'low' | 'medium' | 'high';
+  status: ResidencyStatus | null;
+  documentBased: boolean;
+  validDocuments: Document[];
 }
 
 function travelToCountryStay(travel: Travel): CountryStay {
@@ -26,28 +38,37 @@ export function calculateDaysInCountry(stays: CountryStay[], country: string): n
   }, 0);
 }
 
-export function calculateTaxResidenceRisk(stays: CountryStay[]): {
-  country: string;
-  days: number;
-  risk: 'low' | 'medium' | 'high';
-}[] {
+export async function calculateTaxResidenceRisk(stays: CountryStay[]): Promise<TaxRisk[]> {
   const countryDays = new Map<string, number>();
   
   stays.forEach(stay => {
     const days = calculateDaysInCountry([stay], stay.country);
     countryDays.set(stay.country, (countryDays.get(stay.country) || 0) + days);
   });
-  
-  return Array.from(countryDays.entries()).map(([country, days]) => ({
-    country,
-    days,
-    risk: days > 180 ? 'high' : days > 90 ? 'medium' : 'low'
-  }));
+
+  // Process all countries in parallel
+  const results = await Promise.all(
+    Array.from(countryDays.entries()).map(async ([country, days]) => {
+      const threshold = await getCountryTaxThreshold(country);
+      const risk = days > threshold ? 'high' as const : days > (threshold * 0.5) ? 'medium' as const : 'low' as const;
+      
+      return {
+        country,
+        days,
+        risk,
+        status: null,
+        documentBased: false,
+        validDocuments: []
+      };
+    })
+  );
+
+  return results;
 }
 
-export function calculateTaxResidenceRiskFromTravels(travels: Travel[]) {
+export async function calculateTaxResidenceRiskFromTravels(travels: Travel[]) {
   const stays = travels.map(travelToCountryStay);
-  return calculateTaxResidenceRisk(stays);
+  return await calculateTaxResidenceRisk(stays);
 }
 
 export function calculateTaxYear(date: Date = new Date()): {
@@ -70,7 +91,14 @@ export function calculateTaxYear(date: Date = new Date()): {
   };
 }
 
-export function getCountryTaxThreshold(countryCode: string): number {
-  // This could be expanded with a proper lookup table or API
-  return 183;  // Default 183 days for most countries
+export async function getCountryTaxThreshold(countryCode: string): Promise<number> {
+  try {
+    const rules = await prisma.countryTaxRules.findUnique({
+      where: { country_code: countryCode }
+    });
+    return rules?.residency_threshold ?? 183; // fallback to 183 if no specific rule
+  } catch (error) {
+    console.error(`Error fetching tax rules for ${countryCode}:`, error);
+    return 183; // fallback in case of error
+  }
 }

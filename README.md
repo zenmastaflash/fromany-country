@@ -51,7 +51,7 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Core Features
 
-- **Dashboard
+- **Dashboard**
   - ✅ Shows tax liability
   - ✅ Critical dates (currently only document expiration, but looking to add important filing dates as well)
   - ✅ Compliance Alerts
@@ -73,11 +73,12 @@ While dark mode offers these benefits, it's important to note that it may not be
 - **Travel Integration**
   - ✅ Calendar integration
   - Flight data API connection
-  - Day-by-day location tracking
+  - ✅ Day-by-day location tracking
   - Tax day calculations
   - Visa requirement warnings
   - Entry/exit tracking
   - Travel Planning - plan ahead to reduce tax liability
+  - Natural language input for quick additions
 
 - **Community Building**
   - Links to partner communities (e.g., coliving spaces)
@@ -100,19 +101,22 @@ While dark mode offers these benefits, it's important to note that it may not be
   - ✅ Nomad visas
   - "Explore" function that helps you see at a glance what any given country's tax liability is
   - Other tools
+ 
+- **Misc Features**
+  - Natural Languag Input
+  - i18n Internationalization
+  - Tax Residency Simulator
+  - Geoarbitrage Calculator
 
-### Next Steps
 
-- Travel Integration
-- Create a dashboard for tax residency, liability, and other useful insights
+### Current Works
+
+- Connect Dashboard to Documents and Travel databses for accurate data representationand logic
+- Build out country-based tax laws, important dates, etc
 
 ### Recent Fixes
 
-- Fixed various document upload and storage issues
-- Fixed home page CSS issue
-- Removed background image. It was pretty, but too hard to read font.
-- Fixed Google OAuth callback issue
-- Added country dropdown to document upload
+- fixed auth issue that prevented signup (caused different issue, however
 
 
 ## Quick Start

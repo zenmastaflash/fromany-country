@@ -1,5 +1,3 @@
-// src/lib/dashboard-utils.ts
-
 import { Travel } from '@prisma/client';
 import { calculateTaxResidenceRiskFromTravels } from './tax-utils';
 import { getCurrentLocation, getUpcomingDepartures } from './travel-utils';
@@ -12,11 +10,11 @@ export interface ComplianceAlert {
   actionRequired?: string;
 }
 
-export function generateComplianceAlerts(travels: Travel[]): ComplianceAlert[] {
+export async function generateComplianceAlerts(travels: Travel[]): Promise<ComplianceAlert[]> {
   const alerts: ComplianceAlert[] = [];
   
   // Tax residency alerts
-  const taxRisks = calculateTaxResidenceRiskFromTravels(travels);
+  const taxRisks = await calculateTaxResidenceRiskFromTravels(travels);
   taxRisks.forEach(risk => {
     if (risk.risk !== 'low') {
       alerts.push({

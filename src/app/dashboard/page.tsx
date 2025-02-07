@@ -29,8 +29,8 @@ export default async function DashboardPage() {
 
   // Use our utils to get dashboard data
   const currentLocation = getCurrentLocation(travels);
-  const taxRisks = calculateTaxResidenceRiskFromTravels(travels);
-  const complianceAlerts = generateComplianceAlerts(travels);
+  const taxRisks = await calculateTaxResidenceRiskFromTravels(travels);
+  const complianceAlerts = await generateComplianceAlerts(travels);
 
   // Format data for components
   const formattedLocation = currentLocation ? {
@@ -42,8 +42,10 @@ export default async function DashboardPage() {
   const countryStatuses = taxRisks.map(risk => ({
     country: risk.country,
     daysPresent: risk.days,
-    threshold: 183,  // TODO: Make dynamic based on country
-    lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || ''
+    threshold: 183,
+    lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
+    residencyStatus: risk.status,
+    documentBased: risk.documentBased
   }));
 
   // Generate critical dates from travel and documents

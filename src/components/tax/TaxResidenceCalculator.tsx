@@ -12,7 +12,7 @@ interface Travel {
 
 export default function TaxResidenceCalculator() {
   const [travels, setTravels] = useState<Travel[]>([]);
-  const [residenceRisks, setResidenceRisks] = useState<ReturnType<typeof calculateTaxResidenceRisk>>([]);
+  const [residenceRisks, setResidenceRisks] = useState<Awaited<ReturnType<typeof calculateTaxResidenceRisk>>>([]);
 
   useEffect(() => {
     const fetchTravels = async () => {
@@ -23,7 +23,7 @@ export default function TaxResidenceCalculator() {
         setTravels(data);
 
         // Calculate tax residence risks
-        const risks = calculateTaxResidenceRisk(
+        const risks = await calculateTaxResidenceRisk(
           data.map((t: Travel) => ({
             ...t,
             startDate: new Date(t.startDate),

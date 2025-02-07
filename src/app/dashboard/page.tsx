@@ -8,7 +8,6 @@ import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import TaxLiabilityCard from '@/components/dashboard/TaxLiabilityCard';
 import CriticalDatesCard from '@/components/dashboard/CriticalDatesCard';
 import ComplianceAlertsCard from '@/components/dashboard/ComplianceAlertsCard';
-import { ResidencyStatus } from '@prisma/client';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);

@@ -49,8 +49,9 @@ export async function calculateTaxResidenceRisk(
 
   const results = await Promise.all(
     Array.from(countryDays.entries()).map(async ([country, days]) => {
-      const threshold = await getCountryTaxThreshold(country);
-      const risk = days > threshold ? 'high' as const : days > (threshold * 0.5) ? 'medium' as const : 'low' as const;
+      const rules = await prisma.countryTaxRules.findUnique({
+        where: { country_code: country }
+      });
       
       const validDocuments = documents.filter(doc => 
         doc.issuingCountry === country && 
@@ -58,8 +59,22 @@ export async function calculateTaxResidenceRisk(
         ['RESIDENCY_PERMIT', 'VISA', 'TOURIST_VISA'].includes(doc.type)
       );
 
-      const status = determineResidencyStatus(validDocuments, days, threshold);
+      const status = determineResidencyStatus(validDocuments, days, rules?.residency_threshold ?? 183);
       
+      // Risk calculation now considers document type
+      let risk: 'low' | 'medium' | 'high';
+      const hasResidencyDoc = validDocuments.some(d => ['RESIDENCY_PERMIT', 'VISA'].includes(d.type));
+      
+      if (hasResidencyDoc) {
+        // For residency holders, risk is based on minimum required presence
+        const minDays = rules?.required_presence ?? 183;
+        risk = days < minDays ? 'high' : days < (minDays * 1.1) ? 'medium' : 'low';
+      } else {
+        // For non-residents, risk is based on maximum allowed presence
+        const maxDays = rules?.residency_threshold ?? 183;
+        risk = days > maxDays ? 'high' : days > (maxDays * 0.8) ? 'medium' : 'low';
+      }
+
       return {
         country,
         days,

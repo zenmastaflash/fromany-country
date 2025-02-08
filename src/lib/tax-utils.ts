@@ -38,7 +38,8 @@ export function calculateDaysInCountry(stays: CountryStay[], country: string): n
 
 export async function calculateTaxResidenceRisk(
   stays: CountryStay[],
-  documents: Document[]
+  documents: Document[],
+  userId: string
 ): Promise<TaxRisk[]> {
   const countryDays = new Map<string, number>();
   
@@ -49,11 +50,17 @@ export async function calculateTaxResidenceRisk(
 
   const results = await Promise.all(
     Array.from(countryDays.entries()).map(async ([country, days]) => {
-      const rules = await prisma.countryTaxRules.findUnique({
-        where: { country_code: country },
-        include: {
-          user_tax_status: true
+      // Get country rules and user's tax status
+      const userTaxStatus = await prisma.userTaxStatus.findFirst({
+        where: {
+          user_id: userId,
+          country_code: country,
+          tax_year: new Date().getFullYear()
         }
+      });
+
+      const rules = await prisma.countryTaxRules.findUnique({
+        where: { country_code: country }
       });
       
       const validDocuments = documents.filter(doc => 
@@ -64,13 +71,12 @@ export async function calculateTaxResidenceRisk(
 
       const status = determineResidencyStatus(validDocuments, days, rules?.residency_threshold ?? 183);
       
-      // Risk calculation now considers document type
       let risk: 'low' | 'medium' | 'high';
       const hasResidencyDoc = validDocuments.some(d => ['RESIDENCY_PERMIT', 'VISA'].includes(d.type));
       
-      if (hasResidencyDoc) {
+      if (hasResidencyDoc && userTaxStatus?.required_presence) {
         // For residency holders, risk is based on minimum required presence
-        const minDays = rules?.user_tax_status[0]?.required_presence ?? 183;
+        const minDays = userTaxStatus.required_presence;
         risk = days < minDays ? 'high' : days < (minDays * 1.1) ? 'medium' : 'low';
       } else {
         // For non-residents, risk is based on maximum allowed presence
@@ -94,10 +100,11 @@ export async function calculateTaxResidenceRisk(
 
 export async function calculateTaxResidenceRiskFromTravels(
   travels: Travel[],
-  documents: Document[]
+  documents: Document[],
+  userId: string
 ): Promise<TaxRisk[]> {
   const stays = travels.map(travelToCountryStay);
-  return await calculateTaxResidenceRisk(stays, documents);
+  return await calculateTaxResidenceRisk(stays, documents, userId);
 }
 
 export function calculateTaxYear(date: Date = new Date()): {

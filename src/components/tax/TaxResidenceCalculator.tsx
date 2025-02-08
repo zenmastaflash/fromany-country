@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { calculateTaxResidenceRisk } from '@/lib/tax-utils';
 
@@ -11,11 +12,14 @@ interface Travel {
 }
 
 export default function TaxResidenceCalculator() {
+  const { data: session } = useSession();
   const [travels, setTravels] = useState<Travel[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [residenceRisks, setResidenceRisks] = useState<Awaited<ReturnType<typeof calculateTaxResidenceRisk>>>([]);
 
   useEffect(() => {
+    if (!session?.user?.id) return;
+
     const fetchData = async () => {
       try {
         // Fetch travels
@@ -47,7 +51,7 @@ export default function TaxResidenceCalculator() {
     };
 
     fetchData();
-  }, []);
+  }, [session]);
 
   return (
     <Card>

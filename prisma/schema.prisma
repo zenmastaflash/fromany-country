@@ -54,7 +54,7 @@ model User {
   documents              Document[]
   accounts               Account[]
   sessions               Session[]
-  user_tax_status        UserTaxStatus[]
+  user_tax_status        user_tax_status[]
   trip_scenarios         TripScenarios[]
   travel                Travel[]
 }
@@ -112,7 +112,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model CountryTaxRules {
+model country_tax_rules {
   id                 String    @id @default(cuid())
   country_code       String    @unique
   name              String
@@ -129,10 +129,10 @@ model CountryTaxRules {
   source_type       String?
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
-  user_tax_status   UserTaxStatus[]
+  user_tax_status   user_tax_status[]
 }
 
-model UserTaxStatus {
+model user_tax_status {
   id                  String    @id @default(cuid())
   user_id            String
   country_code       String
@@ -149,7 +149,7 @@ model UserTaxStatus {
   compliance_notes   String?
   alerts_sent        Json?     @db.JsonB
   user               User      @relation(fields: [user_id], references: [id])
-  country            CountryTaxRules @relation(fields: [country_code], references: [country_code])
+  country            country_tax_rules @relation(fields: [country_code], references: [country_code])
 
   @@unique([user_id, country_code, tax_year])
 }

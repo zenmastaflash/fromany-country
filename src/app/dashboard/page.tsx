@@ -8,6 +8,8 @@ import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import TaxLiabilityCard from '@/components/dashboard/TaxLiabilityCard';
 import CriticalDatesCard from '@/components/dashboard/CriticalDatesCard';
 import ComplianceAlertsCard from '@/components/dashboard/ComplianceAlertsCard';
+import { Travel, Document, ResidencyStatus } from '@prisma/client';
+import type { TaxRisk } from '@/lib/tax-utils';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -28,17 +30,9 @@ export default async function DashboardPage() {
   });
 
   // Use our utils to get dashboard data
-  let currentLocation = null;
-  let taxRisks = [];
-  let complianceAlerts = [];
-
-  try {
-    currentLocation = getCurrentLocation(travels);
-    taxRisks = await calculateTaxResidenceRiskFromTravels(travels, documents, session.user.id);
-    complianceAlerts = await generateComplianceAlerts(travels, documents, session.user.id);
-  } catch (error) {
-    console.error('Error calculating dashboard data:', error);
-  }
+  let currentLocation = getCurrentLocation(travels);
+  let taxRisks: TaxRisk[] = await calculateTaxResidenceRiskFromTravels(travels, documents, session.user.id);
+  let complianceAlerts = await generateComplianceAlerts(travels, documents, session.user.id);
 
   // Format data for components
   const formattedLocation = currentLocation ? {

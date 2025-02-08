@@ -29,7 +29,7 @@ export default async function DashboardPage() {
 
   // Use our utils to get dashboard data
   const currentLocation = getCurrentLocation(travels);
-  const taxRisks = await calculateTaxResidenceRiskFromTravels(travels, documents);
+  const taxRisks = await calculateTaxResidenceRiskFromTravels(travels, documents, session.user.id);
   const complianceAlerts = await generateComplianceAlerts(travels, documents);
 
   // Format data for components

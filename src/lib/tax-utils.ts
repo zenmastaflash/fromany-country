@@ -7,7 +7,7 @@ interface CountryStay {
   country: string;
 }
 
-interface TaxRisk {
+export interface TaxRisk {
   country: string;
   days: number;
   risk: 'low' | 'medium' | 'high';

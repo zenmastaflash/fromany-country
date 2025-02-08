@@ -52,7 +52,7 @@ export async function calculateTaxResidenceRisk(
     Array.from(countryDays.entries()).map(async ([country, days]) => {
       let userTaxStatus = null;
       try {
-        userTaxStatus = await prisma.userTaxStatus.findFirst({
+        userTaxStatus = await prisma.user_Tax_Status.findFirst({
           where: {
             user_id: userId,
             country_code: country,

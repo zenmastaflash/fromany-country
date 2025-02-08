@@ -28,9 +28,17 @@ export default async function DashboardPage() {
   });
 
   // Use our utils to get dashboard data
-  const currentLocation = getCurrentLocation(travels);
-  const taxRisks = await calculateTaxResidenceRiskFromTravels(travels, documents, session.user.id);
-  const complianceAlerts = await generateComplianceAlerts(travels, documents, session.user.id);
+  let currentLocation = null;
+  let taxRisks = [];
+  let complianceAlerts = [];
+
+  try {
+    currentLocation = getCurrentLocation(travels);
+    taxRisks = await calculateTaxResidenceRiskFromTravels(travels, documents, session.user.id);
+    complianceAlerts = await generateComplianceAlerts(travels, documents, session.user.id);
+  } catch (error) {
+    console.error('Error calculating dashboard data:', error);
+  }
 
   // Format data for components
   const formattedLocation = currentLocation ? {

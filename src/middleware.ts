@@ -9,12 +9,15 @@ export default withAuth(
     // Check if user has accepted terms
     if (token) {
       try {
-        const response = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/check-terms`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const url = new URL('/api/auth/accept-terms', process.env.NEXTAUTH_URL || req.url)
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${token.raw}` }
         })
-        const { terms_accepted } = await response.json()
         
-        if (!terms_accepted && !req.nextUrl.pathname.startsWith('/auth/')) {
+        if (!response.ok) throw new Error(await response.text())
+        const data = await response.json()
+        
+        if (!data.terms_accepted && !req.nextUrl.pathname.startsWith('/auth/')) {
           return NextResponse.redirect(new URL('/auth/terms', req.url))
         }
       } catch (error) {

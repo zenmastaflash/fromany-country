@@ -50,14 +50,18 @@ export async function calculateTaxResidenceRisk(
 
   const results = await Promise.all(
     Array.from(countryDays.entries()).map(async ([country, days]) => {
-      // Get country rules and user's tax status
-      const userTaxStatus = await prisma.userTaxStatus.findFirst({
-        where: {
-          user_id: userId,
-          country_code: country,
-          tax_year: new Date().getFullYear()
-        }
-      });
+      let userTaxStatus = null;
+      try {
+        userTaxStatus = await prisma.userTaxStatus.findFirst({
+          where: {
+            user_id: userId,
+            country_code: country,
+            tax_year: new Date().getFullYear()
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching tax status:', error);
+      }
 
       const rules = await prisma.countryTaxRules.findUnique({
         where: { country_code: country }

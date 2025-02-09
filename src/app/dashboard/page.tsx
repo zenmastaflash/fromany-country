@@ -1,6 +1,4 @@
-import { getServerSession } from 'next-auth/next';
-import { config as authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
 import { getCurrentLocation } from '@/lib/travel-utils';
 import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
@@ -12,11 +10,7 @@ import { Travel, Document, ResidencyStatus } from '@prisma/client';
 import type { TaxRisk } from '@/lib/tax-utils';
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect('/api/auth/signin');
-  }
+  const session = await requireAuth();
 
   // Fetch travel data
   const travels = await prisma.travel.findMany({

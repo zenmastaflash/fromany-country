@@ -133,7 +133,7 @@ export function calculateTaxYear(date: Date = new Date()): {
 
 export async function getCountryTaxThreshold(countryCode: string): Promise<number> {
   try {
-    const rules = await prisma.countryTaxRules.findUnique({
+    const rules = await prisma.country_tax_rules.findUnique({
       where: { country_code: countryCode }
     });
     return rules?.residency_threshold ?? 183; // fallback to 183 if no specific rule

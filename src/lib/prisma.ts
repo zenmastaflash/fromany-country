@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { Client } from 'pg'
+import { Pool } from 'pg'
 
-const client = new Client({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 })
 
@@ -11,7 +11,7 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  adapter: new PrismaPg(client),
+  adapter: new PrismaPg(pool),
   log: ['error', 'warn'],
 })
 

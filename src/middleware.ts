@@ -2,30 +2,25 @@
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
-import { prisma } from '@/lib/prisma'
 
 export default withAuth(
   async function middleware(req) {
     const token = await getToken({ req })
     
+    // Store the token info in headers for our API routes
+    const requestHeaders = new Headers(req.headers)
     if (token?.email) {
-      try {
-        const user = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: { terms_accepted_at: true }
-        })
-        
-        if (!user?.terms_accepted_at && !req.nextUrl.pathname.startsWith('/auth/')) {
-          return NextResponse.redirect(new URL('/auth/terms', req.url))
-        }
-      } catch (error) {
-        console.error('Error checking terms:', error)
-        // On error, allow access rather than potentially blocking valid users
-        return NextResponse.next()
-      }
+      requestHeaders.set('x-user-email', token.email)
     }
-    
-    return NextResponse.next()
+
+    // Only redirect to terms if explicitly requested by API
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+
+    return response
   },
   {
     callbacks: {

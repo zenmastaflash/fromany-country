@@ -4,11 +4,14 @@ import { config as authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 
-async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
   try {
     return await fn()
-  } catch (error) {
-    if (retries > 0 && error.message?.includes('connection closed')) {
+  } catch (error: any) {  // TypeScript needs to know this is a type with .message
+    if (retries > 0 && (
+      error?.message?.includes('connection closed') ||
+      error?.message?.includes('Connection terminated')
+    )) {
       await new Promise(resolve => setTimeout(resolve, 100))
       return withRetry(fn, retries - 1)
     }

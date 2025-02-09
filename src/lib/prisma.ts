@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { Client } from '@prisma/pg-proxy'
+import { Client } from 'pg'
 
-const client = new Client(process.env.DATABASE_URL!)
+const client = new Client({
+  connectionString: process.env.DATABASE_URL
+})
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined

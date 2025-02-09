@@ -113,23 +113,24 @@ model VerificationToken {
 }
 
 model country_tax_rules {
-  id                 String    @id @default(cuid())
   country_code       String    @unique
   name              String
-  tax_year_start    String    // MM-DD format
-  day_counting_method String
-  residency_threshold Int
+  tax_year_start    String?    // MM-DD format
+  day_counting_method String?
+  residency_threshold Int?
   special_rules     Json?
   tax_treaties      Json?
   version           Int       @default(1)
-  effective_from    DateTime
-  effective_to      DateTime?
-  last_verified_date DateTime?
+  effective_from    DateTime  @db.Date
+  effective_to      DateTime? @db.Date
+  last_verified_date DateTime? @db.Date
   source_url        String?
   source_type       String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+  created_at        DateTime  @default(now()) @db.Timestamptz
+  updated_at        DateTime  @default(now()) @db.Timestamptz
   user_tax_status   user_tax_status[]
+
+  @@id([country_code])
 }
 
 model user_tax_status {

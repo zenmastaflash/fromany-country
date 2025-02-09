@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth-utils';
+import { requireAuth, withRetry } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
 import { getCurrentLocation } from '@/lib/travel-utils';
 import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
@@ -12,16 +12,20 @@ import type { TaxRisk } from '@/lib/tax-utils';
 export default async function DashboardPage() {
   const session = await requireAuth();
 
-  // Fetch travel data
-  const travels = await prisma.travel.findMany({
-    where: { user_id: session.user.id },
-    orderBy: { entry_date: 'desc' }
-  });
+  // Fetch travel data with retry
+  const travels = await withRetry(() => 
+    prisma.travel.findMany({
+      where: { user_id: session.user.id },
+      orderBy: { entry_date: 'desc' }
+    })
+  );
 
-  // TODO: Fetch document data for critical dates
-  const documents = await prisma.document.findMany({
-    where: { userId: session.user.id }
-  });
+  // Fetch document data with retry
+  const documents = await withRetry(() => 
+    prisma.document.findMany({
+      where: { userId: session.user.id }
+    })
+  );
 
   // Use our utils to get dashboard data
   let currentLocation = getCurrentLocation(travels);

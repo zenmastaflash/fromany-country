@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 export async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
   try {
     return await fn()
-  } catch (error: any) {  // TypeScript needs to know this is a type with .message
+  } catch (error: any) {
     if (retries > 0 && (
       error?.message?.includes('connection closed') ||
       error?.message?.includes('Connection terminated')
@@ -26,10 +26,13 @@ export async function requireAuth() {
     redirect('/api/auth/signin')
   }
 
+  // Since we've checked email exists above, TypeScript knows it's not null here
+  const email = session.user.email
+  
   // Check terms acceptance with retry
   const user = await withRetry(() => 
     prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email },
       select: { terms_accepted_at: true, id: true }
     })
   )

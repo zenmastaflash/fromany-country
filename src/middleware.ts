@@ -1,24 +1,27 @@
+// src/middleware.ts
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
+import { prisma } from '@/lib/prisma'
 
 export default withAuth(
   async function middleware(req) {
     const token = await getToken({ req })
     
-    // Check if user has accepted terms
-    if (token) {
+    if (token?.email) {
       try {
-        const response = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/check-terms`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const user = await prisma.user.findUnique({
+          where: { email: token.email },
+          select: { terms_accepted_at: true }
         })
-        const { terms_accepted } = await response.json()
         
-        if (!terms_accepted && !req.nextUrl.pathname.startsWith('/auth/')) {
+        if (!user?.terms_accepted_at && !req.nextUrl.pathname.startsWith('/auth/')) {
           return NextResponse.redirect(new URL('/auth/terms', req.url))
         }
       } catch (error) {
         console.error('Error checking terms:', error)
+        // On error, allow access rather than potentially blocking valid users
+        return NextResponse.next()
       }
     }
     

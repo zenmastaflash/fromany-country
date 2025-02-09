@@ -1,34 +1,35 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
 function TermsContent() {
   const [isAccepting, setIsAccepting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email');
 
   const acceptTerms = async () => {
     setIsAccepting(true);
+    setError(null);
+    
     try {
       const response = await fetch('/api/auth/accept-terms', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
+        }
       });
 
       if (response.ok) {
         router.push('/dashboard');
       } else {
-        console.error('Failed to accept terms');
+        const data = await response.json();
+        setError(data.error || 'Failed to accept terms');
       }
     } catch (error) {
-      console.error('Error accepting terms:', error);
+      setError('Network error. Please try again.');
     }
     setIsAccepting(false);
   };
@@ -36,7 +37,7 @@ function TermsContent() {
   return (
     <Card className="max-w-2xl w-full">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Create Account & Accept Terms</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">Accept Terms of Service</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="prose prose-sm max-w-none">
@@ -57,12 +58,18 @@ function TermsContent() {
           </p>
         </div>
 
+        {error && (
+          <div className="text-red-600 text-sm p-2 rounded bg-red-50">
+            {error}
+          </div>
+        )}
+
         <Button 
           onClick={acceptTerms} 
           className="w-full"
           disabled={isAccepting}
         >
-          {isAccepting ? 'Creating Account...' : 'Create Account & Accept'}
+          {isAccepting ? 'Accepting Terms...' : 'Accept Terms'}
         </Button>
       </CardContent>
     </Card>

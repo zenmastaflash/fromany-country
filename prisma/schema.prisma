@@ -2,6 +2,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -54,7 +55,7 @@ model User {
   documents              Document[]
   accounts               Account[]
   sessions               Session[]
-  user_tax_status        UserTaxStatus[]
+  user_tax_status        user_tax_status[]
   trip_scenarios         TripScenarios[]
   travel                Travel[]
 }
@@ -112,27 +113,28 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model CountryTaxRules {
-  id                 String    @id @default(cuid())
+model country_tax_rules {
   country_code       String    @unique
   name              String
-  tax_year_start    String    // MM-DD format
-  day_counting_method String
-  residency_threshold Int
+  tax_year_start    String?    // MM-DD format
+  day_counting_method String?
+  residency_threshold Int?
   special_rules     Json?
   tax_treaties      Json?
   version           Int       @default(1)
-  effective_from    DateTime
-  effective_to      DateTime?
-  last_verified_date DateTime?
+  effective_from    DateTime  @db.Date
+  effective_to      DateTime? @db.Date
+  last_verified_date DateTime? @db.Date
   source_url        String?
   source_type       String?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  user_tax_status   UserTaxStatus[]
+  created_at        DateTime  @default(now()) @db.Timestamptz
+  updated_at        DateTime  @default(now()) @db.Timestamptz
+  user_tax_status   user_tax_status[]
+
+  @@id([country_code])
 }
 
-model UserTaxStatus {
+model user_tax_status {
   id                  String    @id @default(cuid())
   user_id            String
   country_code       String
@@ -149,7 +151,7 @@ model UserTaxStatus {
   compliance_notes   String?
   alerts_sent        Json?     @db.JsonB
   user               User      @relation(fields: [user_id], references: [id])
-  country            CountryTaxRules @relation(fields: [country_code], references: [country_code])
+  country            country_tax_rules @relation(fields: [country_code], references: [country_code])
 
   @@unique([user_id, country_code, tax_year])
 }

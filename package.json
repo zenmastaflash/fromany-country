@@ -21,6 +21,8 @@
     "@fullcalendar/interaction": "^6.1.15",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
+    "@prisma/adapter-pg": "^5.10.2",
+    "@prisma/pg-proxy": "^0.2.0",
     "@prisma/client": "^5.7.1",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-progress": "^1.1.1",

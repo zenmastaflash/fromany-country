@@ -63,7 +63,12 @@ export async function GET() {
       countryRules,
       taxStatusesByCountry
     );
-    const complianceAlerts = generateComplianceAlerts(travels, documents, session.user.id);
+    const complianceAlerts = generateComplianceAlerts(
+      travels, 
+      documents, 
+      countryRules,
+      taxStatusesByCountry
+    );
 
     // Format critical dates
     const criticalDates = documents

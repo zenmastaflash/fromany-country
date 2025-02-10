@@ -26,6 +26,15 @@ interface UserTaxStatus {
   residency_status?: ResidencyStatus | null;
 }
 
+interface ResidencyRequirement {
+  minDays: number;
+  daysPresent: number;
+  daysRemaining: number;
+  daysNeeded: number;
+  daysPerMonthNeeded: number;
+  isAchievable: boolean;
+}
+
 function travelToCountryStay(travel: Travel): CountryStay {
   return {
     startDate: new Date(travel.entry_date),
@@ -122,6 +131,24 @@ export function calculateTaxYear(date: Date = new Date()): {
     end,
     daysElapsed,
     daysRemaining
+  };
+}
+
+export function calculateResidencyRequirement(
+  days: number,
+  minRequired: number
+): ResidencyRequirement {
+  const { daysElapsed, daysRemaining } = calculateTaxYear();
+  const daysNeeded = minRequired - days;
+  const daysPerMonthNeeded = Math.ceil(daysNeeded / (daysRemaining / 30));
+  
+  return {
+    minDays: minRequired,
+    daysPresent: days,
+    daysRemaining,
+    daysNeeded,
+    daysPerMonthNeeded,
+    isAchievable: daysNeeded <= daysRemaining
   };
 }
 

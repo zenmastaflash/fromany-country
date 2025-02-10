@@ -14,6 +14,8 @@ export interface TaxRisk {
   status: ResidencyStatus | null;
   documentBased: boolean;
   validDocuments: Document[];
+  daysNeeded?: number;
+  daysRemaining?: number;
 }
 
 interface CountryRules {
@@ -89,6 +91,17 @@ export function calculateTaxResidenceRisk(
       risk = !req.isAchievable ? 'high' :
              req.daysPresent < (req.minDays * 0.5) ? 'high' :
              req.daysPresent < (req.minDays * 0.75) ? 'medium' : 'low';
+
+      return {
+        country,
+        days,
+        risk,
+        status,
+        documentBased: validDocuments.length > 0,
+        validDocuments,
+        daysNeeded: req.daysNeeded,
+        daysRemaining: req.daysRemaining
+      };
     } else {
       // For non-residents, risk is based on maximum allowed presence
       const maxDays = rules?.residency_threshold ?? 183;

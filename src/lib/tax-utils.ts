@@ -84,9 +84,11 @@ export function calculateTaxResidenceRisk(
     const hasResidencyDoc = validDocuments.some(d => ['RESIDENCY_PERMIT', 'VISA'].includes(d.type));
     
     if (hasResidencyDoc && userTaxStatus?.required_presence) {
-      // For residency holders, risk is based on minimum required presence
-      const minDays = userTaxStatus.required_presence;
-      risk = days < minDays ? 'high' : days < (minDays * 1.1) ? 'medium' : 'low';
+      const req = calculateResidencyRequirement(days, userTaxStatus.required_presence);
+      
+      risk = !req.isAchievable ? 'high' :
+             req.daysPresent < (req.minDays * 0.5) ? 'high' :
+             req.daysPresent < (req.minDays * 0.75) ? 'medium' : 'low';
     } else {
       // For non-residents, risk is based on maximum allowed presence
       const maxDays = rules?.residency_threshold ?? 183;

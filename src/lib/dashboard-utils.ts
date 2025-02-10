@@ -2,6 +2,16 @@ import { Travel, Document } from '@prisma/client';
 import { calculateTaxResidenceRiskFromTravels } from './tax-utils';
 import { getCurrentLocation, getUpcomingDepartures } from './travel-utils';
 
+interface CountryRules {
+  country_code: string;
+  residency_threshold?: number | null;
+}
+
+interface UserTaxStatus {
+  required_presence?: number | null;
+  residency_status?: ResidencyStatus | null;
+}
+
 export interface ComplianceAlert {
   type: 'tax' | 'visa' | 'entry' | 'exit';
   title: string;
@@ -10,22 +20,22 @@ export interface ComplianceAlert {
   actionRequired?: string;
 }
 
-export async function generateComplianceAlerts(
+export function generateComplianceAlerts(
   travels: Travel[], 
   documents: Document[],
   countryRules: CountryRules[],
   userTaxStatuses: { [country: string]: UserTaxStatus }
-): Promise<ComplianceAlert[]> {
+): ComplianceAlert[] {
   const alerts: ComplianceAlert[] = [];
   
   // Tax residency alerts
   const taxRisks = calculateTaxResidenceRiskFromTravels(
     travels, 
-    documents, 
+    documents,
     countryRules,
     userTaxStatuses
   );
-  
+
   taxRisks.forEach(risk => {
     if (risk.risk !== 'low') {
       alerts.push({

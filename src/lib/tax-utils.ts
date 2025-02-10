@@ -95,49 +95,12 @@ export function calculateTaxResidenceRisk(
   });
 }
 
-export async function calculateTaxResidenceRiskFromTravels(
+export function calculateTaxResidenceRiskFromTravels(
   travels: Travel[],
   documents: Document[],
-  userId: string
-): Promise<TaxRisk[]> {
-  // Fetch country rules
-  const allCountries = [...new Set(travels.map(t => t.country))];
-  const countryRules = await Promise.all(
-    allCountries.map(async country => {
-      const rules = await prisma.country_tax_rules.findUnique({
-        where: { country_code: country }
-      });
-      return {
-        country_code: country,
-        residency_threshold: rules?.residency_threshold
-      };
-    })
-  );
-
-  // Fetch user tax statuses
-  const userTaxStatuses: { [country: string]: UserTaxStatus } = {};
-  await Promise.all(
-    allCountries.map(async country => {
-      try {
-        const status = await prisma.user_tax_status.findFirst({
-          where: {
-            user_id: userId,
-            country_code: country,
-            tax_year: new Date().getFullYear()
-          }
-        });
-        if (status) {
-          userTaxStatuses[country] = {
-            required_presence: status.required_presence,
-            residency_status: status.residency_status
-          };
-        }
-      } catch (error) {
-        console.error('Error fetching tax status:', error);
-      }
-    })
-  );
-
+  countryRules: CountryRules[],
+  userTaxStatuses: { [country: string]: UserTaxStatus }
+): TaxRisk[] {
   const stays = travels.map(travelToCountryStay);
   return calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses);
 }

@@ -22,19 +22,26 @@ export default function TaxResidenceCalculator() {
 
     const fetchData = async () => {
       try {
-        // Fetch travels
-        const travelResponse = await fetch('/api/travel');
+        // Fetch all required data in parallel
+        const [travelResponse, docResponse, rulesResponse, taxStatusResponse] = await Promise.all([
+          fetch('/api/travel'),
+          fetch('/api/documents'),
+          fetch('/api/country-rules'),  // Would need to create this endpoint
+          fetch('/api/tax-status')      // Would need to create this endpoint
+        ]);
+
         if (!travelResponse.ok) throw new Error('Failed to fetch travels');
-        const travelData = await travelResponse.json();
-        setTravels(travelData);
-
-        // Fetch documents
-        const docResponse = await fetch('/api/documents');
         if (!docResponse.ok) throw new Error('Failed to fetch documents');
-        const docData = await docResponse.json();
-        setDocuments(docData);
+        if (!rulesResponse.ok) throw new Error('Failed to fetch country rules');
+        if (!taxStatusResponse.ok) throw new Error('Failed to fetch tax status');
 
-        // Calculate tax residence risks
+        const [travelData, docData, rulesData, taxStatusData] = await Promise.all([
+          travelResponse.json(),
+          docResponse.json(),
+          rulesResponse.json(),
+          taxStatusResponse.json()
+        ]);
+
         const risks = await calculateTaxResidenceRisk(
           travelData.map((t: Travel) => ({
             ...t,
@@ -42,7 +49,8 @@ export default function TaxResidenceCalculator() {
             endDate: t.endDate ? new Date(t.endDate) : undefined
           })),
           docData,
-          session.user.id
+          rulesData,
+          taxStatusData
         );
         setResidenceRisks(risks);
       } catch (error) {

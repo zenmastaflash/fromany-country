@@ -106,11 +106,25 @@ function CountryStatusRow({
   status: CountryStatus;
   getThresholdColor: (days: number, threshold: number) => string;
 }) {
+  const needsMoreTime = status.documentBased && status.daysPresent < status.threshold;
+  
+  const getTimeMessage = () => {
+    if (!status.documentBased) {
+      return `${status.threshold - status.daysPresent} days until tax residency`;
+    }
+
+    if (status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT') {
+      return `${status.threshold - status.daysPresent} days needed to maintain residency`;
+    }
+
+    return `${status.threshold - status.daysPresent} days until limit`;
+  };
+
   return (
     <div key={status.country} className="space-y-1">
       <div className="flex justify-between text-sm">
         <span>{status.country}</span>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-end gap-1">
           {status.residencyStatus && (
             <span className={`px-2 py-0.5 text-xs rounded ${
               status.documentBased ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
@@ -118,7 +132,8 @@ function CountryStatusRow({
               {status.residencyStatus.replace('_', ' ')}
             </span>
           )}
-          <span>{status.daysPresent} / {status.threshold} days</span>
+          <span className="text-sm font-medium">{status.daysPresent} days</span>
+          <span className="text-xs text-gray-500">{getTimeMessage()}</span>
         </div>
       </div>
       <Progress 

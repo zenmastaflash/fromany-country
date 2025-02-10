@@ -13,12 +13,19 @@ export interface ComplianceAlert {
 export async function generateComplianceAlerts(
   travels: Travel[], 
   documents: Document[],
-  userId: string
+  countryRules: CountryRules[],
+  userTaxStatuses: { [country: string]: UserTaxStatus }
 ): Promise<ComplianceAlert[]> {
   const alerts: ComplianceAlert[] = [];
   
   // Tax residency alerts
-  const taxRisks = await calculateTaxResidenceRiskFromTravels(travels, documents, userId);
+  const taxRisks = calculateTaxResidenceRiskFromTravels(
+    travels, 
+    documents, 
+    countryRules,
+    userTaxStatuses
+  );
+  
   taxRisks.forEach(risk => {
     if (risk.risk !== 'low') {
       alerts.push({

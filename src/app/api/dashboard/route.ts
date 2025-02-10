@@ -108,5 +108,6 @@ function getUrgencyFromDate(date: Date): 'high' | 'medium' | 'low' {
   const daysUntil = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   if (daysUntil <= 30) return 'high';
   if (daysUntil <= 90) return 'medium';
+  if (daysUntil < 183) return 'low';
   return 'low';
 }

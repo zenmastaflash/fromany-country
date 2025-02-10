@@ -29,6 +29,19 @@ export default function TaxLiabilityCard({
     return "bg-red-500";
   };
 
+  // Group and sort countries
+  const groupedStatuses = countryStatuses.reduce((acc, status) => {
+    const group = status.documentBased ? 'residence' : 'other';
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(status);
+    return acc;
+  }, {} as Record<string, CountryStatus[]>);
+
+  // Sort each group by days present
+  Object.values(groupedStatuses).forEach(group => 
+    group.sort((a, b) => b.daysPresent - a.daysPresent)
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -58,32 +71,60 @@ export default function TaxLiabilityCard({
           {/* Tax Liability Progress */}
           <div>
             <h3 className="text-lg font-semibold mb-2">Day Counts</h3>
-            <div className="space-y-3">
-              {countryStatuses.map((status) => (
-                <div key={status.country} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>{status.country}</span>
-                    <div className="flex items-center gap-2">
-                      {status.residencyStatus && (
-                        <span className={`px-2 py-0.5 text-xs rounded ${
-                          status.documentBased ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {status.residencyStatus.replace('_', ' ')}
-                        </span>
-                      )}
-                      <span>{status.daysPresent} / {status.threshold} days</span>
-                    </div>
-                  </div>
-                  <Progress 
-                    value={(status.daysPresent / status.threshold) * 100} 
-                    className={getThresholdColor(status.daysPresent, status.threshold)}
-                  />
+            {groupedStatuses.residence && (
+              <div className="mb-4">
+                <h4 className="text-sm font-medium mb-2 text-gray-600">Countries with Visa/Residency</h4>
+                <div className="space-y-3">
+                  {groupedStatuses.residence.map((status) => (
+                    <CountryStatusRow key={status.country} status={status} getThresholdColor={getThresholdColor} />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+            {groupedStatuses.other && (
+              <div>
+                <h4 className="text-sm font-medium mb-2 text-gray-600">Other Countries</h4>
+                <div className="space-y-3">
+                  {groupedStatuses.other.map((status) => (
+                    <CountryStatusRow key={status.country} status={status} getThresholdColor={getThresholdColor} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Extracted row component for cleaner code
+function CountryStatusRow({ 
+  status, 
+  getThresholdColor 
+}: { 
+  status: CountryStatus;
+  getThresholdColor: (days: number, threshold: number) => string;
+}) {
+  return (
+    <div key={status.country} className="space-y-1">
+      <div className="flex justify-between text-sm">
+        <span>{status.country}</span>
+        <div className="flex items-center gap-2">
+          {status.residencyStatus && (
+            <span className={`px-2 py-0.5 text-xs rounded ${
+              status.documentBased ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+            }`}>
+              {status.residencyStatus.replace('_', ' ')}
+            </span>
+          )}
+          <span>{status.daysPresent} / {status.threshold} days</span>
+        </div>
+      </div>
+      <Progress 
+        value={(status.daysPresent / status.threshold) * 100} 
+        className={getThresholdColor(status.daysPresent, status.threshold)}
+      />
+    </div>
   );
 }

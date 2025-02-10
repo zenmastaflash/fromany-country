@@ -73,7 +73,7 @@ export default function TaxLiabilityCard({
             <h3 className="text-lg font-semibold mb-2">Day Counts</h3>
             {groupedStatuses.residence && (
               <div className="mb-4">
-                <h4 className="text-sm font-medium mb-2 text-gray-600">Countries with Visa/Residency</h4>
+                <h4 className="text-link">Countries with Visa/Residency</h4>
                 <div className="space-y-3">
                   {groupedStatuses.residence.map((status) => (
                     <CountryStatusRow key={status.country} status={status} getThresholdColor={getThresholdColor} />
@@ -83,7 +83,7 @@ export default function TaxLiabilityCard({
             )}
             {groupedStatuses.other && (
               <div>
-                <h4 className="text-sm font-medium mb-2 text-gray-600">Other Countries</h4>
+                <h4 className="text-link">Other Countries</h4>
                 <div className="space-y-3">
                   {groupedStatuses.other.map((status) => (
                     <CountryStatusRow key={status.country} status={status} getThresholdColor={getThresholdColor} />

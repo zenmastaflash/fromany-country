@@ -16,6 +16,16 @@ export interface TaxRisk {
   validDocuments: Document[];
 }
 
+interface CountryRules {
+  country_code: string;
+  residency_threshold?: number | null;
+}
+
+interface UserTaxStatus {
+  required_presence?: number | null;
+  residency_status?: ResidencyStatus | null;
+}
+
 function travelToCountryStay(travel: Travel): CountryStay {
   return {
     startDate: new Date(travel.entry_date),
@@ -36,11 +46,12 @@ export function calculateDaysInCountry(stays: CountryStay[], country: string): n
   }, 0);
 }
 
-export async function calculateTaxResidenceRisk(
+export function calculateTaxResidenceRisk(
   stays: CountryStay[],
   documents: Document[],
-  userId: string
-): Promise<TaxRisk[]> {
+  countryRules: CountryRules[],
+  userTaxStatuses: { [country: string]: UserTaxStatus }
+): TaxRisk[] {
   const countryDays = new Map<string, number>();
   
   stays.forEach(stay => {
@@ -48,58 +59,40 @@ export async function calculateTaxResidenceRisk(
     countryDays.set(stay.country, (countryDays.get(stay.country) || 0) + days);
   });
 
-  const results = await Promise.all(
-    Array.from(countryDays.entries()).map(async ([country, days]) => {
-      let userTaxStatus = null;
-      try {
-        userTaxStatus = await prisma.user_tax_status.findFirst({
-          where: {
-            user_id: userId,
-            country_code: country,
-            tax_year: new Date().getFullYear()
-          }
-        });
-      } catch (error) {
-        console.error('Error fetching tax status:', error);
-      }
+  return Array.from(countryDays.entries()).map(([country, days]) => {
+    const rules = countryRules.find(r => r.country_code === country);
+    const userTaxStatus = userTaxStatuses[country];
+    
+    const validDocuments = documents.filter(doc => 
+      doc.issuingCountry === country && 
+      doc.expiryDate && new Date(doc.expiryDate) > new Date() &&
+      ['RESIDENCY_PERMIT', 'VISA', 'TOURIST_VISA'].includes(doc.type)
+    );
 
-      const rules = await prisma.country_tax_rules.findUnique({
-        where: { country_code: country }
-      });
-      
-      const validDocuments = documents.filter(doc => 
-        doc.issuingCountry === country && 
-        doc.expiryDate && new Date(doc.expiryDate) > new Date() &&
-        ['RESIDENCY_PERMIT', 'VISA', 'TOURIST_VISA'].includes(doc.type)
-      );
+    const status = determineResidencyStatus(validDocuments, days, rules?.residency_threshold ?? 183);
+    
+    let risk: 'low' | 'medium' | 'high';
+    const hasResidencyDoc = validDocuments.some(d => ['RESIDENCY_PERMIT', 'VISA'].includes(d.type));
+    
+    if (hasResidencyDoc && userTaxStatus?.required_presence) {
+      // For residency holders, risk is based on minimum required presence
+      const minDays = userTaxStatus.required_presence;
+      risk = days < minDays ? 'high' : days < (minDays * 1.1) ? 'medium' : 'low';
+    } else {
+      // For non-residents, risk is based on maximum allowed presence
+      const maxDays = rules?.residency_threshold ?? 183;
+      risk = days > maxDays ? 'high' : days > (maxDays * 0.8) ? 'medium' : 'low';
+    }
 
-      const status = determineResidencyStatus(validDocuments, days, rules?.residency_threshold ?? 183);
-      
-      let risk: 'low' | 'medium' | 'high';
-      const hasResidencyDoc = validDocuments.some(d => ['RESIDENCY_PERMIT', 'VISA'].includes(d.type));
-      
-      if (hasResidencyDoc && userTaxStatus?.required_presence) {
-        // For residency holders, risk is based on minimum required presence
-        const minDays = userTaxStatus.required_presence;
-        risk = days < minDays ? 'high' : days < (minDays * 1.1) ? 'medium' : 'low';
-      } else {
-        // For non-residents, risk is based on maximum allowed presence
-        const maxDays = rules?.residency_threshold ?? 183;
-        risk = days > maxDays ? 'high' : days > (maxDays * 0.8) ? 'medium' : 'low';
-      }
-
-      return {
-        country,
-        days,
-        risk,
-        status,
-        documentBased: validDocuments.length > 0,
-        validDocuments
-      };
-    })
-  );
-
-  return results;
+    return {
+      country,
+      days,
+      risk,
+      status,
+      documentBased: validDocuments.length > 0,
+      validDocuments
+    };
+  });
 }
 
 export async function calculateTaxResidenceRiskFromTravels(
@@ -107,8 +100,46 @@ export async function calculateTaxResidenceRiskFromTravels(
   documents: Document[],
   userId: string
 ): Promise<TaxRisk[]> {
+  // Fetch country rules
+  const allCountries = [...new Set(travels.map(t => t.country))];
+  const countryRules = await Promise.all(
+    allCountries.map(async country => {
+      const rules = await prisma.country_tax_rules.findUnique({
+        where: { country_code: country }
+      });
+      return {
+        country_code: country,
+        residency_threshold: rules?.residency_threshold
+      };
+    })
+  );
+
+  // Fetch user tax statuses
+  const userTaxStatuses: { [country: string]: UserTaxStatus } = {};
+  await Promise.all(
+    allCountries.map(async country => {
+      try {
+        const status = await prisma.user_tax_status.findFirst({
+          where: {
+            user_id: userId,
+            country_code: country,
+            tax_year: new Date().getFullYear()
+          }
+        });
+        if (status) {
+          userTaxStatuses[country] = {
+            required_presence: status.required_presence,
+            residency_status: status.residency_status
+          };
+        }
+      } catch (error) {
+        console.error('Error fetching tax status:', error);
+      }
+    })
+  );
+
   const stays = travels.map(travelToCountryStay);
-  return await calculateTaxResidenceRisk(stays, documents, userId);
+  return calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses);
 }
 
 export function calculateTaxYear(date: Date = new Date()): {

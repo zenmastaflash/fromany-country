@@ -123,7 +123,7 @@ function CountryStatusRow({
   return (
     <div key={status.country} className="space-y-1">
       <div className="flex justify-between text-sm">
-        <span>{status.country}</span>
+        <span className="text-link">{status.country}</span>
         <div className="flex flex-col items-end gap-1">
           {status.residencyStatus && (
             <span className={`px-2 py-0.5 text-xs rounded ${
@@ -132,8 +132,8 @@ function CountryStatusRow({
               {status.residencyStatus.replace('_', ' ')}
             </span>
           )}
-          <span className="text-sm font-medium">{status.daysPresent} days</span>
-          <span className="text-xs text-gray-500">{getTimeMessage()}</span>
+          <span className="font-medium">{status.daysPresent} days</span>
+          <span className="text-link text-xs">{getTimeMessage()}</span>
         </div>
       </div>
       <Progress 

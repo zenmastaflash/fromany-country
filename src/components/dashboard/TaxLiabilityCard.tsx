@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/progress';
 import { ResidencyStatus } from '@prisma/client';
+import { useState, useEffect } from 'react';
 
 interface CountryStatus {
   country: string;
@@ -22,6 +23,16 @@ export default function TaxLiabilityCard({
   };
   countryStatuses: CountryStatus[];
 }) {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
+
   const getThresholdColor = (days: number, threshold: number) => {
     const percentage = (days / threshold) * 100;
     if (percentage < 60) return "bg-green-500";
@@ -59,7 +70,13 @@ export default function TaxLiabilityCard({
               </div>
               <div>
                 <p className="text-link">Local Time</p>
-                <p className="font-medium">{currentLocation.timezone}</p>
+                <p className="font-medium">
+                  {currentTime.toLocaleTimeString('en-US', { 
+                    timeZone: currentLocation.timezone,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
               </div>
               <div className="col-span-2">
                 <p className="text-link">Present Since</p>
@@ -124,7 +141,7 @@ function CountryStatusRow({
     <div key={status.country} className="space-y-1">
       <div className="flex justify-between text-sm">
         <span className="text-link">{status.country}</span>
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-2">
           {status.residencyStatus && (
             <span className={`px-2 py-0.5 text-xs rounded ${
               status.documentBased ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
@@ -132,14 +149,18 @@ function CountryStatusRow({
               {status.residencyStatus.replace('_', ' ')}
             </span>
           )}
-          <span className="font-medium">{status.daysPresent} days</span>
-          <span className="text-link text-xs">{getTimeMessage()}</span>
         </div>
       </div>
-      <Progress 
-        value={(status.daysPresent / status.threshold) * 100} 
-        className={getThresholdColor(status.daysPresent, status.threshold)}
-      />
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs text-link">
+          <span>{getTimeMessage()}</span>
+          <span>{status.daysPresent} days</span>
+        </div>
+        <Progress 
+          value={(status.daysPresent / status.threshold) * 100} 
+          className={getThresholdColor(status.daysPresent, status.threshold)}
+        />
+      </div>
     </div>
   );
 }

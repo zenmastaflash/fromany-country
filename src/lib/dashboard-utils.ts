@@ -8,7 +8,7 @@ interface TaxStatus {
 
 interface CountryRule {
   country_code: string;
-  residency_threshold: number;
+  residency_threshold: number | null;
 }
 
 export interface ComplianceAlert {
@@ -31,7 +31,7 @@ export function generateComplianceAlerts(
   // 1. Tax Residency Risk Alerts
   Object.entries(taxStatusesByCountry).forEach(([country, status]) => {
     const countryRule = countryRules.find(r => r.country_code === country);
-    if (countryRule && status.required_presence > 0) {
+    if (countryRule && countryRule.residency_threshold && status.required_presence > 0) {
       const remainingDays = countryRule.residency_threshold - status.required_presence;
       if (remainingDays <= 30) {
         alerts.push({

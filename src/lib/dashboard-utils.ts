@@ -1,14 +1,17 @@
-import { Travel, Document, ResidencyStatus } from '@prisma/client';
+import { Travel, Document, ResidencyStatus, DocumentType } from '@prisma/client';
 
 interface TaxStatus {
   required_presence: number;
   residency_status?: ResidencyStatus;
   country_code: string;
+  document_id?: string;
 }
 
 interface CountryRule {
   country_code: string;
   residency_threshold: number | null;
+  tax_year_start?: string;
+  day_counting_method?: string;
 }
 
 export interface ComplianceAlert {
@@ -28,31 +31,22 @@ export function generateComplianceAlerts(
   const alerts: ComplianceAlert[] = [];
   const now = new Date();
 
-  // 1. Tax Residency Risk Alerts
-  Object.entries(taxStatusesByCountry).forEach(([country, status]) => {
-    const countryRule = countryRules.find(r => r.country_code === country);
-    if (countryRule && countryRule.residency_threshold && status.required_presence > 0) {
-      const remainingDays = countryRule.residency_threshold - status.required_presence;
-      if (remainingDays <= 30) {
-        alerts.push({
-          type: 'tax',
-          title: 'Tax Residency Risk',
-          description: `Approaching tax residency threshold in ${country}`,
-          severity: 'high',
-          actionRequired: 'Review tax implications and consider travel plans'
-        });
-      }
-    }
-  });
-
-  // 2. Visa/Stay Duration Alerts
+  // Process current travels
   travels.forEach(travel => {
-    // Check for stays exceeding 90 days without visa
-    if (!travel.visa_expiry) {
+    if (!travel.exit_date || travel.exit_date > now) {
+      // Check if there's a valid visa document for this stay
+      const visaDoc = documents.find(doc => 
+        (doc.type === DocumentType.VISA || doc.type === DocumentType.TOURIST_VISA) &&
+        doc.issuingCountry === travel.country &&
+        doc.status === 'active' &&
+        (!doc.expiryDate || doc.expiryDate > now)
+      );
+
       const entryDate = new Date(travel.entry_date);
       const daysInCountry = Math.ceil((now.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (daysInCountry >= 60) { // Alert at 60 days to give 30 days warning
+
+      // Alert if no visa and approaching 90 days
+      if (!visaDoc && daysInCountry >= 60) {
         alerts.push({
           type: 'visa',
           title: 'Visa-Free Stay Limit Approaching',
@@ -61,29 +55,53 @@ export function generateComplianceAlerts(
           actionRequired: 'Apply for visa or plan departure'
         });
       }
+
+      // Check residency status if one exists
+      const taxStatus = taxStatusesByCountry[travel.country];
+      if (taxStatus) {
+        const countryRule = countryRules.find(r => r.country_code === travel.country);
+        if (countryRule?.residency_threshold) {
+          const daysRemaining = countryRule.residency_threshold - taxStatus.required_presence;
+          if (daysRemaining <= 30) {
+            alerts.push({
+              type: 'tax',
+              title: 'Tax Residency Risk',
+              description: `${daysRemaining} days until potential tax residency in ${travel.country}`,
+              severity: daysRemaining <= 15 ? 'high' : 'medium',
+              actionRequired: 'Review tax implications or plan travel'
+            });
+          }
+        }
+      }
     }
   });
 
-  // 3. Missing Document Alerts
-  const requiredDocTypes = ['passport'];  // Base requirement
-  requiredDocTypes.forEach(type => {
-    const hasValidDoc = documents.some(doc => 
-      doc.type === type && 
-      (!doc.expiryDate || 
-       (doc.expiryDate > now && 
-        // Most countries require passport validity of at least 6 months
-        Math.ceil((doc.expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) > 180))
-    );
-    if (!hasValidDoc) {
+  // Check passport validity
+  const passport = documents.find(doc => 
+    doc.type === DocumentType.PASSPORT && 
+    doc.status === 'active'
+  );
+
+  if (!passport || !passport.expiryDate) {
+    alerts.push({
+      type: 'document',
+      title: 'Missing Passport Information',
+      description: 'No valid passport found in your documents',
+      severity: 'high',
+      actionRequired: 'Upload current passport details'
+    });
+  } else if (passport.expiryDate) {
+    const monthsToExpiry = Math.ceil((passport.expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30));
+    if (monthsToExpiry <= 6) {
       alerts.push({
         type: 'document',
-        title: 'Missing or Expiring Required Document',
-        description: `No valid ${type.replace('_', ' ')} with at least 6 months validity found`,
-        severity: 'high',
-        actionRequired: 'Upload or renew document'
+        title: 'Passport Expiring Soon',
+        description: `Your passport expires in ${monthsToExpiry} months. Many countries require 6 months validity.`,
+        severity: monthsToExpiry <= 3 ? 'high' : 'medium',
+        actionRequired: 'Begin passport renewal process'
       });
     }
-  });
+  }
 
   return alerts;
 }

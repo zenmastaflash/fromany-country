@@ -8,19 +8,44 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
-export async function GET() {
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const dateRange = searchParams.get('dateRange') || 'current_year';
+
   const session = await getServerSession(authConfig);
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    // Calculate date range
+    const now = new Date();
+    let startDate;
+    let endDate = now;
+
+    switch (dateRange) {
+      case 'last_year':
+        startDate = new Date(now.getFullYear() - 1, 0, 1);
+        endDate = new Date(now.getFullYear() - 1, 11, 31);
+        break;
+      case 'current_year':
+      default:
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+    }
+
     // Fetch all data in a single transaction with retry
     const [travels, documents, taxStatuses, countryRules] = await withRetry(() => 
       prisma.$transaction([
-        // Get user's travel records
+        // Get user's travel records within date range
         prisma.travel.findMany({
-          where: { user_id: session.user.id },
+          where: { 
+            user_id: session.user.id,
+            entry_date: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
           orderBy: { entry_date: 'desc' }
         }),
         // Get user's documents
@@ -31,7 +56,7 @@ export async function GET() {
         prisma.user_tax_status.findMany({
           where: { 
             user_id: session.user.id,
-            tax_year: new Date().getFullYear()
+            tax_year: startDate.getFullYear()
           },
           select: {
             country_code: true,
@@ -83,9 +108,9 @@ export async function GET() {
       .map(doc => ({
         type: doc.type.toLowerCase(),
         title: `${doc.title || 'Document'} Expiration`,
-        date: doc.expiryDate!.toISOString(),
+        date: doc.expiryDate && doc.expiryDate.toISOString(),
         description: doc.title || 'Document expiring',
-        urgency: getUrgencyFromDate(doc.expiryDate!)
+        urgency: doc.expiryDate && getUrgencyFromDate(doc.expiryDate)
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -112,7 +137,7 @@ export async function GET() {
   }
 }
 
-function getUrgencyFromDate(date: Date): 'high' | 'medium' | 'low' {
+function getUrgencyFromDate(date) {
   const daysUntil = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   if (daysUntil <= 30) return 'high';
   if (daysUntil <= 90) return 'medium';

@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ResidencyStatus } from '@prisma/client';
 import { useState, useEffect } from 'react';
 
@@ -24,6 +25,7 @@ export default function TaxLiabilityCard({
   countryStatuses: CountryStatus[];
 }) {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [dateRange, setDateRange] = useState('current_year');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -38,6 +40,17 @@ export default function TaxLiabilityCard({
     if (percentage < 60) return "bg-green-500";
     if (percentage < 80) return "bg-yellow-500";
     return "bg-red-500";
+  };
+
+  const handleDateRangeChange = async (value: string) => {
+    setDateRange(value);
+    // Fetch updated data for the selected date range
+    const response = await fetch(`/api/dashboard?dateRange=${value}`);
+    if (response.ok) {
+      const data = await response.json();
+      // Update the countryStatuses data
+      // You'll need to implement this part based on your state management approach
+    }
   };
 
   // Group and sort countries
@@ -56,7 +69,19 @@ export default function TaxLiabilityCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tax Liability Status</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle>Tax Liability Status</CardTitle>
+          <Select value={dateRange} onValueChange={handleDateRangeChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select date range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="current_year">Current Year</SelectItem>
+              <SelectItem value="last_year">Last Year</SelectItem>
+              <SelectItem value="rolling_year">Rolling 365 Days</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

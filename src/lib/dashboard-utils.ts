@@ -13,8 +13,8 @@ export function generateComplianceAlerts(
   documents: any[],
   countryRules: any[],
   taxStatusesByCountry: any
-) {
-  const alerts = [];
+): ComplianceAlert[] {
+  const alerts: ComplianceAlert[] = [];
   const now = new Date();
 
   // 1. Tax Residency Risk Alerts

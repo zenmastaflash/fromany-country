@@ -1,5 +1,16 @@
 import { Travel, Document, ResidencyStatus } from '@prisma/client';
 
+interface TaxStatus {
+  required_presence: number;
+  residency_status?: ResidencyStatus;
+  country_code: string;
+}
+
+interface CountryRule {
+  country_code: string;
+  residency_threshold: number;
+}
+
 export interface ComplianceAlert {
   type: 'tax' | 'visa' | 'entry' | 'exit' | 'document';
   title: string;
@@ -9,10 +20,10 @@ export interface ComplianceAlert {
 }
 
 export function generateComplianceAlerts(
-  travels: any[],
-  documents: any[],
-  countryRules: any[],
-  taxStatusesByCountry: any
+  travels: Travel[],
+  documents: Document[],
+  countryRules: CountryRule[],
+  taxStatusesByCountry: Record<string, TaxStatus>
 ): ComplianceAlert[] {
   const alerts: ComplianceAlert[] = [];
   const now = new Date();

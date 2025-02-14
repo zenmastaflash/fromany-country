@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/progress';
 import { ResidencyStatus } from '@prisma/client';
+import { useState, useEffect } from 'react';
 
 interface CountryStatus {
   country: string;
@@ -22,6 +23,16 @@ export default function TaxLiabilityCard({
   };
   countryStatuses: CountryStatus[];
 }) {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
+
   const getThresholdColor = (days: number, threshold: number) => {
     const percentage = (days / threshold) * 100;
     if (percentage < 60) return "bg-green-500";
@@ -59,7 +70,13 @@ export default function TaxLiabilityCard({
               </div>
               <div>
                 <p className="text-link">Local Time</p>
-                <p className="font-medium">{currentLocation.timezone}</p>
+                <p className="font-medium">
+                  {currentTime.toLocaleTimeString('en-US', { 
+                    timeZone: currentLocation.timezone,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
               </div>
               <div className="col-span-2">
                 <p className="text-link">Present Since</p>
@@ -106,10 +123,24 @@ function CountryStatusRow({
   status: CountryStatus;
   getThresholdColor: (days: number, threshold: number) => string;
 }) {
+  const needsMoreTime = status.documentBased && status.daysPresent < status.threshold;
+  
+  const getTimeMessage = () => {
+    if (!status.documentBased) {
+      return `${status.threshold - status.daysPresent} days until tax residency`;
+    }
+
+    if (status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT') {
+      return `${status.threshold - status.daysPresent} days needed to maintain residency`;
+    }
+
+    return `${status.threshold - status.daysPresent} days until limit`;
+  };
+
   return (
     <div key={status.country} className="space-y-1">
       <div className="flex justify-between text-sm">
-        <span>{status.country}</span>
+        <span className="text-link">{status.country}</span>
         <div className="flex items-center gap-2">
           {status.residencyStatus && (
             <span className={`px-2 py-0.5 text-xs rounded ${
@@ -118,13 +149,18 @@ function CountryStatusRow({
               {status.residencyStatus.replace('_', ' ')}
             </span>
           )}
-          <span>{status.daysPresent} / {status.threshold} days</span>
         </div>
       </div>
-      <Progress 
-        value={(status.daysPresent / status.threshold) * 100} 
-        className={getThresholdColor(status.daysPresent, status.threshold)}
-      />
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs text-link">
+          <span>{getTimeMessage()}</span>
+          <span>{status.daysPresent} days</span>
+        </div>
+        <Progress 
+          value={(status.daysPresent / status.threshold) * 100} 
+          className={getThresholdColor(status.daysPresent, status.threshold)}
+        />
+      </div>
     </div>
   );
 }

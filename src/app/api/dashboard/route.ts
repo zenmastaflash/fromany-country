@@ -70,16 +70,24 @@ export async function GET() {
       taxStatusesByCountry
     );
 
-    // Format critical dates
+    // Get date 6 months from now
+    const sixMonthsFromNow = new Date();
+    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+
+    // Format critical dates - filter to next 6 months and sort by date
     const criticalDates = documents
-      .filter(doc => doc.expiryDate)
+      .filter(doc => doc.expiryDate && 
+        doc.expiryDate > new Date() && 
+        doc.expiryDate <= sixMonthsFromNow
+      )
       .map(doc => ({
         type: doc.type.toLowerCase(),
         title: `${doc.title || 'Document'} Expiration`,
         date: doc.expiryDate!.toISOString(),
         description: doc.title || 'Document expiring',
         urgency: getUrgencyFromDate(doc.expiryDate!)
-      }));
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return NextResponse.json({
       currentLocation: currentLocation ? {

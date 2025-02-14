@@ -8,7 +8,7 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
-export async function GET(request) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const dateRange = searchParams.get('dateRange') || 'current_year';
 
@@ -137,7 +137,7 @@ export async function GET(request) {
   }
 }
 
-function getUrgencyFromDate(date) {
+function getUrgencyFromDate(date: Date): 'high' | 'medium' | 'low' {
   const daysUntil = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   if (daysUntil <= 30) return 'high';
   if (daysUntil <= 90) return 'medium';

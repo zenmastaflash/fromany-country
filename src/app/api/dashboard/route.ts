@@ -8,7 +8,7 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
-export async function GET(request) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const dateRange = searchParams.get('dateRange') || 'current_year';
 
@@ -20,13 +20,17 @@ export async function GET(request) {
   try {
     // Calculate date range
     const now = new Date();
-    let startDate;
+    let startDate: Date;
     let endDate = now;
 
     switch (dateRange) {
       case 'last_year':
         startDate = new Date(now.getFullYear() - 1, 0, 1);
         endDate = new Date(now.getFullYear() - 1, 11, 31);
+        break;
+      case 'rolling_year':
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
         break;
       case 'current_year':
       default:
@@ -37,7 +41,6 @@ export async function GET(request) {
     // Fetch all data in a single transaction with retry
     const [travels, documents, taxStatuses, countryRules] = await withRetry(() => 
       prisma.$transaction([
-        // Get user's travel records within date range
         prisma.travel.findMany({
           where: { 
             user_id: session.user.id,
@@ -48,15 +51,13 @@ export async function GET(request) {
           },
           orderBy: { entry_date: 'desc' }
         }),
-        // Get user's documents
         prisma.document.findMany({
           where: { userId: session.user.id }
         }),
-        // Get user's tax statuses
         prisma.user_tax_status.findMany({
           where: { 
             user_id: session.user.id,
-            tax_year: startDate.getFullYear()
+            tax_year: new Date().getFullYear()
           },
           select: {
             country_code: true,
@@ -64,7 +65,6 @@ export async function GET(request) {
             residency_status: true
           }
         }),
-        // Get all country rules
         prisma.country_tax_rules.findMany({
           select: {
             country_code: true,

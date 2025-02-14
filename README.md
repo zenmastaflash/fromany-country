@@ -103,7 +103,7 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Other tools
  
 - **Misc Features**
-  - Natural Languag Input
+  - Natural Language Input
   - i18n Internationalization
   - Tax Residency Simulator
   - Geoarbitrage Calculator

@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/progress';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ResidencyStatus } from '@prisma/client';
 import { useState, useEffect } from 'react';
 
@@ -30,7 +30,7 @@ export default function TaxLiabilityCard({
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // Update every minute
+    }, 60000);
 
     return () => clearInterval(timer);
   }, []);
@@ -45,11 +45,14 @@ export default function TaxLiabilityCard({
   const handleDateRangeChange = async (value: string) => {
     setDateRange(value);
     // Fetch updated data for the selected date range
-    const response = await fetch(`/api/dashboard?dateRange=${value}`);
-    if (response.ok) {
-      const data = await response.json();
-      // Update the countryStatuses data
-      // You'll need to implement this part based on your state management approach
+    try {
+      const response = await fetch(`/api/dashboard?dateRange=${value}`);
+      if (response.ok) {
+        const data = await response.json();
+        // You'll need to implement state update logic here
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
     }
   };
 
@@ -71,16 +74,13 @@ export default function TaxLiabilityCard({
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>Tax Liability Status</CardTitle>
-          <Select value={dateRange} onValueChange={handleDateRangeChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select date range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="current_year">Current Year</SelectItem>
-              <SelectItem value="last_year">Last Year</SelectItem>
-              <SelectItem value="rolling_year">Rolling 365 Days</SelectItem>
-            </SelectContent>
-          </Select>
+          <Tabs value={dateRange} onValueChange={handleDateRangeChange} className="w-[400px]">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="current_year">Current Year</TabsTrigger>
+              <TabsTrigger value="last_year">Last Year</TabsTrigger>
+              <TabsTrigger value="rolling_year">Rolling 365</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </CardHeader>
       <CardContent>

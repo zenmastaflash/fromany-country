@@ -15,7 +15,9 @@ interface CountryStatus {
 
 export default function TaxLiabilityCard({ 
   currentLocation,
-  countryStatuses 
+  countryStatuses,
+  dateRange,
+  onDateRangeChange
 }: { 
   currentLocation: { 
     country: string;
@@ -23,9 +25,10 @@ export default function TaxLiabilityCard({
     timezone: string;
   };
   countryStatuses: CountryStatus[];
+  dateRange: string;
+  onDateRangeChange: (range: string) => void;
 }) {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [dateRange, setDateRange] = useState('current_year');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,20 +43,6 @@ export default function TaxLiabilityCard({
     if (percentage < 60) return "bg-green-500";
     if (percentage < 80) return "bg-yellow-500";
     return "bg-red-500";
-  };
-
-  const handleDateRangeChange = async (value: string) => {
-    setDateRange(value);
-    // Fetch updated data for the selected date range
-    try {
-      const response = await fetch(`/api/dashboard?dateRange=${value}`);
-      if (response.ok) {
-        const data = await response.json();
-        // You'll need to implement state update logic here
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
   };
 
   // Group and sort countries
@@ -74,7 +63,7 @@ export default function TaxLiabilityCard({
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>Tax Liability Status</CardTitle>
-          <Tabs value={dateRange} onValueChange={handleDateRangeChange} className="w-[400px]">
+          <Tabs value={dateRange} onValueChange={onDateRangeChange} className="w-[400px]">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="current_year">Current Year</TabsTrigger>
               <TabsTrigger value="last_year">Last Year</TabsTrigger>

@@ -1,4 +1,6 @@
 // src/app/api/dashboard/route.ts
+import { ResidencyStatus } from '@prisma/client';
+import type { TaxRisk } from '@/lib/tax-utils';
 import { authConfig } from '@/lib/auth';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
@@ -8,12 +10,10 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
-interface DashboardStatus {
-  documentBased: boolean;
-  threshold: number;
-  daysPresent: number;
-  residencyStatus: ResidencyStatus | null;
-}
+type DashboardStatus = TaxRisk & {
+  timeMessage?: string;
+  thresholdColor?: string;
+};
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -117,7 +117,7 @@ export async function GET(request: Request) {
       travels, 
       documents, 
       countryRules,
-      taxStatusesByCountry
+      taxRisks
     );
 
     // Get date 6 months from now

@@ -1,18 +1,5 @@
 import { Travel, Document, ResidencyStatus, DocumentType } from '@prisma/client';
-
-interface TaxStatus {
-  required_presence: number;
-  residency_status?: ResidencyStatus;
-  country_code: string;
-  document_id?: string;
-}
-
-interface CountryRule {
-  country_code: string;
-  residency_threshold: number | null;
-  tax_year_start?: string;
-  day_counting_method?: string;
-}
+import { TaxRisk } from './tax-utils';
 
 export interface ComplianceAlert {
   type: 'tax' | 'visa' | 'entry' | 'exit' | 'document';
@@ -25,25 +12,29 @@ export interface ComplianceAlert {
 export function generateComplianceAlerts(
   travels: Travel[],
   documents: Document[],
-  countryRules: CountryRule[],
-  taxStatusesByCountry: Record<string, TaxStatus>
+  countryRules: { country_code: string; residency_threshold: number | null }[],
+  taxRisks: TaxRisk[]
 ): ComplianceAlert[] {
   const alerts: ComplianceAlert[] = [];
   const now = new Date();
 
-  // Check residency achievements
-  Object.entries(taxStatusesByCountry).forEach(([country, status]) => {
-    const countryRule = countryRules.find(r => r.country_code === country);
-    if (countryRule?.residency_threshold && status.residency_status) {
-      if (status.required_presence >= countryRule.residency_threshold) {
-        alerts.push({
-          type: 'tax',
-          title: 'Residency Requirement Met',
-          description: `You have met the minimum residency requirement for ${country} (${status.required_presence} days)`,
-          severity: 'low',
-          actionRequired: null
-        });
-      }
+  // Use taxRisks for residency alerts
+  taxRisks.forEach(risk => {
+    if (risk.documentBased && risk.days >= (risk.threshold ?? 183)) {
+      alerts.push({
+        type: 'tax',
+        title: 'Residency Requirement Met',
+        description: `You have met the minimum residency requirement for ${risk.country} (${risk.days} days)`,
+        severity: 'low'
+      });
+    } else if (risk.daysNeeded && risk.daysNeeded <= 30) {
+      alerts.push({
+        type: 'tax',
+        title: 'Tax Residency Risk',
+        description: `${risk.daysNeeded} days until potential tax residency in ${risk.country}`,
+        severity: risk.daysNeeded <= 15 ? 'high' : 'medium',
+        actionRequired: 'Review tax implications or plan travel'
+      });
     }
   });
 
@@ -70,24 +61,6 @@ export function generateComplianceAlerts(
           severity: daysInCountry >= 80 ? 'high' : 'medium',
           actionRequired: 'Apply for visa or plan departure'
         });
-      }
-
-      // Check residency status if one exists
-      const taxStatus = taxStatusesByCountry[travel.country];
-      if (taxStatus) {
-        const countryRule = countryRules.find(r => r.country_code === travel.country);
-        if (countryRule?.residency_threshold) {
-          const daysRemaining = countryRule.residency_threshold - taxStatus.required_presence;
-          if (daysRemaining <= 30) {
-            alerts.push({
-              type: 'tax',
-              title: 'Tax Residency Risk',
-              description: `${daysRemaining} days until potential tax residency in ${travel.country}`,
-              severity: daysRemaining <= 15 ? 'high' : 'medium',
-              actionRequired: 'Review tax implications or plan travel'
-            });
-          }
-        }
       }
     }
   });

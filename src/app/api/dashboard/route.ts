@@ -126,16 +126,17 @@ export async function GET(request: Request) {
 
     // Format critical dates - filter to next 6 months and sort by date
     const criticalDates = documents
-      .filter(doc => doc.expiryDate && 
-        doc.expiryDate > new Date() && 
-        doc.expiryDate <= sixMonthsFromNow
-      )
+      .filter(doc => {
+        if (!doc.expiryDate) return false;
+        const now = new Date();
+        return doc.expiryDate > now && doc.expiryDate <= sixMonthsFromNow;
+      })
       .map(doc => ({
         type: doc.type.toLowerCase(),
         title: `${doc.title || 'Document'} Expiration`,
-        date: doc.expiryDate && doc.expiryDate.toISOString(),
+        date: doc.expiryDate!.toISOString(), // Non-null assertion is safe here due to filter
         description: doc.title || 'Document expiring',
-        urgency: getUrgencyFromDate(doc.expiryDate)
+        urgency: getUrgencyFromDate(doc.expiryDate!) // Non-null assertion is safe here due to filter
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 

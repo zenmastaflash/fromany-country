@@ -45,10 +45,24 @@ export async function GET(request: Request) {
         prisma.travel.findMany({
           where: { 
             user_id: session.user.id,
-            entry_date: {
-              gte: startDate,
-              lte: endDate
-            }
+            OR: [
+              // Entries within the date range
+              {
+                entry_date: {
+                  gte: startDate,
+                  lte: endDate
+                }
+              },
+              // Entries that started before but extend into the range
+              {
+                entry_date: {
+                  lt: startDate
+                },
+                exit_date: {
+                  gte: startDate
+                }
+              }
+            ]
           },
           orderBy: { entry_date: 'desc' }
         }),
@@ -118,6 +132,29 @@ export async function GET(request: Request) {
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+    const getTimeMessage = (status) => {
+      if (!status.documentBased) {
+        return `${status.threshold - status.daysPresent} days until tax residency`;
+      }
+
+      if (status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT') {
+        if (status.daysPresent >= status.threshold) {
+          return `Minimum residency requirement met (${status.daysPresent} days)`;
+        }
+        return `${status.threshold - status.daysPresent} days needed to maintain residency`;
+      }
+
+      return `${status.threshold - status.daysPresent} days until limit`;
+    };
+
+    const getThresholdColor = (days, threshold) => {
+      const percentage = (days / threshold) * 100;
+      if (percentage >= 100) return "bg-blue-500"; // Achievement color
+      if (percentage < 60) return "bg-green-500";
+      if (percentage < 80) return "bg-yellow-500";
+      return "bg-red-500";
+    };
+
     return NextResponse.json({
       currentLocation: currentLocation ? {
         country: currentLocation.country,
@@ -130,7 +167,9 @@ export async function GET(request: Request) {
         threshold: countryRules.find(r => r.country_code === risk.country)?.residency_threshold ?? 183,
         lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
         residencyStatus: risk.status,
-        documentBased: risk.documentBased
+        documentBased: risk.documentBased,
+        timeMessage: getTimeMessage(risk),
+        thresholdColor: getThresholdColor(risk.days, risk.threshold)
       })),
       criticalDates,
       complianceAlerts

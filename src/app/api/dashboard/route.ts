@@ -1,4 +1,4 @@
-// src/app/api/dashboard/route.ts
+// src/app/api/dashboard/route.js
 import { authConfig } from '@/lib/auth';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
@@ -8,7 +8,7 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
-export async function GET(request: Request) {
+export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const dateRange = searchParams.get('dateRange') || 'current_year';
 
@@ -126,9 +126,9 @@ export async function GET(request: Request) {
       .map(doc => ({
         type: doc.type.toLowerCase(),
         title: `${doc.title || 'Document'} Expiration`,
-        date: doc.expiryDate!.toISOString(),
+        date: doc.expiryDate && doc.expiryDate.toISOString(),
         description: doc.title || 'Document expiring',
-        urgency: getUrgencyFromDate(doc.expiryDate!)
+        urgency: getUrgencyFromDate(doc.expiryDate)
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -180,7 +180,7 @@ export async function GET(request: Request) {
   }
 }
 
-function getUrgencyFromDate(date: Date): 'high' | 'medium' | 'low' {
+function getUrgencyFromDate(date) {
   const daysUntil = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   if (daysUntil <= 30) return 'high';
   if (daysUntil <= 90) return 'medium';

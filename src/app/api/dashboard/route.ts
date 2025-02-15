@@ -1,4 +1,4 @@
-// src/app/api/dashboard/route.js
+// src/app/api/dashboard/route.ts
 import { authConfig } from '@/lib/auth';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
@@ -8,7 +8,14 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
-export async function GET(request) {
+interface DashboardStatus {
+  documentBased: boolean;
+  threshold: number;
+  daysPresent: number;
+  residencyStatus: ResidencyStatus | null;
+}
+
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const dateRange = searchParams.get('dateRange') || 'current_year';
 
@@ -132,7 +139,7 @@ export async function GET(request) {
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    const getTimeMessage = (status) => {
+    const getTimeMessage = (status: DashboardStatus) => {
       if (!status.documentBased) {
         return `${status.threshold - status.daysPresent} days until tax residency`;
       }
@@ -147,7 +154,7 @@ export async function GET(request) {
       return `${status.threshold - status.daysPresent} days until limit`;
     };
 
-    const getThresholdColor = (days, threshold) => {
+    const getThresholdColor = (days: number, threshold: number) => {
       const percentage = (days / threshold) * 100;
       if (percentage >= 100) return "bg-blue-500"; // Achievement color
       if (percentage < 60) return "bg-green-500";
@@ -180,7 +187,7 @@ export async function GET(request) {
   }
 }
 
-function getUrgencyFromDate(date) {
+function getUrgencyFromDate(date: Date): 'high' | 'medium' | 'low' {
   const daysUntil = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   if (daysUntil <= 30) return 'high';
   if (daysUntil <= 90) return 'medium';

@@ -10,6 +10,86 @@ interface ComplianceAlert {
   actionRequired?: string;
 }
 
+export function generateComplianceAlerts(
+  travels: Travel[],
+  documents: Document[],
+  countryRules: CountryRule[],
+  taxStatusesByCountry: Record<string, TaxStatus>
+): ComplianceAlert[] {
+  const alerts: ComplianceAlert[] = [];
+  const now = new Date();
+
+  // Process residency statuses and requirements
+  Object.entries(taxStatusesByCountry).forEach(([country, status]) => {
+    const countryRule = countryRules.find(r => r.country_code === country);
+    if (countryRule?.residency_threshold) {
+      const residencyDoc = documents.find(doc => 
+        doc.type === DocumentType.RESIDENCY_PERMIT &&
+        doc.issuingCountry === country &&
+        doc.status === 'active'
+      );
+
+      if (residencyDoc) {
+        // For residents, show achievement or remaining days needed
+        if (status.required_presence >= countryRule.residency_threshold) {
+          alerts.push({
+            type: 'tax',
+            title: 'Residency Achievement',
+            description: `You have met the ${countryRule.residency_threshold} day requirement for ${country} with ${status.required_presence} days present`,
+            severity: 'low'
+          });
+        } else {
+          const daysNeeded = countryRule.residency_threshold - status.required_presence;
+          alerts.push({
+            type: 'tax',
+            title: `Residency Days Needed - ${country}`,
+            description: `${daysNeeded} more days needed to maintain residency status`,
+            severity: daysNeeded <= 30 ? 'high' : 'medium',
+            actionRequired: 'Plan travel to meet residency requirements'
+          });
+        }
+      } else {
+        // For non-residents, warn about approaching tax residency
+        if (status.required_presence >= countryRule.residency_threshold - 30) {
+          alerts.push({
+            type: 'tax',
+            title: 'Tax Residency Risk',
+            description: `Approaching tax residency threshold in ${country} (${status.required_presence}/${countryRule.residency_threshold} days)`,
+            severity: 'high',
+            actionRequired: 'Review tax implications of continued stay'
+          });
+        }
+      }
+    }
+  });
+
+  // Check current travels for visa/stay duration
+  travels.forEach(travel => {
+    if (!travel.exit_date || travel.exit_date > now) {
+      const visaDoc = documents.find(doc => 
+        (doc.type === DocumentType.VISA || doc.type === DocumentType.TOURIST_VISA) &&
+        doc.issuingCountry === travel.country &&
+        doc.status === 'active'
+      );
+
+      const entryDate = new Date(travel.entry_date);
+      const daysInCountry = Math.ceil((now.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (!visaDoc && daysInCountry >= 60) {
+        alerts.push({
+          type: 'visa',
+          title: `Stay Duration Alert - ${travel.country}`,
+          description: `You've been in ${travel.country} for ${daysInCountry} days. Most countries limit visa-free stays to 90 days.`,
+          severity: daysInCountry >= 80 ? 'high' : 'medium',
+          actionRequired: 'Apply for visa or plan departure'
+        });
+      }
+    }
+  });
+
+  return alerts;
+}
+
 export default function ComplianceAlertsCard({ alerts }: { alerts: ComplianceAlert[] }) {
   const getSeverityStyles = (severity: string) => {
     switch (severity) {

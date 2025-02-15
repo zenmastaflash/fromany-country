@@ -45,12 +45,23 @@ function travelToCountryStay(travel: Travel): CountryStay {
   };
 }
 
-export function calculateDaysInCountry(stays: CountryStay[], country: string): number {
+export function calculateDaysInCountry(
+  stays: CountryStay[], 
+  country: string,
+  startDate?: Date,
+  endDate?: Date
+): number {
   return stays.reduce((total, stay) => {
     if (stay.country !== country) return total;
     
-    const start = new Date(stay.startDate);
-    const end = stay.endDate ? new Date(stay.endDate) : new Date();
+    let start = new Date(stay.startDate);
+    let end = stay.endDate ? new Date(stay.endDate) : new Date();
+    
+    // Adjust dates to fit within range if provided
+    if (startDate && start < startDate) start = startDate;
+    if (endDate && end > endDate) end = endDate;
+    if (start > end) return total;
+    
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     
     return total + days;
@@ -61,12 +72,14 @@ export function calculateTaxResidenceRisk(
   stays: CountryStay[],
   documents: Document[],
   countryRules: CountryRules[],
-  userTaxStatuses: { [country: string]: UserTaxStatus }
+  userTaxStatuses: { [country: string]: UserTaxStatus },
+  startDate?: Date,
+  endDate?: Date
 ): TaxRisk[] {
   const countryDays = new Map<string, number>();
   
   stays.forEach(stay => {
-    const days = calculateDaysInCountry([stay], stay.country);
+    const days = calculateDaysInCountry([stay], stay.country, startDate, endDate);
     countryDays.set(stay.country, (countryDays.get(stay.country) || 0) + days);
   });
 

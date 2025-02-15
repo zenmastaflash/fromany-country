@@ -31,6 +31,22 @@ export function generateComplianceAlerts(
   const alerts: ComplianceAlert[] = [];
   const now = new Date();
 
+  // Check residency achievements
+  Object.entries(taxStatusesByCountry).forEach(([country, status]) => {
+    const countryRule = countryRules.find(r => r.country_code === country);
+    if (countryRule?.residency_threshold && status.residency_status) {
+      if (status.required_presence >= countryRule.residency_threshold) {
+        alerts.push({
+          type: 'tax',
+          title: 'Residency Requirement Met',
+          description: `You have met the minimum residency requirement for ${country} (${status.required_presence} days)`,
+          severity: 'low',
+          actionRequired: null
+        });
+      }
+    }
+  });
+
   // Process current travels
   travels.forEach(travel => {
     if (!travel.exit_date || travel.exit_date > now) {

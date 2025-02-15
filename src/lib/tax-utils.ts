@@ -16,6 +16,7 @@ export interface TaxRisk {
   validDocuments: Document[];
   daysNeeded?: number;
   daysRemaining?: number;
+  threshold?: number;
 }
 
 interface CountryRules {
@@ -93,7 +94,8 @@ export function calculateTaxResidenceRisk(
       ['RESIDENCY_PERMIT', 'VISA', 'TOURIST_VISA'].includes(doc.type)
     );
 
-    const status = determineResidencyStatus(validDocuments, days, rules?.residency_threshold ?? 183);
+    const threshold = rules?.residency_threshold ?? 183;
+    const status = determineResidencyStatus(validDocuments, days, threshold);
     
     let risk: 'low' | 'medium' | 'high';
     const hasResidencyDoc = validDocuments.some(d => ['RESIDENCY_PERMIT', 'VISA'].includes(d.type));
@@ -113,11 +115,12 @@ export function calculateTaxResidenceRisk(
         documentBased: validDocuments.length > 0,
         validDocuments,
         daysNeeded: req.daysNeeded,
-        daysRemaining: req.daysRemaining
+        daysRemaining: req.daysRemaining,
+        threshold
       };
     } else {
       // For non-residents, risk is based on maximum allowed presence
-      const maxDays = rules?.residency_threshold ?? 183;
+      const maxDays = threshold;
       risk = days > maxDays ? 'high' : days > (maxDays * 0.8) ? 'medium' : 'low';
     }
 
@@ -127,7 +130,8 @@ export function calculateTaxResidenceRisk(
       risk,
       status,
       documentBased: validDocuments.length > 0,
-      validDocuments
+      validDocuments,
+      threshold
     };
   });
 }

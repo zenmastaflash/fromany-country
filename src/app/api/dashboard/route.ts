@@ -26,7 +26,11 @@ export async function GET(request: Request) {
     switch (dateRange) {
       case 'last_year':
         startDate = new Date(now.getFullYear() - 1, 0, 1);
-        endDate = new Date(now.getFullYear() - 1, 11, 31);
+        endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+        break;
+      case 'rolling_year':
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
         break;
       case 'current_year':
       default:
@@ -56,7 +60,7 @@ export async function GET(request: Request) {
         prisma.user_tax_status.findMany({
           where: { 
             user_id: session.user.id,
-            tax_year: startDate.getFullYear()
+            tax_year: dateRange === 'last_year' ? startDate.getFullYear() : now.getFullYear()
           },
           select: {
             country_code: true,

@@ -13,6 +13,8 @@ import { withRetry } from '@/lib/auth-utils';
 type DashboardStatus = TaxRisk & {
   timeMessage?: string;
   thresholdColor?: string;
+  threshold: number;
+  daysPresent: number;
 };
 
 export async function GET(request: Request) {
@@ -142,17 +144,17 @@ export async function GET(request: Request) {
 
     const getTimeMessage = (status: DashboardStatus) => {
       if (!status.documentBased) {
-        return `${status.threshold - status.daysPresent} days until tax residency`;
+        return `${Math.max(0, status.threshold - status.daysPresent)} days until tax residency`;
       }
 
       if (status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT') {
         if (status.daysPresent >= status.threshold) {
           return `Minimum residency requirement met (${status.daysPresent} days)`;
         }
-        return `${status.threshold - status.daysPresent} days needed to maintain residency`;
+        return `${Math.max(0, status.threshold - status.daysPresent)} days needed to maintain residency`;
       }
 
-      return `${status.threshold - status.daysPresent} days until limit`;
+      return `${Math.max(0, status.threshold - status.daysPresent)} days until limit`;
     };
 
     const getThresholdColor = (days: number, threshold: number) => {
@@ -169,16 +171,19 @@ export async function GET(request: Request) {
         entryDate: currentLocation.entry_date.toISOString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       } : null,
-      countryStatuses: taxRisks.map(risk => ({
-        country: risk.country,
-        daysPresent: risk.days,
-        threshold: countryRules.find(r => r.country_code === risk.country)?.residency_threshold ?? 183,
-        lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
-        residencyStatus: risk.status,
-        documentBased: risk.documentBased,
-        timeMessage: getTimeMessage(risk),
-        thresholdColor: getThresholdColor(risk.days, risk.threshold)
-      })),
+      countryStatuses: taxRisks.map(risk => {
+        const threshold = countryRules.find(r => r.country_code === risk.country)?.residency_threshold ?? 183;
+        return {
+          country: risk.country,
+          daysPresent: risk.days,
+          threshold,
+          lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
+          residencyStatus: risk.status,
+          documentBased: risk.documentBased,
+          timeMessage: getTimeMessage({ ...risk, threshold, daysPresent: risk.days }),
+          thresholdColor: getThresholdColor(risk.days, threshold)
+        };
+      }),
       criticalDates,
       complianceAlerts
     });

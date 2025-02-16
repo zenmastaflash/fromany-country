@@ -38,11 +38,19 @@ export default function TaxLiabilityCard({
     return () => clearInterval(timer);
   }, []);
 
-  const getThresholdColor = (days: number, threshold: number) => {
+  const getThresholdColor = (days: number, threshold: number, status: CountryStatus) => {
     const percentage = (days / threshold) * 100;
-    if (percentage < 60) return "bg-green-500";
-    if (percentage < 80) return "bg-yellow-500";
-    return "bg-red-500";
+    
+    // For residency permits and working visas
+    if (status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT') {
+      return days >= threshold ? "bg-blue-500" : "bg-red-500";  // Blue when met, red until then
+    }
+    
+    // For tax residency warnings
+    if (percentage >= 100) return "bg-red-500";  // Over limit
+    if (percentage < 60) return "bg-green-500";  // Safe
+    if (percentage < 80) return "bg-yellow-500";  // Getting close
+    return "bg-red-500";  // Very close
   };
 
   // Group and sort countries
@@ -135,7 +143,7 @@ function CountryStatusRow({
   getThresholdColor 
 }: { 
   status: CountryStatus;
-  getThresholdColor: (days: number, threshold: number) => string;
+  getThresholdColor: (days: number, threshold: number, status: CountryStatus) => string;
 }) {
   const needsMoreTime = status.documentBased && status.daysPresent < status.threshold;
   
@@ -145,6 +153,9 @@ function CountryStatusRow({
     }
 
     if (status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT') {
+      if (status.daysPresent >= status.threshold) {
+        return `Minimum residency requirement met (${status.threshold} days)`;
+      }
       return `${status.threshold - status.daysPresent} days needed to maintain residency`;
     }
 
@@ -171,9 +182,12 @@ function CountryStatusRow({
           <span>{status.daysPresent} days</span>
         </div>
         <Progress 
-  value={status.progressValue} 
-  className={getThresholdColor(status.daysPresent, status.threshold)}
-/>
+          value={status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT'
+            ? Math.min((status.daysPresent / status.threshold) * 100, 100)
+            : (status.daysPresent / status.threshold) * 100
+          }
+          className={getThresholdColor(status.daysPresent, status.threshold, status)}
+        />
       </div>
     </div>
   );

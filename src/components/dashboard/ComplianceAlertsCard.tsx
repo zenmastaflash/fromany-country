@@ -1,14 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Shield, AlertTriangle } from 'lucide-react';
-
-interface ComplianceAlert {
-  type: 'tax' | 'visa' | 'entry' | 'exit';
-  title: string;
-  description: string;
-  severity: 'high' | 'medium' | 'low';
-  actionRequired?: string;
-}
+import { ComplianceAlert } from '@/lib/dashboard-utils';
 
 export default function ComplianceAlertsCard({ alerts }: { alerts: ComplianceAlert[] }) {
   const getSeverityStyles = (severity: string) => {

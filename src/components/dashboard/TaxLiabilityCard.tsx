@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ResidencyStatus } from '@prisma/client';
 import { useState, useEffect } from 'react';
 
@@ -14,7 +15,9 @@ interface CountryStatus {
 
 export default function TaxLiabilityCard({ 
   currentLocation,
-  countryStatuses 
+  countryStatuses,
+  dateRange,
+  onDateRangeChange
 }: { 
   currentLocation: { 
     country: string;
@@ -22,13 +25,15 @@ export default function TaxLiabilityCard({
     timezone: string;
   };
   countryStatuses: CountryStatus[];
+  dateRange: string;
+  onDateRangeChange: (range: string) => void;
 }) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // Update every minute
+    }, 60000);
 
     return () => clearInterval(timer);
   }, []);
@@ -56,7 +61,16 @@ export default function TaxLiabilityCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tax Liability Status</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle>Tax Liability Status</CardTitle>
+          <Tabs value={dateRange} onValueChange={onDateRangeChange} className="w-[400px]">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="current_year">Current Year</TabsTrigger>
+              <TabsTrigger value="last_year">Last Year</TabsTrigger>
+              <TabsTrigger value="rolling_year">Rolling 365</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

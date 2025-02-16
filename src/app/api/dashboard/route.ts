@@ -1,4 +1,6 @@
 // src/app/api/dashboard/route.ts
+import { ResidencyStatus } from '@prisma/client';
+import type { TaxRisk } from '@/lib/tax-utils';
 import { authConfig } from '@/lib/auth';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
@@ -8,19 +10,62 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const dateRange = searchParams.get('dateRange') || 'current_year';
+
   const session = await getServerSession(authConfig);
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    // Calculate date range
+    const now = new Date();
+    let startDate;
+    let endDate = now;
+
+    switch (dateRange) {
+      case 'last_year':
+        startDate = new Date(now.getFullYear() - 1, 0, 1);
+        endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+        break;
+      case 'rolling_year':
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      case 'current_year':
+      default:
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+    }
+
     // Fetch all data in a single transaction with retry
     const [travels, documents, taxStatuses, countryRules] = await withRetry(() => 
       prisma.$transaction([
-        // Get user's travel records
+        // Get user's travel records within date range
         prisma.travel.findMany({
-          where: { user_id: session.user.id },
+          where: { 
+            user_id: session.user.id,
+            OR: [
+              // Entries within the date range
+              {
+                entry_date: {
+                  gte: startDate,
+                  lte: endDate
+                }
+              },
+              // Entries that started before but extend into the range
+              {
+                entry_date: {
+                  lt: startDate
+                },
+                exit_date: {
+                  gte: startDate
+                }
+              }
+            ]
+          },
           orderBy: { entry_date: 'desc' }
         }),
         // Get user's documents
@@ -31,7 +76,7 @@ export async function GET() {
         prisma.user_tax_status.findMany({
           where: { 
             user_id: session.user.id,
-            tax_year: new Date().getFullYear()
+            tax_year: dateRange === 'last_year' ? startDate.getFullYear() : now.getFullYear()
           },
           select: {
             country_code: true,
@@ -67,19 +112,51 @@ export async function GET() {
       travels, 
       documents, 
       countryRules,
-      taxStatusesByCountry
+      taxRisks
     );
 
-    // Format critical dates
+    // Get date 6 months from now
+    const sixMonthsFromNow = new Date();
+    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+
+    // Format critical dates - filter to next 6 months and sort by date
     const criticalDates = documents
-      .filter(doc => doc.expiryDate)
+      .filter(doc => {
+        if (!doc.expiryDate) return false;
+        const now = new Date();
+        return doc.expiryDate > now && doc.expiryDate <= sixMonthsFromNow;
+      })
       .map(doc => ({
         type: doc.type.toLowerCase(),
         title: `${doc.title || 'Document'} Expiration`,
-        date: doc.expiryDate!.toISOString(),
+        date: doc.expiryDate!.toISOString(), // Non-null assertion is safe here due to filter
         description: doc.title || 'Document expiring',
-        urgency: getUrgencyFromDate(doc.expiryDate!)
-      }));
+        urgency: getUrgencyFromDate(doc.expiryDate!) // Non-null assertion is safe here due to filter
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const getTimeMessage = (risk: TaxRisk & { threshold: number }) => {
+      if (!risk.documentBased) {
+        return `${Math.max(0, risk.threshold - risk.days)} days until tax residency`;
+      }
+
+      if (risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT') {
+        if (risk.days >= risk.threshold) {
+          return `Minimum residency requirement met (${risk.days} days)`;
+        }
+        return `${Math.max(0, risk.threshold - risk.days)} days needed to maintain residency`;
+      }
+
+      return `${Math.max(0, risk.threshold - risk.days)} days until limit`;
+    };
+
+    const getThresholdColor = (days: number, threshold: number) => {
+      const percentage = (days / threshold) * 100;
+      if (percentage >= 100) return "bg-blue-500"; // Achievement color
+      if (percentage < 60) return "bg-green-500";
+      if (percentage < 80) return "bg-yellow-500";
+      return "bg-red-500";
+    };
 
     return NextResponse.json({
       currentLocation: currentLocation ? {
@@ -87,14 +164,22 @@ export async function GET() {
         entryDate: currentLocation.entry_date.toISOString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       } : null,
-      countryStatuses: taxRisks.map(risk => ({
-        country: risk.country,
-        daysPresent: risk.days,
-        threshold: countryRules.find(r => r.country_code === risk.country)?.residency_threshold ?? 183,
-        lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
-        residencyStatus: risk.status,
-        documentBased: risk.documentBased
-      })),
+      countryStatuses: taxRisks.map(risk => {
+        const threshold = countryRules.find(r => r.country_code === risk.country)?.residency_threshold ?? 183;
+        return {
+          country: risk.country,
+          daysPresent: risk.days,
+          threshold,
+          lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
+          residencyStatus: risk.status,
+          documentBased: risk.documentBased,
+          timeMessage: getTimeMessage({ 
+            ...risk, 
+            threshold: threshold 
+          }),
+          thresholdColor: getThresholdColor(risk.days, threshold)
+        };
+      }),
       criticalDates,
       complianceAlerts
     });

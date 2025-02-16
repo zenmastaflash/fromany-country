@@ -9,14 +9,15 @@ export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState('current_year');
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    fetchDashboardData(dateRange);
+  }, [dateRange]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (range: string) => {
     try {
-      const response = await fetch('/api/dashboard');
+      const response = await fetch(`/api/dashboard?dateRange=${range}`);
       if (!response.ok) throw new Error('Failed to fetch dashboard data');
       const dashboardData = await response.json();
       setData(dashboardData);
@@ -47,6 +48,8 @@ export default function DashboardPage() {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
           }}
           countryStatuses={data.countryStatuses}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
         />
         <CriticalDatesCard dates={data.criticalDates} />
         <div className="lg:col-span-2">

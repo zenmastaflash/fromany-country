@@ -16,6 +16,7 @@ export interface TaxRisk {
   validDocuments: Document[];
   daysNeeded?: number;
   daysRemaining?: number;
+  threshold?: number;
 }
 
 interface CountryRules {
@@ -45,12 +46,23 @@ function travelToCountryStay(travel: Travel): CountryStay {
   };
 }
 
-export function calculateDaysInCountry(stays: CountryStay[], country: string): number {
+export function calculateDaysInCountry(
+  stays: CountryStay[], 
+  country: string,
+  startDate?: Date,
+  endDate?: Date
+): number {
   return stays.reduce((total, stay) => {
     if (stay.country !== country) return total;
     
-    const start = new Date(stay.startDate);
-    const end = stay.endDate ? new Date(stay.endDate) : new Date();
+    let start = new Date(stay.startDate);
+    let end = stay.endDate ? new Date(stay.endDate) : new Date();
+    
+    // Adjust dates to fit within range if provided
+    if (startDate && start < startDate) start = startDate;
+    if (endDate && end > endDate) end = endDate;
+    if (start > end) return total;
+    
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     
     return total + days;
@@ -61,12 +73,14 @@ export function calculateTaxResidenceRisk(
   stays: CountryStay[],
   documents: Document[],
   countryRules: CountryRules[],
-  userTaxStatuses: { [country: string]: UserTaxStatus }
+  userTaxStatuses: { [country: string]: UserTaxStatus },
+  startDate?: Date,
+  endDate?: Date
 ): TaxRisk[] {
   const countryDays = new Map<string, number>();
   
   stays.forEach(stay => {
-    const days = calculateDaysInCountry([stay], stay.country);
+    const days = calculateDaysInCountry([stay], stay.country, startDate, endDate);
     countryDays.set(stay.country, (countryDays.get(stay.country) || 0) + days);
   });
 
@@ -80,7 +94,8 @@ export function calculateTaxResidenceRisk(
       ['RESIDENCY_PERMIT', 'VISA', 'TOURIST_VISA'].includes(doc.type)
     );
 
-    const status = determineResidencyStatus(validDocuments, days, rules?.residency_threshold ?? 183);
+    const threshold = rules?.residency_threshold ?? 183;
+    const status = determineResidencyStatus(validDocuments, days, threshold);
     
     let risk: 'low' | 'medium' | 'high';
     const hasResidencyDoc = validDocuments.some(d => ['RESIDENCY_PERMIT', 'VISA'].includes(d.type));
@@ -100,11 +115,12 @@ export function calculateTaxResidenceRisk(
         documentBased: validDocuments.length > 0,
         validDocuments,
         daysNeeded: req.daysNeeded,
-        daysRemaining: req.daysRemaining
+        daysRemaining: req.daysRemaining,
+        threshold
       };
     } else {
       // For non-residents, risk is based on maximum allowed presence
-      const maxDays = rules?.residency_threshold ?? 183;
+      const maxDays = threshold;
       risk = days > maxDays ? 'high' : days > (maxDays * 0.8) ? 'medium' : 'low';
     }
 
@@ -114,7 +130,8 @@ export function calculateTaxResidenceRisk(
       risk,
       status,
       documentBased: validDocuments.length > 0,
-      validDocuments
+      validDocuments,
+      threshold
     };
   });
 }

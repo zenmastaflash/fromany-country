@@ -150,12 +150,20 @@ export async function GET(request: Request) {
       return `${Math.max(0, risk.threshold - risk.days)} days until limit`;
     };
 
-    const getThresholdColor = (days: number, threshold: number) => {
-      const percentage = (days / threshold) * 100;
-      if (percentage >= 100) return "bg-blue-500"; // Achievement color
-      if (percentage < 60) return "bg-green-500";
-      if (percentage < 80) return "bg-yellow-500";
-      return "bg-red-500";
+    const getThresholdColor = (risk: TaxRisk & { threshold: number }) => {
+      const percentage = (risk.days / risk.threshold) * 100;
+      
+      // For residency permits and working visas
+      if (risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT') {
+        if (percentage >= 100) return "bg-blue-500";  // Met requirement
+        return "bg-red-500";  // Haven't met requirement yet
+      }
+      
+      // For other cases (tax residency warning)
+      if (percentage >= 100) return "bg-red-500";  // Over limit
+      if (percentage < 60) return "bg-green-500";  // Safe
+      if (percentage < 80) return "bg-yellow-500";  // Getting close
+      return "bg-red-500";  // Very close
     };
 
     return NextResponse.json({
@@ -173,11 +181,8 @@ export async function GET(request: Request) {
           lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
           residencyStatus: risk.status,
           documentBased: risk.documentBased,
-          timeMessage: getTimeMessage({ 
-            ...risk, 
-            threshold: threshold 
-          }),
-          thresholdColor: getThresholdColor(risk.days, threshold)
+          timeMessage: getTimeMessage({ ...risk, threshold }),
+          thresholdColor: getThresholdColor({ ...risk, threshold })
         };
       }),
       criticalDates,

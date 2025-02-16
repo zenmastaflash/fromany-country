@@ -40,11 +40,14 @@ export const authConfig: NextAuthOptions = {
             select: {
               image: true,
               displayName: true,
+              terms_accepted_at: true,
             },
           });
           if (user) {
             session.user.image = user.image || session.user.image;
             session.user.name = user.displayName || session.user.name;
+            // @ts-ignore
+            session.user.terms_accepted_at = user.terms_accepted_at;
           }
         }
         return session;

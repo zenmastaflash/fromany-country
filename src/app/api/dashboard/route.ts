@@ -142,7 +142,7 @@ export async function GET(request: Request) {
 
       if (risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT') {
         if (risk.days >= risk.threshold) {
-          return `Minimum residency requirement met (${risk.days} days)`;
+          return `Minimum residency requirement met (${risk.threshold} days)`;
         }
         return `${Math.max(0, risk.threshold - risk.days)} days needed to maintain residency`;
       }
@@ -150,12 +150,20 @@ export async function GET(request: Request) {
       return `${Math.max(0, risk.threshold - risk.days)} days until limit`;
     };
 
-    const getThresholdColor = (days: number, threshold: number) => {
-      const percentage = (days / threshold) * 100;
-      if (percentage >= 100) return "bg-blue-500"; // Achievement color
-      if (percentage < 60) return "bg-green-500";
-      if (percentage < 80) return "bg-yellow-500";
-      return "bg-red-500";
+    const getThresholdColor = (risk: TaxRisk & { threshold: number }) => {
+      const percentage = (risk.days / risk.threshold) * 100;
+      const isRequirementMet = risk.days >= risk.threshold;
+      
+      // For residency permits and working visas
+      if (risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT') {
+        return isRequirementMet ? "bg-blue-500" : "bg-red-500";
+      }
+      
+      // For other cases (tax residency warning)
+      if (percentage >= 100) return "bg-red-500";  // Over limit
+      if (percentage < 60) return "bg-green-500";  // Safe
+      if (percentage < 80) return "bg-yellow-500";  // Getting close
+      return "bg-red-500";  // Very close
     };
 
     return NextResponse.json({
@@ -166,6 +174,10 @@ export async function GET(request: Request) {
       } : null,
       countryStatuses: taxRisks.map(risk => {
         const threshold = countryRules.find(r => r.country_code === risk.country)?.residency_threshold ?? 183;
+        const progressValue = risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT'
+          ? Math.min((risk.days / threshold) * 100, 100)  // Cap at 100% for residency
+          : (risk.days / threshold) * 100;  // Allow over 100% for tax residency warning
+
         return {
           country: risk.country,
           daysPresent: risk.days,
@@ -173,11 +185,9 @@ export async function GET(request: Request) {
           lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
           residencyStatus: risk.status,
           documentBased: risk.documentBased,
-          timeMessage: getTimeMessage({ 
-            ...risk, 
-            threshold: threshold 
-          }),
-          thresholdColor: getThresholdColor(risk.days, threshold)
+          timeMessage: getTimeMessage({ ...risk, threshold }),
+          thresholdColor: getThresholdColor({ ...risk, threshold }),
+          progressValue
         };
       }),
       criticalDates,

@@ -111,13 +111,25 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Current Works
 
-- Connect Dashboard to Documents and Travel databses for accurate data representationand logic
 - Build out country-based tax laws, important dates, etc
+- Fixing annoying Accept Terms page issue where users have to accept upon each login
 
-### Recent Fixes
+### Recent Fixes/Features
+#### Fixed
+- Negative days showing in Netherlands (and other countries) after meeting residency requirements
+- Progress bar continuing past 100% when exceeding residency days requirement
+- Progress bar color staying red even after meeting residency threshold
+- Bug with TypeScript definitions causing build errors
 
-- fixed auth issue that prevented signup (caused different issue, however
-
+#### Features
+- Residency status indicators now show:
+ - Blue bar when minimum days requirement is met
+ - Red bar until minimum days requirement is met
+ - "Minimum residency requirement met (X days)" message when requirement is met
+ - Capped progress bar at 100% for residency permits/visas
+- Tax residency warnings still show progress beyond 100% with red bar
+- Added proper TypeScript definitions for all functions
+- Kept existing compliant status messages
 
 ## Quick Start
 

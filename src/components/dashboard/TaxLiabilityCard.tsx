@@ -171,9 +171,9 @@ function CountryStatusRow({
           <span>{status.daysPresent} days</span>
         </div>
         <Progress 
-          value={(status.daysPresent / status.threshold) * 100} 
-          className={getThresholdColor(status.daysPresent, status.threshold)}
-        />
+  value={status.progressValue} 
+  className={getThresholdColor(status.daysPresent, status.threshold)}
+/>
       </div>
     </div>
   );

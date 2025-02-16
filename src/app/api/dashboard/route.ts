@@ -142,7 +142,7 @@ export async function GET(request: Request) {
 
       if (risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT') {
         if (risk.days >= risk.threshold) {
-          return `Minimum residency requirement met (${risk.days} days)`;
+          return `Minimum residency requirement met (${risk.threshold} days)`;
         }
         return `${Math.max(0, risk.threshold - risk.days)} days needed to maintain residency`;
       }
@@ -174,6 +174,10 @@ export async function GET(request: Request) {
       } : null,
       countryStatuses: taxRisks.map(risk => {
         const threshold = countryRules.find(r => r.country_code === risk.country)?.residency_threshold ?? 183;
+        const progressValue = risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT'
+          ? Math.min((risk.days / threshold) * 100, 100)  // Cap at 100% for residency
+          : (risk.days / threshold) * 100;  // Allow over 100% for tax residency warning
+
         return {
           country: risk.country,
           daysPresent: risk.days,
@@ -182,7 +186,8 @@ export async function GET(request: Request) {
           residencyStatus: risk.status,
           documentBased: risk.documentBased,
           timeMessage: getTimeMessage({ ...risk, threshold }),
-          thresholdColor: getThresholdColor({ ...risk, threshold })
+          thresholdColor: getThresholdColor({ ...risk, threshold }),
+          progressValue
         };
       }),
       criticalDates,

@@ -10,13 +10,6 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
-type DashboardStatus = TaxRisk & {
-  timeMessage?: string;
-  thresholdColor?: string;
-  threshold: number;
-  daysPresent: number;
-};
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const dateRange = searchParams.get('dateRange') || 'current_year';
@@ -142,19 +135,19 @@ export async function GET(request: Request) {
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    const getTimeMessage = (status: DashboardStatus) => {
-      if (!status.documentBased) {
-        return `${Math.max(0, status.threshold - status.daysPresent)} days until tax residency`;
+    const getTimeMessage = (risk: TaxRisk & { threshold: number }) => {
+      if (!risk.documentBased) {
+        return `${Math.max(0, risk.threshold - risk.days)} days until tax residency`;
       }
 
-      if (status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT') {
-        if (status.daysPresent >= status.threshold) {
-          return `Minimum residency requirement met (${status.daysPresent} days)`;
+      if (risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT') {
+        if (risk.days >= risk.threshold) {
+          return `Minimum residency requirement met (${risk.days} days)`;
         }
-        return `${Math.max(0, status.threshold - status.daysPresent)} days needed to maintain residency`;
+        return `${Math.max(0, risk.threshold - risk.days)} days needed to maintain residency`;
       }
 
-      return `${Math.max(0, status.threshold - status.daysPresent)} days until limit`;
+      return `${Math.max(0, risk.threshold - risk.days)} days until limit`;
     };
 
     const getThresholdColor = (days: number, threshold: number) => {
@@ -180,7 +173,10 @@ export async function GET(request: Request) {
           lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
           residencyStatus: risk.status,
           documentBased: risk.documentBased,
-          timeMessage: getTimeMessage({ ...risk, threshold, daysPresent: risk.days }),
+          timeMessage: getTimeMessage({ 
+            ...risk, 
+            threshold: threshold 
+          }),
           thresholdColor: getThresholdColor(risk.days, threshold)
         };
       }),

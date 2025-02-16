@@ -152,11 +152,11 @@ export async function GET(request: Request) {
 
     const getThresholdColor = (risk: TaxRisk & { threshold: number }) => {
       const percentage = (risk.days / risk.threshold) * 100;
+      const isRequirementMet = risk.days >= risk.threshold;
       
       // For residency permits and working visas
       if (risk.status === 'PERMANENT_RESIDENT' || risk.status === 'TEMPORARY_RESIDENT') {
-        if (percentage >= 100) return "bg-blue-500";  // Met requirement
-        return "bg-red-500";  // Haven't met requirement yet
+        return isRequirementMet ? "bg-blue-500" : "bg-red-500";
       }
       
       // For other cases (tax residency warning)

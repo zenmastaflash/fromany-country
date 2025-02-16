@@ -32,7 +32,7 @@ export const authConfig: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user }) {
-      if (user) {
+      if (user?.email) {  // Add null check
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
           select: { terms_accepted_at: true }

@@ -7,15 +7,8 @@ const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-  maxUses: 7500,
-  native: false
+  maxUses: 7500
 })
-
-// Add event listeners for debugging in development
-if (process.env.NODE_ENV !== 'production') {
-  pool.on('connect', () => console.log('Pool connected'))
-  pool.on('error', (err) => console.error('Pool error:', err))
-}
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -34,9 +27,3 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
 }
-
-// Cleanup function
-process.on('SIGINT', async () => {
-  await pool.end()
-  process.exit(0)
-})

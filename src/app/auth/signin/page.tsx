@@ -2,15 +2,18 @@
 
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/input';
 
 type AuthMode = 'signin' | 'signup';
 
 export default function SignIn() {
+  const router = useRouter();
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleGoogleSignIn = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -25,14 +28,18 @@ export default function SignIn() {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await signIn('email', {
-        email,
-        password,
-        callbackUrl: '/auth/terms',
-      });
-    } catch (error) {
-      console.error('Email auth error:', error);
+    setError('');
+    
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false
+    });
+
+    if (result?.error) {
+      setError(result.error);
+    } else {
+      router.push('/auth/terms');
     }
   };
 
@@ -51,6 +58,7 @@ export default function SignIn() {
           <CardContent>
             <div className="space-y-4">
               <form onSubmit={handleEmailAuth} className="space-y-3">
+                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 <Input
                   type="email"
                   placeholder="Email"

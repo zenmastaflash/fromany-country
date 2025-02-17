@@ -7,6 +7,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 import type { Session } from "next-auth"
 import type { JWT } from "next-auth/jwt"
+import { compare } from 'bcrypt'
 
 export const authConfig: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -39,7 +40,13 @@ export const authConfig: NextAuthOptions = {
         
         if (!user) return null;
         
-        // Here we'll add password comparison once we update the schema
+        const isValidPassword = await compare(
+          credentials.password,
+          user.password || ''
+        );
+
+        if (!isValidPassword) return null;
+        
         return user;
       }
     })

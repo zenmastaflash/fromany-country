@@ -15,6 +15,8 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [displayName, setDisplayName] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const validatePassword = (password: string) => {
     const requirements = {
@@ -97,6 +99,28 @@ export default function SignIn() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
+                {mode === 'signup' && (
+                  <>
+                    <Input
+                      type="text"
+                      placeholder="Display Name"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                    />
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="terms"
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        className="rounded border-gray-300"
+                      />
+                      <label htmlFor="terms" className="text-sm">
+                        I accept the terms and conditions
+                      </label>
+                    </div>
+                  </>
+                )}
                 <div>
                   <Input
                     type="password"

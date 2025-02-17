@@ -51,6 +51,12 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Core Features
 
+- **Authentication**
+  - ✅ Google Auth
+  - Sign up flow
+  - terms acceptance
+  - password reset
+
 - **Dashboard**
   - ✅ Shows tax liability
   - ✅ Critical dates (currently only document expiration, but looking to add important filing dates as well)

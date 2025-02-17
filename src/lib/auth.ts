@@ -31,30 +31,23 @@ export const authConfig: NextAuthOptions = {
     async signIn({ user, account }) {
       return true;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
-      try {
-        if (session?.user) {
-          session.user.id = token.sub!;
-          const user = await prisma.user.findUnique({
-            where: { id: token.sub },
-            select: {
-              image: true,
-              displayName: true,
-              terms_accepted_at: true,
-            },
-          });
-          if (user) {
-            session.user.image = user.image || session.user.image;
-            session.user.name = user.displayName || session.user.name;
-            // @ts-ignore
-            session.user.terms_accepted_at = user.terms_accepted_at;
-          }
-        }
-        return session;
-      } catch (error) {
-        console.error("Session Error:", error);
-        return session;
+    async jwt({ token, user }) {
+      if (user?.email) {  // Add null check
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          select: { terms_accepted_at: true }
+        });
+        token.terms_accepted_at = dbUser?.terms_accepted_at;
       }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub!;
+        // @ts-ignore
+        session.user.terms_accepted_at = token.terms_accepted_at;
+      }
+      return session;
     },
     async redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${baseUrl}${url}`;

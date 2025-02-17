@@ -3,11 +3,17 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
-  const { email, password, displayName } = await req.json();
-  const hashedPassword = await hash(password, 12);
-  
   try {
-    const user = await prisma.user.create({
+    const { email, password, displayName } = await req.json();
+    
+    // Check if user exists
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return NextResponse.json({ error: 'Email already registered' }, { status: 400 });
+    }
+
+    const hashedPassword = await hash(password, 12);
+    await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
@@ -15,9 +21,9 @@ export async function POST(req: Request) {
         terms_accepted_at: new Date()
       }
     });
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
+    return NextResponse.json({ error: 'Error creating account' }, { status: 500 });
   }
 }

@@ -1,9 +1,17 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Input } from '@/components/ui/input';
+
+type AuthMode = 'signin' | 'signup';
 
 export default function SignIn() {
+  const [mode, setMode] = useState<AuthMode>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   const handleGoogleSignIn = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
@@ -12,6 +20,19 @@ export default function SignIn() {
       });
     } catch (error) {
       console.error('Sign in error:', error);
+    }
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await signIn('email', {
+        email,
+        password,
+        callbackUrl: '/auth/terms',
+      });
+    } catch (error) {
+      console.error('Email auth error:', error);
     }
   };
 
@@ -24,11 +45,43 @@ export default function SignIn() {
               Welcome to fromany.country
             </CardTitle>
             <p className="text-center text-sm text-link mt-2">
-              Your global life, simplified. Sign in to manage your travels, documents, and more.
+              Your global life, simplified. {mode === 'signin' ? 'Sign in' : 'Sign up'} to manage your travels, documents, and more.
             </p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              <form onSubmit={handleEmailAuth} className="space-y-3">
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="submit"
+                  className="w-full rounded-lg bg-primary p-3 text-text hover:bg-accent transition-colors duration-200"
+                >
+                  {mode === 'signin' ? 'Sign In' : 'Sign Up'} with Email
+                </button>
+              </form>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-background text-muted-foreground">Or</span>
+                </div>
+              </div>
+
               <button
                 onClick={handleGoogleSignIn}
                 className="flex w-full items-center justify-center gap-3 rounded-lg bg-primary p-3 text-text hover:bg-accent transition-colors duration-200"
@@ -57,6 +110,16 @@ export default function SignIn() {
                 </svg>
                 Continue with Google
               </button>
+              
+              <p className="text-center text-sm text-muted-foreground">
+                {mode === 'signin' ? "Don't have an account? " : "Already have an account? "}
+                <button
+                  onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+                  className="text-primary hover:underline"
+                >
+                  {mode === 'signin' ? 'Sign up' : 'Sign in'}
+                </button>
+              </p>
             </div>
           </CardContent>
         </Card>

@@ -3,6 +3,7 @@ import NextAuth from "next-auth"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import GoogleProvider from "next-auth/providers/google"
+import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 import type { Session } from "next-auth"
 import type { JWT } from "next-auth/jwt"
@@ -23,6 +24,25 @@ export const authConfig: NextAuthOptions = {
         },
       },
     }),
+    CredentialsProvider({
+      name: "Email",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        });
+        
+        if (!user) return null;
+        
+        // Here we'll add password comparison once we update the schema
+        return user;
+      }
+    })
   ],
   session: {
     strategy: "jwt",

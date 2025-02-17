@@ -14,6 +14,29 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+  const validatePassword = (password: string) => {
+    const requirements = {
+      minLength: password.length >= 8,
+      hasUpper: /[A-Z]/.test(password),
+      hasLower: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+
+    const errors = [];
+    if (!requirements.minLength) errors.push("At least 8 characters");
+    if (!requirements.hasUpper) errors.push("One uppercase letter");
+    if (!requirements.hasLower) errors.push("One lowercase letter");
+    if (!requirements.hasNumber) errors.push("One number");
+    if (!requirements.hasSpecial) errors.push("One special character");
+
+    return {
+      isValid: Object.values(requirements).every(Boolean),
+      errors
+    };
+  };
 
   const handleGoogleSignIn = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -29,6 +52,14 @@ export default function SignIn() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (mode === 'signup') {
+      const validation = validatePassword(password);
+      if (!validation.isValid) {
+        setPasswordErrors(validation.errors);
+        return;
+      }
+    }
     
     const result = await signIn('credentials', {
       email,
@@ -66,13 +97,31 @@ export default function SignIn() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <div>
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (mode === 'signup') {
+                        const validation = validatePassword(e.target.value);
+                        setPasswordErrors(validation.errors);
+                      }
+                    }}
+                    required
+                  />
+                  {mode === 'signup' && passwordErrors.length > 0 && (
+                    <div className="mt-2 text-sm text-red-500">
+                      <p>Password must contain:</p>
+                      <ul className="list-disc pl-5">
+                        {passwordErrors.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
                 <button
                   type="submit"
                   className="w-full rounded-lg bg-primary p-3 text-text hover:bg-accent transition-colors duration-200"

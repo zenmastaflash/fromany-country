@@ -32,20 +32,26 @@ export const authConfig: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Please enter both email and password');
+        }
         
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         });
         
-        if (!user) return null;
+        if (!user) {
+          throw new Error('No account found with this email');
+        }
         
-        const isValidPassword = await compare(
-          credentials.password,
-          user.password || ''
-        );
-
-        if (!isValidPassword) return null;
+        if (!user.password) {
+          throw new Error('Please sign in with Google');
+        }
+        
+        const isValidPassword = await compare(credentials.password, user.password);
+        if (!isValidPassword) {
+          throw new Error('Incorrect password');
+        }
         
         return user;
       }

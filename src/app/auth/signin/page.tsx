@@ -56,13 +56,35 @@ export default function SignIn() {
     setError('');
     
     if (mode === 'signup') {
+      if (!termsAccepted) {
+        setError('Please accept the terms and conditions');
+        return;
+      }
+
       const validation = validatePassword(password);
       if (!validation.isValid) {
         setPasswordErrors(validation.errors);
         return;
       }
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, displayName })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error);
+          return;
+        }
+      } catch (err) {
+        setError('Failed to create account');
+        return;
+      }
     }
-    
+
     const result = await signIn('credentials', {
       email,
       password,
@@ -72,7 +94,7 @@ export default function SignIn() {
     if (result?.error) {
       setError(result.error);
     } else {
-      router.push('/auth/terms');
+      router.push('/dashboard');
     }
   };
 

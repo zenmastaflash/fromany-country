@@ -10,6 +10,9 @@ import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
 import { generateComplianceAlerts } from '@/lib/dashboard-utils';
 import { withRetry } from '@/lib/auth-utils';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const dateRange = searchParams.get('dateRange') || 'current_year';

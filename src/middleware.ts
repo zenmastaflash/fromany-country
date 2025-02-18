@@ -14,10 +14,14 @@ export default withAuth(
 
     const user = await prisma.user.findUnique({
       where: { email: token.email },
-      select: { terms_accepted_at: true }
+      select: { 
+        terms_accepted_at: true,
+        terms_version: true 
+      }
     })
 
-    if (!user?.terms_accepted_at && !req.nextUrl.pathname.startsWith('/auth/terms')) {
+    const needsTerms = !user?.terms_accepted_at || user.terms_version !== 1 // Current version
+    if (needsTerms && !req.nextUrl.pathname.startsWith('/auth/terms')) {
       return NextResponse.redirect(new URL('/auth/terms', req.url))
     }
 

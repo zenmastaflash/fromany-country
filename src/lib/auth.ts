@@ -68,9 +68,13 @@ export const authConfig: NextAuthOptions = {
       if (user?.email) {  // Add null check
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
-          select: { terms_accepted_at: true }
+          select: { 
+            terms_accepted_at: true,
+            terms_version: true
+          }
         });
         token.terms_accepted_at = dbUser?.terms_accepted_at;
+        token.terms_version = dbUser?.terms_version;
       }
       return token;
     },
@@ -79,6 +83,8 @@ export const authConfig: NextAuthOptions = {
         session.user.id = token.sub!;
         // @ts-ignore
         session.user.terms_accepted_at = token.terms_accepted_at;
+        // @ts-ignore
+        session.user.terms_version = token.terms_version;
       }
       return session;
     },

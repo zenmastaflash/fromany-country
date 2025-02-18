@@ -82,7 +82,7 @@ export const authConfig: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub!;
+        session.user.id = token.id as string;
         // @ts-ignore
         session.user.terms_accepted_at = token.terms_accepted_at;
         // @ts-ignore

@@ -9,6 +9,8 @@ import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { Travel } from '@prisma/client';
 
+export const runtime = 'nodejs';
+
 export default function TravelPage() {
   const [showForm, setShowForm] = useState(false);
   const [travels, setTravels] = useState<Travel[]>([]);

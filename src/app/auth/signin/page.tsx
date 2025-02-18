@@ -44,7 +44,7 @@ export default function SignIn() {
     e.preventDefault();
     try {
       await signIn('google', {
-        callbackUrl: '/auth/terms',
+        callbackUrl: '/dashboard',
       });
     } catch (error) {
       console.error('Sign in error:', error);

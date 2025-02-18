@@ -9,6 +9,8 @@ import DocumentUploadFlow from '@/components/documents/DocumentUploadFlow';
 import DocumentList from '@/components/documents/DocumentList';
 import SharedDocumentList from '@/components/documents/SharedDocumentList';
 
+export const runtime = 'nodejs';
+
 function DocumentsContent() {
   const searchParams = useSearchParams();
   const [refreshKey, setRefreshKey] = useState(0);

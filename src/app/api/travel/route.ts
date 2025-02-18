@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 type TravelCreateInput = Omit<Prisma.TravelCreateInput, 'user'>;
 
 export async function POST(request: Request) {

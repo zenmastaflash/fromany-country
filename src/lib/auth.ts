@@ -69,10 +69,12 @@ export const authConfig: NextAuthOptions = {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
           select: { 
+            id: true,
             terms_accepted_at: true,
             terms_version: true
           }
         });
+        token.id = dbUser?.id;
         token.terms_accepted_at = dbUser?.terms_accepted_at;
         token.terms_version = dbUser?.terms_version;
       }

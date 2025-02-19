@@ -2,6 +2,9 @@
 const nextConfig = {
   experimental: {
     // Remove serverActions as it's now default
+  },
+  middleware: {
+    runtime: 'nodejs'
   }
 }
 

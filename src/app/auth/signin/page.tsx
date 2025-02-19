@@ -2,21 +2,49 @@
 
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/input';
 
 type AuthMode = 'signin' | 'signup';
 
 export default function SignIn() {
+  const router = useRouter();
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [displayName, setDisplayName] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const validatePassword = (password: string) => {
+    const requirements = {
+      minLength: password.length >= 8,
+      hasUpper: /[A-Z]/.test(password),
+      hasLower: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+
+    const errors = [];
+    if (!requirements.minLength) errors.push("At least 8 characters");
+    if (!requirements.hasUpper) errors.push("One uppercase letter");
+    if (!requirements.hasLower) errors.push("One lowercase letter");
+    if (!requirements.hasNumber) errors.push("One number");
+    if (!requirements.hasSpecial) errors.push("One special character");
+
+    return {
+      isValid: Object.values(requirements).every(Boolean),
+      errors
+    };
+  };
 
   const handleGoogleSignIn = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
       await signIn('google', {
-        callbackUrl: '/auth/terms',
+        callbackUrl: '/dashboard',
       });
     } catch (error) {
       console.error('Sign in error:', error);
@@ -25,14 +53,48 @@ export default function SignIn() {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await signIn('email', {
-        email,
-        password,
-        callbackUrl: '/auth/terms',
-      });
-    } catch (error) {
-      console.error('Email auth error:', error);
+    setError('');
+    
+    if (mode === 'signup') {
+      if (!termsAccepted) {
+        setError('Please accept the terms and conditions');
+        return;
+      }
+
+      const validation = validatePassword(password);
+      if (!validation.isValid) {
+        setPasswordErrors(validation.errors);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, displayName })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error);
+          return;
+        }
+      } catch (err) {
+        setError('Failed to create account');
+        return;
+      }
+    }
+
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false
+    });
+
+    if (result?.error) {
+      setError(result.error);
+    } else {
+      router.push('/dashboard');
     }
   };
 
@@ -51,6 +113,7 @@ export default function SignIn() {
           <CardContent>
             <div className="space-y-4">
               <form onSubmit={handleEmailAuth} className="space-y-3">
+                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 <Input
                   type="email"
                   placeholder="Email"
@@ -58,13 +121,53 @@ export default function SignIn() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                {mode === 'signup' && (
+                  <>
+                    <Input
+                      type="text"
+                      placeholder="Display Name"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                    />
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="terms"
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        className="rounded border-gray-300"
+                      />
+                      <label htmlFor="terms" className="text-sm">
+                        I accept the terms and conditions
+                      </label>
+                    </div>
+                  </>
+                )}
+                <div>
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (mode === 'signup') {
+                        const validation = validatePassword(e.target.value);
+                        setPasswordErrors(validation.errors);
+                      }
+                    }}
+                    required
+                  />
+                  {mode === 'signup' && passwordErrors.length > 0 && (
+                    <div className="mt-2 text-sm text-red-500">
+                      <p>Password must contain:</p>
+                      <ul className="list-disc pl-5">
+                        {passwordErrors.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
                 <button
                   type="submit"
                   className="w-full rounded-lg bg-primary p-3 text-text hover:bg-accent transition-colors duration-200"

@@ -3,9 +3,11 @@ import NextAuth from "next-auth"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import GoogleProvider from "next-auth/providers/google"
+import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 import type { Session } from "next-auth"
 import type { JWT } from "next-auth/jwt"
+import { compare } from 'bcrypt'
 
 export const authConfig: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -23,6 +25,37 @@ export const authConfig: NextAuthOptions = {
         },
       },
     }),
+    CredentialsProvider({
+      name: "Email",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Please enter both email and password');
+        }
+        
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        });
+        
+        if (!user) {
+          throw new Error('No account found with this email');
+        }
+        
+        if (!user.password) {
+          throw new Error('Please sign in with Google');
+        }
+        
+        const isValidPassword = await compare(credentials.password, user.password);
+        if (!isValidPassword) {
+          throw new Error('Incorrect password');
+        }
+        
+        return user;
+      }
+    })
   ],
   session: {
     strategy: "jwt",
@@ -35,17 +68,25 @@ export const authConfig: NextAuthOptions = {
       if (user?.email) {  // Add null check
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
-          select: { terms_accepted_at: true }
+          select: { 
+            id: true,
+            terms_accepted_at: true,
+            terms_version: true
+          }
         });
+        token.id = dbUser?.id;
         token.terms_accepted_at = dbUser?.terms_accepted_at;
+        token.terms_version = dbUser?.terms_version;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub!;
+        session.user.id = token.id as string;
         // @ts-ignore
         session.user.terms_accepted_at = token.terms_accepted_at;
+        // @ts-ignore
+        session.user.terms_version = token.terms_version;
       }
       return session;
     },

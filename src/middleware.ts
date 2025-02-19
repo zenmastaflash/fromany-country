@@ -2,7 +2,7 @@
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
-import { prisma } from "@/lib/prisma"
+import type { NextRequest } from "next/server"
 
 export default withAuth(
   async function middleware(req) {
@@ -12,12 +12,12 @@ export default withAuth(
       return NextResponse.redirect(new URL('/auth/signin', req.url))
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: token.email },
-      select: { terms_accepted_at: true }
-    })
-
-    if (!user?.terms_accepted_at && !req.nextUrl.pathname.startsWith('/auth/terms')) {
+    // Terms version check without database call
+    const terms_accepted_at = token.terms_accepted_at
+    const terms_version = token.terms_version
+    
+    const needsTerms = !terms_accepted_at || terms_version !== 1 // Current version
+    if (needsTerms && !req.nextUrl.pathname.startsWith('/auth/terms')) {
       return NextResponse.redirect(new URL('/auth/terms', req.url))
     }
 

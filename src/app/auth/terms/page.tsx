@@ -69,7 +69,7 @@ function TermsContent() {
           className="w-full"
           disabled={isAccepting}
         >
-          {isAccepting ? 'Accepting Terms...' : 'Accept Terms'}
+          {isAccepting ? 'Accepting Terms...' : 'Accept Terms of Service'}
         </Button>
       </CardContent>
     </Card>

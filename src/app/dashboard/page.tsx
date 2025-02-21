@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import TaxLiabilityCard from '@/components/dashboard/TaxLiabilityCard';
 import CriticalDatesCard from '@/components/dashboard/CriticalDatesCard';
 import ComplianceAlertsCard from '@/components/dashboard/ComplianceAlertsCard';

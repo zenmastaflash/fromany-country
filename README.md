@@ -53,7 +53,7 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 - **Authentication**
   - ✅ Google Auth
-  - Sign up flow
+  - ✅ Sign up flow
   - terms acceptance
   - password reset
 

@@ -17,8 +17,10 @@ export default withAuth(
     const terms_version = token.terms_version
     
     const needsTerms = !terms_accepted_at || terms_version !== 1 // Current version
-    if (needsTerms && !req.nextUrl.pathname.startsWith('/auth/terms')) {
-      return NextResponse.redirect(new URL('/auth/terms', req.url))
+    
+    // Instead of redirecting to /auth/terms, add query param to show terms drawer
+    if (needsTerms) {
+      return NextResponse.redirect(new URL(`/dashboard?showTerms=true`, req.url))
     }
 
     const requestHeaders = new Headers(req.headers)

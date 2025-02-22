@@ -29,9 +29,8 @@ function DocumentsContent() {
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleFormSubmit = async (data: FormData) => {
+  const handleFormSubmit = async (data: any) => {  // We'll use any since we know the form sends processed data
     try {
-      // Creating FormData object even though we don't have a file
       const formData = new FormData();
       
       // Add metadata
@@ -42,7 +41,7 @@ function DocumentsContent() {
         expiryDate: data.expiryDate || null,
         number: data.number || null,
         issuingCountry: data.issuingCountry || null,
-        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : []  // Convert string to array here
+        tags: data.tags  // Don't try to split again, just use the array from the form
       };
       
       formData.append('metadata', JSON.stringify(metadata));

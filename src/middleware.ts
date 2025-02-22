@@ -18,8 +18,8 @@ export default withAuth(
     
     const needsTerms = !terms_accepted_at || terms_version !== 1 // Current version
     
-    // Instead of redirecting to /auth/terms, add query param to show terms drawer
-    if (needsTerms) {
+    // Check if the current URL already has showTerms parameter
+    if (needsTerms && !req.nextUrl.searchParams.has('showTerms')) {
       return NextResponse.redirect(new URL(`/dashboard?showTerms=true`, req.url))
     }
 

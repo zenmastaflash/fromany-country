@@ -109,7 +109,9 @@ export async function GET(request: Request) {
       travels, 
       documents, 
       countryRules,
-      taxStatusesByCountry
+      taxStatusesByCountry,
+      startDate,
+      endDate
     );
     const complianceAlerts = generateComplianceAlerts(
       travels, 

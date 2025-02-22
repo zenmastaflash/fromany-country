@@ -71,7 +71,8 @@ export default function DashboardPage() {
 
       if (response.ok) {
         setTermsOpen(false);
-        // Force refresh to update the session/token
+        // Clear session first then refresh to get fresh session with updated terms
+        await fetch('/api/auth/session', { method: 'DELETE' });
         window.location.href = '/dashboard';
       } else {
         throw new Error('Failed to accept terms');

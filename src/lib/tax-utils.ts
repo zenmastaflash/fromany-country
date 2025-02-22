@@ -166,6 +166,42 @@ export function calculateTaxResidenceRiskFromTravels(
   endDate?: Date
 ): TaxRisk[] {
   const stays = travels.map(travelToCountryStay);
+  
+  // Check if this is a full year calculation for "last year"
+  const isFullLastYear = startDate && endDate && 
+    startDate.getMonth() === 0 && startDate.getDate() === 1 && 
+    endDate.getMonth() === 11 && endDate.getDate() === 31 &&
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getFullYear() < new Date().getFullYear();
+  
+  // For "last year" calculations with a single country stay covering the whole year
+  if (isFullLastYear) {
+    // Check if there's a single country with full year coverage
+    const countriesWithFullYearCoverage = new Set<string>();
+    
+    stays.forEach(stay => {
+      // If the stay spans the entire year
+      if (stay.startDate <= startDate && (!stay.endDate || stay.endDate >= endDate)) {
+        countriesWithFullYearCoverage.add(stay.country);
+      }
+    });
+    
+    if (countriesWithFullYearCoverage.size > 0) {
+      // Process with standard calculation but override the days for full year countries
+      const risks = calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses, startDate, endDate);
+      
+      return risks.map(risk => {
+        if (countriesWithFullYearCoverage.has(risk.country)) {
+          const year = startDate.getFullYear();
+          const fullYearDays = year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0) ? 366 : 365;
+          return {...risk, days: fullYearDays};
+        }
+        return risk;
+      });
+    }
+  }
+  
+  // Standard calculation for all other cases
   return calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses, startDate, endDate);
 }
 

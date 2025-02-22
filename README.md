@@ -54,7 +54,7 @@ While dark mode offers these benefits, it's important to note that it may not be
 - **Authentication**
   - ✅ Google Auth
   - ✅ Sign up flow
-  - terms acceptance
+  - ✅ terms acceptance
   - password reset
 
 - **Dashboard**
@@ -118,10 +118,10 @@ While dark mode offers these benefits, it's important to note that it may not be
 ### Current Works
 
 - Build out country-based tax laws, important dates, etc
-- Fixing annoying Accept Terms page issue where users have to accept upon each login
 
 ### Recent Fixes/Features
 #### Fixed
+- Fixing annoying Accept Terms page issue where users have to accept upon each login
 - Negative days showing in Netherlands (and other countries) after meeting residency requirements
 - Progress bar continuing past 100% when exceeding residency days requirement
 - Progress bar color staying red even after meeting residency threshold

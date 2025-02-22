@@ -29,33 +29,29 @@ function DocumentsContent() {
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleFormSubmit = async (data: any) => {  // We'll use any since we know the form sends processed data
+  const handleFormSubmit = async (data: any) => {
     try {
-      const formData = new FormData();
-      
-      // Add metadata
-      const metadata = {
-        title: data.title,
-        type: data.type,
-        issueDate: data.issueDate || null,
-        expiryDate: data.expiryDate || null,
-        number: data.number || null,
-        issuingCountry: data.issuingCountry || null,
-        tags: data.tags  // Don't try to split again, just use the array from the form
-      };
-      
-      formData.append('metadata', JSON.stringify(metadata));
-
-      const response = await fetch('/api/documents/upload', {
+      const response = await fetch('/api/documents/create', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: data.title,
+          type: data.type,
+          issueDate: data.issueDate || null,
+          expiryDate: data.expiryDate || null,
+          number: data.number || null,
+          issuingCountry: data.issuingCountry || null,
+          tags: data.tags,  // Already split into array by the form
+          status: 'active'
+        })
       });
 
       if (!response.ok) {
         throw new Error('Failed to create document');
       }
 
-      // Refresh the document list
       setRefreshKey(prev => prev + 1);
     } catch (error) {
       console.error('Error creating document:', error);

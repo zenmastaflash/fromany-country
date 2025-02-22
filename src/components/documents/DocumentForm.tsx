@@ -71,12 +71,25 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
     fetchCountries();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      type: DocumentType.OTHER,
+      number: '',
+      issueDate: '',
+      expiryDate: '',
+      issuingCountry: '',
+      tags: '',
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
+    await onSubmit({
       ...formData,
       tags: formData.tags.split(',').map(tag => tag.trim()), // Convert tags to array
     });
+    resetForm(); // Reset form after successful submission
   };
 
   return (

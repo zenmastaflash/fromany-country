@@ -22,6 +22,11 @@ export default function DocumentViewer({ documentId, title, onClose }: DocumentV
       try {
         const response = await fetch(`/api/documents/view/${documentId}`);
         if (!response.ok) {
+          // If it's a 404, we'll just show a message that this is a document without a file
+          if (response.status === 404) {
+            setError('This document has no file attachment');
+            return;
+          }
           throw new Error('Failed to load document');
         }
         const data = await response.json();

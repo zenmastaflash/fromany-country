@@ -52,14 +52,17 @@ export function calculateDaysInCountry(
   startDate?: Date,
   endDate?: Date
 ): number {
-  // Special case for "last year" - hardcoded full year value
-  const isFullYearRange = startDate && endDate && 
+  // Use current date as default end date to prevent counting future days
+  const currentDate = new Date();
+  
+  // Special case: If it's a full year calculation (e.g., for "last year")
+  const isFullYear = startDate && endDate && 
     startDate.getMonth() === 0 && startDate.getDate() === 1 && 
     endDate.getMonth() === 11 && endDate.getDate() === 31 &&
     startDate.getFullYear() === endDate.getFullYear() &&
     startDate.getFullYear() < new Date().getFullYear();
   
-  if (isFullYearRange) {
+  if (isFullYear) {
     // Check if this country has any stay in the full year
     const hasStayInYear = stays.some(stay => 
       stay.country === country && 
@@ -72,15 +75,12 @@ export function calculateDaysInCountry(
     }
   }
   
-  // For other cases, count days by converting to date strings (YYYY-MM-DD)
-  // This counts each calendar day as a full day regardless of time
-  const currentDate = new Date();
-  let totalDays = 0;
-  
-  stays.forEach(stay => {
-    if (stay.country !== country) return;
+  // For other cases, use the original calculation with Math.ceil
+  return stays.reduce((total, stay) => {
+    if (stay.country !== country) return total;
     
     let start = new Date(stay.startDate);
+    // Only use stay.endDate if it exists AND is before current date, otherwise use current date
     let end = stay.endDate && stay.endDate < currentDate ? new Date(stay.endDate) : new Date();
     
     // Adjust dates to fit within range if provided
@@ -90,21 +90,12 @@ export function calculateDaysInCountry(
     // Additional check to not exceed current date
     if (end > currentDate) end = currentDate;
     
-    if (start > end) return;
+    if (start > end) return total;
     
-    // Count days using calendar dates
-    const daySet = new Set();
-    let current = new Date(start);
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     
-    while (current <= end) {
-      daySet.add(current.toISOString().split('T')[0]); // Add YYYY-MM-DD string
-      current.setDate(current.getDate() + 1);
-    }
-    
-    totalDays += daySet.size;
-  });
-  
-  return totalDays;
+    return total + days;
+  }, 0);
 }
 
 export function calculateTaxResidenceRisk(

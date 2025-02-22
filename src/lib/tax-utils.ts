@@ -52,17 +52,38 @@ export function calculateDaysInCountry(
   startDate?: Date,
   endDate?: Date
 ): number {
+  // Use current date as default end date to prevent counting future days
+  const currentDate = new Date();
+  
   return stays.reduce((total, stay) => {
     if (stay.country !== country) return total;
     
     let start = new Date(stay.startDate);
-    let end = stay.endDate ? new Date(stay.endDate) : new Date();
+    // Only use stay.endDate if it exists AND is before current date, otherwise use current date
+    let end = stay.endDate && stay.endDate < currentDate ? new Date(stay.endDate) : new Date();
     
     // Adjust dates to fit within range if provided
     if (startDate && start < startDate) start = startDate;
     if (endDate && end > endDate) end = endDate;
+    
+    // Additional check to not exceed current date
+    if (end > currentDate) end = currentDate;
+    
     if (start > end) return total;
     
+    // For "last_year" date range, ensure we include both the first and last day
+    const isFullYearRange = startDate && endDate && 
+      startDate.getMonth() === 0 && startDate.getDate() === 1 && 
+      endDate.getMonth() === 11 && endDate.getDate() === 31;
+    
+    // When calculating for full years, use this formula that includes both start and end dates
+    if (isFullYearRange && start.getTime() === startDate.getTime() && end.getTime() === endDate.getTime()) {
+      const year = startDate.getFullYear();
+      // Account for leap years
+      return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0) ? 366 : 365;
+    }
+    
+    // Otherwise use regular calculation for partial stays
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     
     return total + days;
@@ -140,10 +161,12 @@ export function calculateTaxResidenceRiskFromTravels(
   travels: Travel[],
   documents: Document[],
   countryRules: CountryRules[],
-  userTaxStatuses: { [country: string]: UserTaxStatus }
+  userTaxStatuses: { [country: string]: UserTaxStatus },
+  startDate?: Date,
+  endDate?: Date
 ): TaxRisk[] {
   const stays = travels.map(travelToCountryStay);
-  return calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses);
+  return calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses, startDate, endDate);
 }
 
 export function calculateTaxYear(date: Date = new Date()): {

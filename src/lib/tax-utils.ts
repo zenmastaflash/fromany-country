@@ -148,10 +148,12 @@ export function calculateTaxResidenceRiskFromTravels(
   travels: Travel[],
   documents: Document[],
   countryRules: CountryRules[],
-  userTaxStatuses: { [country: string]: UserTaxStatus }
+  userTaxStatuses: { [country: string]: UserTaxStatus },
+  startDate?: Date,
+  endDate?: Date
 ): TaxRisk[] {
   const stays = travels.map(travelToCountryStay);
-  return calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses);
+  return calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses, startDate, endDate);
 }
 
 export function calculateTaxYear(date: Date = new Date()): {

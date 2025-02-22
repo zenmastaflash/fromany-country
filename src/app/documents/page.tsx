@@ -53,8 +53,10 @@ function DocumentsContent() {
       }
 
       setRefreshKey(prev => prev + 1);
+      return true;  // Return true to indicate success
     } catch (error) {
       console.error('Error creating document:', error);
+      return false;  // Return false to indicate failure
     }
   };
 

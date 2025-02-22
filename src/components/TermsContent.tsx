@@ -14,7 +14,7 @@ export default function TermsContent() {
         <li>We may update these terms as our services evolve. Continued use of the service after changes constitutes acceptance of the updated terms.</li>
       </ul>
 
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-sm text-text">
         By accepting these terms, you acknowledge that you have read and understood these terms, agree to create an account with fromany.country, and agree to be bound by these terms. If you do not agree to these terms, you should not create an account or use this service.
       </p>
     </div>

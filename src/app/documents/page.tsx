@@ -31,13 +31,27 @@ function DocumentsContent() {
 
   const handleFormSubmit = async (data: FormData) => {
     try {
-      // Create document without file
-      const response = await fetch('/api/documents/create-manual', {
+      // Creating FormData object even though we don't have a file
+      const formData = new FormData();
+      
+      // Add metadata
+      const metadata = {
+        title: data.title,
+        type: data.type,
+        issueDate: data.issueDate || null,
+        expiryDate: data.expiryDate || null,
+        number: data.number || null,
+        issuingCountry: data.issuingCountry || null,
+        tags: typeof data.tags === 'string' ? 
+          data.tags.split(',').map(tag => tag.trim()) : 
+          data.tags
+      };
+      
+      formData.append('metadata', JSON.stringify(metadata));
+
+      const response = await fetch('/api/documents/upload', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+        body: formData,
       });
 
       if (!response.ok) {

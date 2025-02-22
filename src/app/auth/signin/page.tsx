@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/input';
+import TermsDrawer from '@/components/TermsDrawer';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -17,6 +18,8 @@ export default function SignIn() {
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [displayName, setDisplayName] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [isAcceptingTerms, setIsAcceptingTerms] = useState(false);
 
   const validatePassword = (password: string) => {
     const requirements = {
@@ -49,6 +52,11 @@ export default function SignIn() {
     } catch (error) {
       console.error('Sign in error:', error);
     }
+  };
+
+  const handleAcceptTerms = () => {
+    setTermsAccepted(true);
+    setShowTerms(false);
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -138,7 +146,13 @@ export default function SignIn() {
                         className="rounded border-gray-300"
                       />
                       <label htmlFor="terms" className="text-sm">
-                        I accept the terms and conditions
+                        I accept the <button 
+                          type="button"
+                          onClick={() => setShowTerms(true)}
+                          className="text-primary underline hover:text-accent"
+                        >
+                          terms and conditions
+                        </button>
                       </label>
                     </div>
                   </>
@@ -227,6 +241,12 @@ export default function SignIn() {
           </CardContent>
         </Card>
       </div>
+      <TermsDrawer 
+        isOpen={showTerms}
+        onClose={() => setShowTerms(false)}
+        onAccept={handleAcceptTerms}
+        isAccepting={isAcceptingTerms}
+      />
     </main>
   );
 }

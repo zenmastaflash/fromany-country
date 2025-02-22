@@ -9,6 +9,17 @@ import DocumentUploadFlow from '@/components/documents/DocumentUploadFlow';
 import DocumentList from '@/components/documents/DocumentList';
 import SharedDocumentList from '@/components/documents/SharedDocumentList';
 import DocumentForm from '@/components/documents/DocumentForm';
+import { DocumentType } from '@prisma/client';
+
+interface FormData {
+  title: string;
+  type: DocumentType;
+  number: string;
+  issueDate: string;
+  expiryDate: string;
+  issuingCountry: string;
+  tags: string[];
+}
 
 function DocumentsContent() {
   const searchParams = useSearchParams();
@@ -18,9 +29,26 @@ function DocumentsContent() {
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleFormSubmit = async (data) => {
-    // Handle form submission
-    setRefreshKey(prev => prev + 1);
+  const handleFormSubmit = async (data: FormData) => {
+    try {
+      // Create document without file
+      const response = await fetch('/api/documents/create-manual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create document');
+      }
+
+      // Refresh the document list
+      setRefreshKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Error creating document:', error);
+    }
   };
 
   return (

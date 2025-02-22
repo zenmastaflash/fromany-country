@@ -91,7 +91,10 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
     const loadDocumentUrls = async () => {
       const urls: Record<string, string> = {};
       for (const doc of documents) {
-        urls[doc.id] = await getDocumentUrl(doc.id);
+        // Only try to get URL if document has a fileUrl
+        if (doc.fileUrl) {
+          urls[doc.id] = await getDocumentUrl(doc.id);
+        }
       }
       setDocumentUrls(urls);
     };
@@ -308,8 +311,8 @@ export default function DocumentList({ refreshKey = 0 }: DocumentListProps) {
                           <div>
                             <h3 className="text-lg font-medium">
                               <button 
-                                onClick={() => setViewingDocument(doc)}
-                                className="text-link hover:underline focus:outline-none"
+                                onClick={() => doc.fileUrl ? setViewingDocument(doc) : null}
+                                className={`text-link hover:underline focus:outline-none ${!doc.fileUrl ? 'cursor-default' : ''}`}
                               >
                                 {doc.title || 'Untitled Document'}
                               </button>

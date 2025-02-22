@@ -52,15 +52,23 @@ export function calculateDaysInCountry(
   startDate?: Date,
   endDate?: Date
 ): number {
+  // Use current date as default end date to prevent counting future days
+  const currentDate = new Date();
+  
   return stays.reduce((total, stay) => {
     if (stay.country !== country) return total;
     
     let start = new Date(stay.startDate);
-    let end = stay.endDate ? new Date(stay.endDate) : new Date();
+    // Only use stay.endDate if it exists AND is before current date, otherwise use current date
+    let end = stay.endDate && stay.endDate < currentDate ? new Date(stay.endDate) : new Date();
     
     // Adjust dates to fit within range if provided
     if (startDate && start < startDate) start = startDate;
     if (endDate && end > endDate) end = endDate;
+    
+    // Additional check to not exceed current date
+    if (end > currentDate) end = currentDate;
+    
     if (start > end) return total;
     
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));

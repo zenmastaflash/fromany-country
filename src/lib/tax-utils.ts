@@ -71,6 +71,19 @@ export function calculateDaysInCountry(
     
     if (start > end) return total;
     
+    // For "last_year" date range, ensure we include both the first and last day
+    const isFullYearRange = startDate && endDate && 
+      startDate.getMonth() === 0 && startDate.getDate() === 1 && 
+      endDate.getMonth() === 11 && endDate.getDate() === 31;
+    
+    // When calculating for full years, use this formula that includes both start and end dates
+    if (isFullYearRange && start.getTime() === startDate.getTime() && end.getTime() === endDate.getTime()) {
+      const year = startDate.getFullYear();
+      // Account for leap years
+      return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0) ? 366 : 365;
+    }
+    
+    // Otherwise use regular calculation for partial stays
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     
     return total + days;

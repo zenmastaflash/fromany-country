@@ -55,6 +55,27 @@ export function calculateDaysInCountry(
   // Use current date as default end date to prevent counting future days
   const currentDate = new Date();
   
+  // Special case: If it's a full year calculation (e.g., for "last year")
+  const isFullYear = startDate && endDate && 
+    startDate.getMonth() === 0 && startDate.getDate() === 1 && 
+    endDate.getMonth() === 11 && endDate.getDate() === 31 &&
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getFullYear() < new Date().getFullYear();
+  
+  if (isFullYear) {
+    // Check if this country has any stay in the full year
+    const hasStayInYear = stays.some(stay => 
+      stay.country === country && 
+      ((stay.startDate <= endDate && (!stay.endDate || stay.endDate >= startDate)))
+    );
+    
+    if (hasStayInYear) {
+      const year = startDate.getFullYear();
+      return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0) ? 366 : 365;
+    }
+  }
+  
+  // For other cases, use the original calculation with Math.ceil
   return stays.reduce((total, stay) => {
     if (stay.country !== country) return total;
     
@@ -63,27 +84,14 @@ export function calculateDaysInCountry(
     let end = stay.endDate && stay.endDate < currentDate ? new Date(stay.endDate) : new Date();
     
     // Adjust dates to fit within range if provided
-    if (startDate && start < startDate) start = startDate;
-    if (endDate && end > endDate) end = endDate;
+    if (startDate && start < startDate) start = new Date(startDate);
+    if (endDate && end > endDate) end = new Date(endDate);
     
     // Additional check to not exceed current date
     if (end > currentDate) end = currentDate;
     
     if (start > end) return total;
     
-    // For "last_year" date range, ensure we include both the first and last day
-    const isFullYearRange = startDate && endDate && 
-      startDate.getMonth() === 0 && startDate.getDate() === 1 && 
-      endDate.getMonth() === 11 && endDate.getDate() === 31;
-    
-    // When calculating for full years, use this formula that includes both start and end dates
-    if (isFullYearRange && start.getTime() === startDate.getTime() && end.getTime() === endDate.getTime()) {
-      const year = startDate.getFullYear();
-      // Account for leap years
-      return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0) ? 366 : 365;
-    }
-    
-    // Otherwise use regular calculation for partial stays
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     
     return total + days;
@@ -166,7 +174,129 @@ export function calculateTaxResidenceRiskFromTravels(
   endDate?: Date
 ): TaxRisk[] {
   const stays = travels.map(travelToCountryStay);
-  return calculateTaxResidenceRisk(stays, documents, countryRules, userTaxStatuses, startDate, endDate);
+  
+  // Create a map of countries to total days
+  const countryToDaysMap = new Map<string, number>();
+  
+  // Process each country's stays separately
+  const uniqueCountries = [...new Set(stays.map(stay => stay.country))];
+  
+  uniqueCountries.forEach(country => {
+    const countryStays = stays.filter(stay => stay.country === country);
+    
+    // Special case for "last year"
+    const isFullLastYear = startDate && endDate && 
+      startDate.getMonth() === 0 && startDate.getDate() === 1 && 
+      endDate.getMonth() === 11 && endDate.getDate() === 31 &&
+      startDate.getFullYear() === endDate.getFullYear() &&
+      startDate.getFullYear() < new Date().getFullYear();
+    
+    if (isFullLastYear) {
+      // Check if this country has complete coverage for the year
+      const hasFullYearCoverage = countryStays.some(stay => 
+        stay.startDate <= startDate && (!stay.endDate || stay.endDate >= endDate)
+      );
+      
+      if (hasFullYearCoverage) {
+        const year = startDate.getFullYear();
+        countryToDaysMap.set(country, year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0) ? 366 : 365);
+        return; // Skip regular calculation for this country
+      }
+    }
+    
+    // For regular calculation, use a more precise day counting approach
+    const currentDate = new Date();
+    let totalDays = 0;
+    
+    // Sort stays by start date
+    const sortedStays = [...countryStays].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+    
+    // Track days we've already counted to avoid double counting
+    const countedDays = new Set<string>();
+    
+    sortedStays.forEach(stay => {
+      let start = new Date(stay.startDate);
+      let end = stay.endDate && stay.endDate < currentDate ? new Date(stay.endDate) : new Date();
+      
+      // Adjust dates to fit within range if provided
+      if (startDate && start < startDate) start = new Date(startDate);
+      if (endDate && end > endDate) end = new Date(endDate);
+      
+      // Additional check to not exceed current date
+      if (end > currentDate) end = currentDate;
+      
+      if (start > end) return;
+      
+      // Count each day once
+      let current = new Date(start);
+      while (current <= end) {
+        const dateKey = current.toISOString().split('T')[0]; // YYYY-MM-DD format
+        if (!countedDays.has(dateKey)) {
+          countedDays.add(dateKey);
+          totalDays++;
+        }
+        
+        // Move to next day
+        current.setDate(current.getDate() + 1);
+      }
+    });
+    
+    countryToDaysMap.set(country, totalDays);
+  });
+  
+  // Now build the TaxRisk array using our accurate day counts
+  return uniqueCountries.map(country => {
+    const days = countryToDaysMap.get(country) || 0;
+    
+    const rules = countryRules.find(r => r.country_code === country);
+    const userTaxStatus = userTaxStatuses[country];
+    
+    const validDocuments = documents.filter(doc => 
+      doc.issuingCountry === country && 
+      doc.expiryDate && new Date(doc.expiryDate) > new Date() &&
+      ['RESIDENCY_PERMIT', 'VISA', 'TOURIST_VISA'].includes(doc.type)
+    );
+
+    const threshold = rules?.residency_threshold ?? 183;
+    const status = determineResidencyStatus(validDocuments, days, threshold);
+    
+    let risk: 'low' | 'medium' | 'high';
+    const hasResidencyDoc = validDocuments.some(d => ['RESIDENCY_PERMIT', 'VISA'].includes(d.type));
+    
+    if (hasResidencyDoc && userTaxStatus?.required_presence) {
+      const req = calculateResidencyRequirement(days, userTaxStatus.required_presence);
+      
+      risk = !req.isAchievable ? 'high' :
+             req.daysPresent < (req.minDays * 0.5) ? 'high' :
+             req.daysPresent < (req.minDays * 0.75) ? 'medium' : 'low';
+
+      return {
+        country,
+        days,
+        risk,
+        status,
+        documentBased: validDocuments.length > 0,
+        validDocuments,
+        daysNeeded: req.daysNeeded,
+        daysRemaining: req.daysRemaining,
+        threshold
+      };
+    } else {
+      // For non-residents, risk is based on maximum allowed presence
+      const maxDays = threshold;
+      risk = days > maxDays ? 'high' : days > (maxDays * 0.8) ? 'medium' : 'low';
+    }
+
+    return {
+      country,
+      days,
+      risk,
+      status,
+      documentBased: validDocuments.length > 0,
+      validDocuments,
+      threshold
+    };
+  });
 }
 
 export function calculateTaxYear(date: Date = new Date()): {

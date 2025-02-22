@@ -178,8 +178,8 @@ function CountryStatusRow({
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-link">
-          <span>{getTimeMessage()}</span>
           <span>{status.daysPresent} days</span>
+          <span>{getTimeMessage()}</span>
         </div>
         <Progress 
           value={status.residencyStatus === 'PERMANENT_RESIDENT' || status.residencyStatus === 'TEMPORARY_RESIDENT'

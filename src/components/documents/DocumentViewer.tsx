@@ -15,6 +15,7 @@ export default function DocumentViewer({ documentId, title, onClose }: DocumentV
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPdf, setIsPdf] = useState(false);
 
   useEffect(() => {
     const fetchUrl = async () => {
@@ -25,6 +26,9 @@ export default function DocumentViewer({ documentId, title, onClose }: DocumentV
         }
         const data = await response.json();
         setUrl(data.url);
+        
+        // Check if it's a PDF or an image
+        setIsPdf(data.url.toLowerCase().includes('.pdf'));
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Error loading document');
       } finally {
@@ -44,7 +48,7 @@ export default function DocumentViewer({ documentId, title, onClose }: DocumentV
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
-        <CardContent className="flex-1 overflow-hidden relative bg-background">
+        <CardContent className="flex-1 overflow-auto relative bg-background">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -54,11 +58,21 @@ export default function DocumentViewer({ documentId, title, onClose }: DocumentV
               <p>{error}</p>
             </div>
           ) : url ? (
-            <iframe 
-              src={url}
-              className="w-full h-full border-0"
-              title={title || 'Document'}
-            />
+            isPdf ? (
+              <iframe 
+                src={url}
+                className="w-full h-full border-0"
+                title={title || 'Document'}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <img 
+                  src={url} 
+                  alt={title || 'Document'} 
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            )
           ) : null}
         </CardContent>
       </Card>

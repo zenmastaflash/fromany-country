@@ -8,12 +8,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DocumentUploadFlow from '@/components/documents/DocumentUploadFlow';
 import DocumentList from '@/components/documents/DocumentList';
 import SharedDocumentList from '@/components/documents/SharedDocumentList';
+import DocumentForm from '@/components/documents/DocumentForm';
 
 function DocumentsContent() {
   const searchParams = useSearchParams();
   const [refreshKey, setRefreshKey] = useState(0);
   
   const handleUploadSuccess = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleFormSubmit = async (data) => {
+    // Handle form submission
     setRefreshKey(prev => prev + 1);
   };
 
@@ -31,13 +37,26 @@ function DocumentsContent() {
 
         <TabsContent value="my-documents">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle>Upload Document</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <DocumentUploadFlow onUploadSuccess={handleUploadSuccess} />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Add Document Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DocumentForm 
+                    onSubmit={handleFormSubmit} 
+                    initialData={{}}
+                    onCancel={() => {}}
+                  />
                 </CardContent>
               </Card>
             </div>

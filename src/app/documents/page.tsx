@@ -42,9 +42,7 @@ function DocumentsContent() {
         expiryDate: data.expiryDate || null,
         number: data.number || null,
         issuingCountry: data.issuingCountry || null,
-        tags: typeof data.tags === 'string' ? 
-          data.tags.split(',').map(tag => tag.trim()) : 
-          data.tags
+        tags: data.tags  // No need for type checking since it's already string[]
       };
       
       formData.append('metadata', JSON.stringify(metadata));

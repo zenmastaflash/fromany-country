@@ -18,7 +18,7 @@ interface FormData {
   issueDate: string;
   expiryDate: string;
   issuingCountry: string;
-  tags: string[];
+  tags: string;  // Change this to string since that's what the form sends
 }
 
 function DocumentsContent() {
@@ -42,7 +42,7 @@ function DocumentsContent() {
         expiryDate: data.expiryDate || null,
         number: data.number || null,
         issuingCountry: data.issuingCountry || null,
-        tags: data.tags  // No need for type checking since it's already string[]
+        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : []  // Convert string to array here
       };
       
       formData.append('metadata', JSON.stringify(metadata));

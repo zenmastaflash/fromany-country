@@ -117,7 +117,29 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Current Works
 
-- Build out country-based tax laws, important dates, etc
+Dependency Updates:
+
+Update AWS SDK packages to the latest versions (before they enter maintenance mode)
+
+CI/CD Implementation:
+
+Create a GitHub Actions workflow for automated testing and deployment
+Add linting and TypeScript type checking to the CI pipeline
+Configure automated deployment to Vercel on successful builds
+
+
+Feature Implementation Priority:
+
+Focus on completing country tax rules database (issue #110)
+Enhance OCR functionality (issue #75)
+Add the capability to export calendar data to Excel/Sheets (issue #72)
+
+
+Code Improvements:
+
+Implement better error handling, especially for OCR processing
+Add more comprehensive unit and integration tests
+Enhance documentation for developers
 
 ### Recent Fixes/Features
 #### Fixed

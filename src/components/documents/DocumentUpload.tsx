@@ -34,20 +34,9 @@ export default function DocumentUpload(props: DocumentUploadProps) {
   const processFileWithOCR = async (file: File) => {
     setIsProcessing(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch('/api/documents/extract', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error('OCR processing failed');
-      }
-      
-      const result = await response.json();
-      return result.metadata;
+      const { processImageWithOCR } = await import('@/lib/documentUtils');
+      const metadata = await processImageWithOCR(file);
+      return metadata;
     } catch (error) {
       console.error('Error during OCR processing:', error);
       return null;

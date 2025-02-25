@@ -1,4 +1,3 @@
-// src/components/documents/DocumentUpload.tsx
 'use client';
 
 import { useState, useRef } from 'react';
@@ -8,7 +7,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
 type DocumentUploadProps = {
   onSuccess?: () => void;
-  onFileSelect?: (file: File) => void;  // New prop for multi-step
+  onFileSelect?: (file: File, extractedData?: any) => void;  // Updated prop
 };
 
 type ValidationError = {
@@ -19,6 +18,7 @@ type ValidationError = {
 export default function DocumentUpload(props: DocumentUploadProps) {
   const [error, setError] = useState<ValidationError | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): ValidationError | null => {
@@ -31,7 +31,32 @@ export default function DocumentUpload(props: DocumentUploadProps) {
     return null;
   };
 
-  const handleFile = (file: File) => {
+  const processFileWithOCR = async (file: File) => {
+    setIsProcessing(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/documents/extract', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('OCR processing failed');
+      }
+      
+      const result = await response.json();
+      return result.metadata;
+    } catch (error) {
+      console.error('Error during OCR processing:', error);
+      return null;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleFile = async (file: File) => {
     const validationError = validateFile(file);
     if (validationError) {
       setError(validationError);
@@ -39,7 +64,14 @@ export default function DocumentUpload(props: DocumentUploadProps) {
     }
 
     setError(null);
-    if (props.onFileSelect) {
+    
+    // Process with OCR if it's an image or PDF
+    if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+      const extractedData = await processFileWithOCR(file);
+      if (props.onFileSelect) {
+        props.onFileSelect(file, extractedData);
+      }
+    } else if (props.onFileSelect) {
       props.onFileSelect(file);
     }
   };
@@ -84,25 +116,35 @@ export default function DocumentUpload(props: DocumentUploadProps) {
       >
         <label className="flex flex-col items-center justify-center w-full h-32 cursor-pointer">
           <div className="flex flex-col items-center justify-center pt-5 pb-6">
-            <svg
-              className={`w-8 h-8 mb-4 ${dragActive ? 'text-indigo-600' : 'text-gray-500'}`}
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 16"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-              />
-            </svg>
-            <p className="mb-2 text-sm text-gray-500">
-              <span className="font-semibold">Click to upload</span> or drag and drop
-            </p>
-            <p className="text-xs text-gray-500">PDF, PNG, JPG or JPEG (max. 10MB)</p>
+            {isProcessing ? (
+              <>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                <p className="text-sm text-gray-500">Processing document with OCR...</p>
+              </>
+            ) : (
+              <>
+                <svg
+                  className={`w-8 h-8 mb-4 ${dragActive ? 'text-indigo-600' : 'text-gray-500'}`}
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 16"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                  />
+                </svg>
+                <p className="mb-2 text-sm text-gray-500">
+                  <span className="font-semibold">Click to upload</span> or drag and drop
+                </p>
+                <p className="text-xs text-gray-500">PDF, PNG, JPG or JPEG (max. 10MB)</p>
+                <p className="text-xs text-primary mt-1">Documents will be scanned with OCR</p>
+              </>
+            )}
           </div>
           <input
             ref={fileInputRef}
@@ -110,6 +152,7 @@ export default function DocumentUpload(props: DocumentUploadProps) {
             className="hidden"
             onChange={handleFileChange}
             accept=".pdf,.png,.jpg,.jpeg"
+            disabled={isProcessing}
           />
         </label>
       </div>

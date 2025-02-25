@@ -44,7 +44,7 @@
     "resend": "^2.1.0",
     "lucide-react": "^0.263.1",
     "tailwind-merge": "^2.6.0",
-    "tesseract.js": "^5.0.2",
+    "tesseract.js": "^6.0.0",
     "tippy.js": "^6.3.7",
     "xlsx": "^0.18.5"
   },

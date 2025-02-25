@@ -71,8 +71,8 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Version control
 
 - **Document Intelligence**
-  - OCR integration
-  - Automatic data extraction
+  - ✅ OCR integration
+  - ✅ Automatic data extraction
   - Smart categorization
   - Authenticity validation
 
@@ -121,6 +121,7 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Recent Fixes/Features
 #### Fixed
+- Added basic OCR
 - Fixing annoying Accept Terms page issue where users have to accept upon each login
 - Negative days showing in Netherlands (and other countries) after meeting residency requirements
 - Progress bar continuing past 100% when exceeding residency days requirement

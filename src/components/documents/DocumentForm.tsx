@@ -21,6 +21,7 @@ interface DocumentFormProps {
   };
   onSubmit: (data: any) => void;
   onCancel?: () => void;
+  isSubmitting?: boolean;
 }
 
 interface FormData {
@@ -33,7 +34,7 @@ interface FormData {
   tags: string;
 }
 
-export default function DocumentForm({ initialData, onSubmit, onCancel }: DocumentFormProps) {
+export default function DocumentForm({ initialData, onSubmit, onCancel, isSubmitting = false }: DocumentFormProps) {
   const [formData, setFormData] = useState<FormData>({
     title: initialData?.title || '',
     type: initialData?.type || DocumentType.OTHER,
@@ -203,8 +204,14 @@ export default function DocumentForm({ initialData, onSubmit, onCancel }: Docume
         <Button
           type="submit"
           variant="primary"
+          disabled={isSubmitting}
         >
-          Save
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <span className="animate-spin h-4 w-4 mr-2 border-t-2 border-b-2 border-text rounded-full"></span>
+              Saving...
+            </span>
+          ) : 'Save'}
         </Button>
       </div>
     </form>

@@ -34,7 +34,7 @@ export default function DocumentUpload(props: DocumentUploadProps) {
   const processFileWithOCR = async (file: File) => {
     setIsProcessing(true);
     try {
-      const { processImageWithOCR } = await import('@/lib/documentUtils');
+      const { processImageWithOCR } = await import('@/lib/document-utils');
       const metadata = await processImageWithOCR(file);
       return metadata;
     } catch (error) {

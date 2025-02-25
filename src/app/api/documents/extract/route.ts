@@ -4,6 +4,10 @@ import { createWorker } from 'tesseract.js';
 
 export async function POST(req: NextRequest) {
   try {
+    if (!req.headers.get('x-user-email')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     console.log("OCR API route called with POST method");
     const formData = await req.formData();
     const file = formData.get('file') as File;

@@ -1,26 +1,33 @@
 // src/app/api/documents/extract/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import * as tesseract from 'tesseract.js';
-import { parse as parseDate } from 'date-fns';
+import { createWorker } from 'tesseract.js';
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("OCR API route called with POST method");
     const formData = await req.formData();
     const file = formData.get('file') as File;
     
     if (!file) {
+      console.log("No file provided in request");
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Convert file to buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Process with Tesseract
-    const { data } = await tesseract.recognize(buffer, 'eng', {
-      logger: m => console.log(m),
-    });
+    // Convert file to ArrayBuffer and then to Buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    
+    console.log(`Processing file: ${file.name}, size: ${buffer.length} bytes`);
+    
+    // Initialize Tesseract worker
+    const worker = await createWorker('eng');
+    
+    // Process image with Tesseract
+    const { data } = await worker.recognize(buffer);
+    await worker.terminate();
 
     const extractedText = data.text;
+    console.log(`OCR extraction completed. Extracted ${extractedText.length} characters`);
     
     // Extract potential metadata
     const metadata = {
@@ -31,17 +38,20 @@ export async function POST(req: NextRequest) {
       documentType: identifyDocumentType(extractedText),
     };
 
+    console.log("Extracted metadata:", metadata);
     return NextResponse.json({ success: true, metadata });
   } catch (error) {
     console.error('OCR extraction error:', error);
-    return NextResponse.json({ error: 'Failed to process document' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to process document', 
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 
 // Helper functions to extract metadata
 function extractDocumentNumber(text: string): string | null {
   // Look for common document number patterns
-  // This is a simplified example - you might want to use more complex regex patterns
   const patterns = [
     /passport no\.?\s*[:]\s*([A-Z0-9]+)/i,
     /document no\.?\s*[:]\s*([A-Z0-9]+)/i,
@@ -59,7 +69,7 @@ function extractDocumentNumber(text: string): string | null {
 }
 
 function extractDates(text: string): { issueDate: string | null, expiryDate: string | null } {
-  // Simplified date extraction - could be enhanced with more patterns
+  // Simplified date extraction
   const issueDatePatterns = [
     /date of issue\s*[:]\s*(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/i,
     /issued on\s*[:]\s*(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/i,
@@ -94,7 +104,7 @@ function extractDates(text: string): { issueDate: string | null, expiryDate: str
 }
 
 function extractCountry(text: string): string | null {
-  // Look for country names - this is a simplified example
+  // Look for country names
   const countryPatterns = [
     /issued by\s*[:]\s*([A-Za-z\s]+)/i,
     /country\s*[:]\s*([A-Za-z\s]+)/i,
@@ -134,4 +144,9 @@ function identifyDocumentType(text: string): string | null {
   }
   
   return 'OTHER';
+}
+
+// Add this to the same file
+export async function GET() {
+  return NextResponse.json({ status: 'OCR API is working' });
 }

@@ -6,9 +6,28 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 
+interface TaxAnalysisResult {
+  residency_risks: Array<{
+    country_code: string;
+    country_name: string;
+    days_present: number;
+    threshold: number;
+    remaining_days: number;
+    risk_level: string;
+  }>;
+  recommendations: Array<{
+    type: string;
+    title: string;
+    description: string;
+    actions: string[];
+  }>;
+  tax_optimization_score: number;
+  ai_insights: string;
+}
+
 export default function TaxAdvisorTest() {
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState<TaxAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Example travel history data

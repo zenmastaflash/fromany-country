@@ -24,8 +24,8 @@ interface UserData {
 interface TaxRule {
   country_code: string;
   name: string;
-  residency_threshold: number | null;  // Allow null values
-  special_rules: string | Record<string, any> | null;  // Also allow null for special_rules
+  residency_threshold: number | null;
+  special_rules: any; // Change to 'any' to accommodate Prisma's JSON type
 }
 
 interface ResidencyRisk {
@@ -151,9 +151,14 @@ export async function POST(req: NextRequest) {
     let taxRules: TaxRule[] = [];
     try {
       const countries = travel_history.map((entry: TravelEntry) => entry.country);
-      taxRules = await prisma.country_tax_rules.findMany({
+      taxRules = (await prisma.country_tax_rules.findMany({
         where: { country_code: { in: countries } }
-      });
+      })).map(rule => ({
+        country_code: rule.country_code,
+        name: rule.name,
+        residency_threshold: rule.residency_threshold,
+        special_rules: rule.special_rules
+      }));
     } catch (error) {
       console.error('Database error:', error);
       // Fallback to mock data for testing

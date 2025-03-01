@@ -2,10 +2,14 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/input';
 import BackgroundTest from './BackgroundTest';
+import TaxAdvisorTest from './TaxAdvisorTest';
 
 export default function UITest() {
   return (
     <div className="space-y-12 p-8">
+      {/* Tax Advisor Test */}
+      <TaxAdvisorTest />
+
       {/* Background Tests */}
       <BackgroundTest />
 

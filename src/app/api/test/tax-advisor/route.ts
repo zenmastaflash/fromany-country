@@ -24,8 +24,8 @@ interface UserData {
 interface TaxRule {
   country_code: string;
   name: string;
-  residency_threshold: number;
-  special_rules: string | Record<string, any>;
+  residency_threshold: number | null;  // Allow null values
+  special_rules: string | Record<string, any> | null;  // Also allow null for special_rules
 }
 
 interface ResidencyRisk {
@@ -55,7 +55,8 @@ function simulateAIAnalysis(userData: UserData, taxRules: TaxRule[]) {
     const countryRule = taxRules.find(rule => rule.country_code === countryCode);
     if (!countryRule) return null;
     
-    const threshold = countryRule.residency_threshold;
+    // Use a default value (e.g., 183 days) if residency_threshold is null
+    const threshold = countryRule.residency_threshold ?? 183;
     const remainingDays = threshold - days;
     const riskLevel = remainingDays < 30 ? 'high' : remainingDays < 60 ? 'medium' : 'low';
     

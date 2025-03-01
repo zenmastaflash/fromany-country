@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
     // Get tax rules from database
     let taxRules = [];
     try {
-      const countries = travel_history.map(entry => entry.country);
+      const countries = travel_history.map((entry: TravelEntry) => entry.country);
       taxRules = await prisma.country_tax_rules.findMany({
         where: { country_code: { in: countries } }
       });

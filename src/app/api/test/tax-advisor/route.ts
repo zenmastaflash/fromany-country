@@ -2,8 +2,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// Define TypeScript interfaces
+interface TravelEntry {
+  country: string;
+  entry_date: string;
+  exit_date: string | null;
+  city?: string;
+}
+
+interface UserData {
+  userId: string;
+  citizenship?: string;
+  travel_history: TravelEntry[];
+  income_sources?: {
+    type: string;
+    country: string;
+    annual_amount: number;
+  }[];
+}
+
+interface TaxRule {
+  country_code: string;
+  name: string;
+  residency_threshold: number;
+  special_rules: string | Record<string, any>;
+}
+
+interface ResidencyRisk {
+  country_code: string;
+  country_name: string;
+  days_present: number;
+  threshold: number;
+  remaining_days: number;
+  risk_level: string;
+}
+
 // Mock function to simulate AI analysis
-function simulateAIAnalysis(userData, taxRules) {
+function simulateAIAnalysis(userData: UserData, taxRules: TaxRule[]) {
   // This would be replaced by actual AI service call
   const travelDaysByCountry = userData.travel_history.reduce((acc, trip) => {
     const countryCode = trip.country;
@@ -90,7 +125,7 @@ function simulateAIAnalysis(userData, taxRules) {
 }
 
 // Helper function to calculate a tax optimization score
-function calculateTaxOptimizationScore(residencyRisks, userData) {
+function calculateTaxOptimizationScore(residencyRisks: ResidencyRisk[], userData: UserData) {
   const highRiskCount = residencyRisks.filter(risk => risk.risk_level === 'high').length;
   const mediumRiskCount = residencyRisks.filter(risk => risk.risk_level === 'medium').length;
   

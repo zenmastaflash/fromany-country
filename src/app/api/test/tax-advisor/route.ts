@@ -147,9 +147,9 @@ export async function POST(req: NextRequest) {
     const { userId, travel_history } = data;
     
     // Get tax rules from database
-    let taxRules = [];
+    let taxRules: TaxRule[] = [];
     try {
-      const countries = travel_history.map(entry => entry.country);
+      const countries = travel_history.map((entry: TravelEntry) => entry.country);
       taxRules = await prisma.country_tax_rules.findMany({
         where: { country_code: { in: countries } }
       });
@@ -190,7 +190,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Perform AI analysis (simulated for now)
-    const analysisResults = simulateAIAnalysis(data, taxRules);
+    const analysisResults = simulateAIAnalysis(data as UserData, taxRules);
     
     return NextResponse.json(analysisResults);
   } catch (error) {

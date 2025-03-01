@@ -40,11 +40,11 @@ interface ResidencyRisk {
 // Mock function to simulate AI analysis
 function simulateAIAnalysis(userData: UserData, taxRules: TaxRule[]) {
   // This would be replaced by actual AI service call
-  const travelDaysByCountry = userData.travel_history.reduce((acc, trip) => {
+  const travelDaysByCountry = userData.travel_history.reduce((acc: Record<string, number>, trip) => {
     const countryCode = trip.country;
     const startDate = new Date(trip.entry_date);
     const endDate = trip.exit_date ? new Date(trip.exit_date) : new Date();
-    const dayCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    const dayCount = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     
     acc[countryCode] = (acc[countryCode] || 0) + dayCount;
     return acc;

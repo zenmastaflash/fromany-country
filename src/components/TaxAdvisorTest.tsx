@@ -70,7 +70,9 @@ export default function TaxAdvisorTest() {
       const data = await response.json();
       setResults(data);
     } catch (err) {
-      setError(err.message || 'An error occurred');
+      setError(
+        err instanceof Error ? err.message : 'An error occurred'
+      );
     } finally {
       setLoading(false);
     }

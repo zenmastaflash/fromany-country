@@ -67,7 +67,7 @@ function simulateAIAnalysis(userData: UserData, taxRules: TaxRule[]) {
       remaining_days: remainingDays,
       risk_level: riskLevel
     };
-  }).filter(Boolean);
+  }).filter((risk): risk is ResidencyRisk => risk !== null);
   
   // Generate tax optimization recommendations
   const recommendations = [];

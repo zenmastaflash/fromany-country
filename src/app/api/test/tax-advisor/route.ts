@@ -73,7 +73,7 @@ function simulateAIAnalysis(userData: UserData, taxRules: TaxRule[]) {
   const recommendations = [];
   
   // Check for high-risk countries
-  const highRiskCountries = residencyRisks.filter(risk => risk.risk_level === 'high');
+  const highRiskCountries = residencyRisks.filter((risk): risk is ResidencyRisk => risk.risk_level === 'high');
   if (highRiskCountries.length > 0) {
     recommendations.push({
       type: 'warning',
@@ -126,8 +126,8 @@ function simulateAIAnalysis(userData: UserData, taxRules: TaxRule[]) {
 
 // Helper function to calculate a tax optimization score
 function calculateTaxOptimizationScore(residencyRisks: ResidencyRisk[], userData: UserData) {
-  const highRiskCount = residencyRisks.filter(risk => risk.risk_level === 'high').length;
-  const mediumRiskCount = residencyRisks.filter(risk => risk.risk_level === 'medium').length;
+  const highRiskCount = residencyRisks.filter((risk): risk is ResidencyRisk => risk.risk_level === 'high').length;
+  const mediumRiskCount = residencyRisks.filter((risk): risk is ResidencyRisk => risk.risk_level === 'medium').length;
   
   // Score from 0-100, where higher is better
   let score = 100;

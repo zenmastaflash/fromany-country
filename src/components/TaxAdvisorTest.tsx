@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 export default function TaxAdvisorTest() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Example travel history data
   const exampleData = {

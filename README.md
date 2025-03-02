@@ -61,9 +61,9 @@ While dark mode offers these benefits, it's important to note that it may not be
   - ✅ Shows tax liability
   - ✅ Critical dates (currently only document expiration, but looking to add important filing dates as well)
   - ✅ Compliance Alerts
-  - AI integration
+  - ✅ AI integration
   - AI session caching - will be implemented later, when im sure that i can do this and maintain user privacy
-  - Travel pattern recognition - will help to determine if tax optimization is improving or worsening over time
+  - ✅ Travel pattern recognition - will help to determine if tax optimization is improving or worsening over time
 
 - **Document Management**
   - ✅ Upload & storage using Supabase and AWS S3 
@@ -133,6 +133,7 @@ Configure automated deployment to Vercel on successful builds
 
 Feature Implementation Priority:
 
+AI Dashboard Integration
 Focus on completing country tax rules database (issue #110)
 Enhance OCR functionality (issue #75)
 Add the capability to export calendar data to Excel/Sheets (issue #72)
@@ -146,22 +147,10 @@ Enhance documentation for developers
 
 ### Recent Fixes/Features
 #### Fixed
-- Added basic OCR
-- Fixing annoying Accept Terms page issue where users have to accept upon each login
-- Negative days showing in Netherlands (and other countries) after meeting residency requirements
-- Progress bar continuing past 100% when exceeding residency days requirement
-- Progress bar color staying red even after meeting residency threshold
-- Bug with TypeScript definitions causing build errors
+- 
 
 #### Features
-- Residency status indicators now show:
- - Blue bar when minimum days requirement is met
- - Red bar until minimum days requirement is met
- - "Minimum residency requirement met (X days)" message when requirement is met
- - Capped progress bar at 100% for residency permits/visas
-- Tax residency warnings still show progress beyond 100% with red bar
-- Added proper TypeScript definitions for all functions
-- Kept existing compliant status messages
+- AI Tax Advisor - not quite working properly, but will continue to iterate
 
 ## Quick Start
 

@@ -6,6 +6,7 @@ import TaxLiabilityCard from '@/components/dashboard/TaxLiabilityCard';
 import CriticalDatesCard from '@/components/dashboard/CriticalDatesCard';
 import ComplianceAlertsCard from '@/components/dashboard/ComplianceAlertsCard';
 import TermsDrawer from '@/components/TermsDrawer';
+import TaxAdvisorCard from '@/components/dashboard/TaxAdvisorCard';
 
 // Move the component that uses useSearchParams into a separate component
 function DashboardContent() {
@@ -112,10 +113,9 @@ export default function DashboardPage() {
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
           />
+          <TaxAdvisorCard />
           <CriticalDatesCard dates={data.criticalDates} />
-          <div className="lg:col-span-2">
-            <ComplianceAlertsCard alerts={data.complianceAlerts} />
-          </div>
+          <ComplianceAlertsCard alerts={data.complianceAlerts} />
         </div>
       </main>
       

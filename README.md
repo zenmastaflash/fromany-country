@@ -61,6 +61,9 @@ While dark mode offers these benefits, it's important to note that it may not be
   - ✅ Shows tax liability
   - ✅ Critical dates (currently only document expiration, but looking to add important filing dates as well)
   - ✅ Compliance Alerts
+  - AI integration
+  - AI session caching - will be implemented later, when im sure that i can do this and maintain user privacy
+  - Travel pattern recognition - will help to determine if tax optimization is improving or worsening over time
 
 - **Document Management**
   - ✅ Upload & storage using Supabase and AWS S3 
@@ -71,8 +74,8 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Version control
 
 - **Document Intelligence**
-  - OCR integration
-  - Automatic data extraction
+  - ✅ OCR integration
+  - ✅ Automatic data extraction
   - Smart categorization
   - Authenticity validation
 
@@ -117,10 +120,33 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Current Works
 
-- Build out country-based tax laws, important dates, etc
+Dependency Updates:
+
+Update AWS SDK packages to the latest versions (before they enter maintenance mode)
+
+CI/CD Implementation:
+
+Create a GitHub Actions workflow for automated testing and deployment
+Add linting and TypeScript type checking to the CI pipeline
+Configure automated deployment to Vercel on successful builds
+
+
+Feature Implementation Priority:
+
+Focus on completing country tax rules database (issue #110)
+Enhance OCR functionality (issue #75)
+Add the capability to export calendar data to Excel/Sheets (issue #72)
+
+
+Code Improvements:
+
+Implement better error handling, especially for OCR processing
+Add more comprehensive unit and integration tests
+Enhance documentation for developers
 
 ### Recent Fixes/Features
 #### Fixed
+- Added basic OCR
 - Fixing annoying Accept Terms page issue where users have to accept upon each login
 - Negative days showing in Netherlands (and other countries) after meeting residency requirements
 - Progress bar continuing past 100% when exceeding residency days requirement

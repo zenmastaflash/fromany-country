@@ -108,8 +108,8 @@ export default function SharedDocumentList({ refreshKey = 0 }: SharedDocumentLis
                 <div>
                   <h3 className="text-lg font-medium">
                     <button 
-                      onClick={() => setViewingDocument(doc)}
-                      className="text-link hover:underline focus:outline-none"
+                      onClick={() => doc.fileUrl ? setViewingDocument(doc) : null}
+                      className={`text-link hover:underline focus:outline-none ${!doc.fileUrl ? 'cursor-default' : ''}`}
                     >
                       {doc.title || 'Untitled Document'}
                     </button>

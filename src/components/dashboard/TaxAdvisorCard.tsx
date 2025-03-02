@@ -65,6 +65,12 @@ export default function TaxAdvisorCard() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Add tax advice disclaimer */}
+        <div className="mb-4 p-3 bg-secondary-dark rounded text-sm">
+          <p className="font-semibold mb-1">Tax Advice Disclaimer:</p>
+          <p>This AI-powered analysis is for informational and planning purposes only. Always consult with a qualified tax professional for advice specific to your situation.</p>
+        </div>
+        
         {error && (
           <div className="p-4 mb-4 text-accent bg-secondary-dark rounded">
             <p>{error}</p>

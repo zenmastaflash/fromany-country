@@ -61,6 +61,9 @@ While dark mode offers these benefits, it's important to note that it may not be
   - ✅ Shows tax liability
   - ✅ Critical dates (currently only document expiration, but looking to add important filing dates as well)
   - ✅ Compliance Alerts
+  - AI integration
+  - AI session caching - will be implemented later, when im sure that i can do this and maintain user privacy
+  - Travel pattern recognition - will help to determine if tax optimization is improving or worsening over time
 
 - **Document Management**
   - ✅ Upload & storage using Supabase and AWS S3 

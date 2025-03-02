@@ -23,13 +23,6 @@ export interface UserData {
     country: string;
     annual_amount: number;
   }[];
-  documents?: Array<{
-    type: string;
-    country: string;
-    expiryDate?: string;
-    issuingCountry: string;
-    status: string;
-  }>;
 }
 
 export interface TaxRule {
@@ -71,13 +64,22 @@ export async function analyzeTaxSituation(
     // Create a prompt for the AI with necessary context
     const prompt = `
 You are an expert tax advisor for digital nomads and global travelers. 
-Based on the following travel history and tax rules, please analyze the tax implications, risks, and opportunities.
+Based on the following user data and tax rules, please analyze the tax implications, risks, and opportunities.
 
 USER TRAVEL HISTORY:
 ${JSON.stringify(userData.travel_history, null, 2)}
 
+USER DOCUMENTS:
+${JSON.stringify(userData.documents, null, 2)}
+
 TAX RULES BY COUNTRY:
 ${JSON.stringify(taxRules, null, 2)}
+
+Important considerations:
+1. RESIDENCY_PERMIT documents indicate the user MUST maintain residency in that country
+2. For countries where the user has a RESIDENCY_PERMIT, being below the threshold is a risk, not exceeding it
+3. For countries with no residency documents, normal tax residency thresholds apply
+4. VISA documents may modify tax obligations or create specific requirements
 
 Please provide the following:
 1. Calculate days present in each country and identify residency risks

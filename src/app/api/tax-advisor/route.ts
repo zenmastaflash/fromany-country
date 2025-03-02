@@ -87,18 +87,6 @@ export async function POST(req: NextRequest) {
     // Analyze tax situation
     const analysisResults = await analyzeTaxSituation(userData, formattedTaxRules);
     
-    // Store analysis results for future reference
-    // This could be used to track how recommendations change over time
-    // or to show historical analysis
-    const storedResult = await prisma.tax_analysis.create({
-      data: {
-        user_id: userId,
-        analysis_date: new Date(),
-        result: analysisResults as any,  // Store the entire result
-        year: currentYear,
-      },
-    });
-    
     return NextResponse.json(analysisResults);
   } catch (error) {
     console.error('Error in tax-advisor API:', error);

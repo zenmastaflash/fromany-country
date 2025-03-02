@@ -129,7 +129,7 @@ export default function TaxAdvisorCard() {
             
             {/* Button to view more details */}
             <div className="text-center">
-              <Button variant="link">
+              <Button variant="ghost">
                 View Full Analysis
               </Button>
             </div>

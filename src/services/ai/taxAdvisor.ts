@@ -14,6 +14,14 @@ export interface TravelEntry {
   purpose?: string;
 }
 
+export interface DocumentEntry {
+  type: string;
+  status: string;
+  country: string;
+  expiryDate?: string;
+  issuingCountry: string;
+}
+
 export interface UserData {
   userId: string;
   citizenship?: string;
@@ -23,6 +31,7 @@ export interface UserData {
     country: string;
     annual_amount: number;
   }[];
+  documents?: DocumentEntry[];
 }
 
 export interface TaxRule {

@@ -23,6 +23,13 @@ export interface UserData {
     country: string;
     annual_amount: number;
   }[];
+  documents?: Array<{
+    type: string;
+    country: string;
+    expiryDate?: string;
+    issuingCountry: string;
+    status: string;
+  }>;
 }
 
 export interface TaxRule {

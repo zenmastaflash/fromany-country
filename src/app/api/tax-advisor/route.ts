@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       },
     });
     
-    // Format travel data for analysis
+    // Format travel data for analysis.
     const formattedTravelData = travelData.map(entry => ({
       country: entry.country,
       entry_date: entry.entry_date.toISOString(),

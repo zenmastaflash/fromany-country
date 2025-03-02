@@ -1,6 +1,6 @@
 {
   "functions": {
-    ".next/server/app/api/tax-advisor/**": {
+    ".next/server/app/api/**/route.js": {
       "maxDuration": 60
     }
   },

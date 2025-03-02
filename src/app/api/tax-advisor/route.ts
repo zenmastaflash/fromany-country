@@ -5,9 +5,11 @@ import { prisma } from '@/lib/prisma';
 import { analyzeTaxSituation } from '@/services/ai/taxAdvisor';
 import { TaxRule, UserData } from '@/services/ai/taxAdvisor';
 
-export const config = {
-  maxDuration: 60 // This extends the timeout to 60 seconds (maximum for hobby plans)
-};
+export const runtime = 'nodejs';  // Or 'edge' depending on your deployment
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+export const maxDuration = 60;  // In seconds
 
 export async function POST(req: NextRequest) {
   try {

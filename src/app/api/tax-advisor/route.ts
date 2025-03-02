@@ -5,6 +5,10 @@ import { prisma } from '@/lib/prisma';
 import { analyzeTaxSituation } from '@/services/ai/taxAdvisor';
 import { TaxRule, UserData } from '@/services/ai/taxAdvisor';
 
+export const config = {
+  maxDuration: 60 // This extends the timeout to 60 seconds (maximum for hobby plans)
+};
+
 export async function POST(req: NextRequest) {
   try {
     // Authenticate the request

@@ -85,13 +85,19 @@ ${JSON.stringify(userData.documents || [], null, 2)}
 TAX RULES BY COUNTRY:
 ${JSON.stringify(taxRules, null, 2)}
 
-Important considerations:
-1. RESIDENCY_PERMIT documents indicate the user MUST maintain residency in that country
-2. For countries where the user has a RESIDENCY_PERMIT, being below the threshold is a risk, not exceeding it
-3. For countries with no residency documents, normal tax residency thresholds apply
-4. VISA documents may modify tax obligations or create specific requirements
-5. IMPORTANT: Pay careful attention to document expiry dates and advise on renewal if needed
-6. Also consider if the user has documents from multiple countries and potential conflicts
+CRITICAL INSTRUCTIONS ABOUT RESIDENCY PERMITS:
+* RESIDENCY_PERMIT documents mean the user is REQUIRED to spend a minimum time in that country
+* For countries where the user has a RESIDENCY_PERMIT, THE RISK IS NOT SPENDING ENOUGH DAYS
+* This is the OPPOSITE of regular tourist visits where the risk is spending too many days
+* In the Netherlands, for example, a residency permit typically requires spending AT LEAST 183 days per year
+* If a user has a RESIDENCY_PERMIT, DO NOT advise them to reduce their days in that country
+* Instead, warn if they haven't stayed enough days to maintain their residency status
+
+Other important considerations:
+* For countries WITHOUT residency documents, normal tax residency thresholds apply (risk of staying too many days)
+* VISA documents may modify tax obligations or create specific requirements
+* Pay careful attention to document expiry dates and advise on renewal if needed
+* Consider if the user has documents from multiple countries and potential conflicts
 
 Please provide the following:
 1. Calculate days present in each country and identify residency risks, taking into account document status

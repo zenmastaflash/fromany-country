@@ -160,16 +160,59 @@ Format your response as a valid JSON with the following structure:
  * Enhanced fallback function that considers documents
  */
 function fallbackAnalysis(userData: UserData, taxRules: TaxRule[]): AnalysisResult {
-  // Calculate days present in each country
-  const travelDaysByCountry = userData.travel_history.reduce((acc: Record<string, number>, trip) => {
-    const countryCode = trip.country;
-    const startDate = new Date(trip.entry_date);
-    const endDate = trip.exit_date ? new Date(trip.exit_date) : new Date();
-    const dayCount = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  // First, convert travel entries to CountryStay format
+  const stays = userData.travel_history.map(travel => ({
+    startDate: new Date(travel.entry_date),
+    endDate: travel.exit_date ? new Date(travel.exit_date) : undefined,
+    country: travel.country
+  }));
+  
+  // Create a map of country codes to day counts using the proper calculation
+  const countryDays: Record<string, number> = {};
+  const currentDate = new Date();
+  
+  // Get unique countries
+  const uniqueCountries = [...new Set(stays.map(stay => stay.country))];
+  
+  // Use the same calculation logic as in tax-utils.ts
+  uniqueCountries.forEach(country => {
+    const countryStays = stays.filter(stay => stay.country === country);
+    let totalDays = 0;
     
-    acc[countryCode] = (acc[countryCode] || 0) + dayCount;
-    return acc;
-  }, {});
+    // Sort stays by start date
+    const sortedStays = [...countryStays].sort((a, b) => 
+      a.startDate.getTime() - b.startDate.getTime()
+    );
+    
+    // Track days we've already counted to avoid double counting
+    const countedDays = new Set<string>();
+    
+    sortedStays.forEach(stay => {
+      let start = new Date(stay.startDate);
+      let end = stay.endDate && stay.endDate < currentDate ? 
+          new Date(stay.endDate) : new Date();
+      
+      // Don't count future days
+      if (end > currentDate) end = currentDate;
+      
+      if (start > end) return;
+      
+      // Count each day once
+      let current = new Date(start);
+      while (current <= end) {
+        const dateKey = current.toISOString().split('T')[0]; // YYYY-MM-DD format
+        if (!countedDays.has(dateKey)) {
+          countedDays.add(dateKey);
+          totalDays++;
+        }
+        
+        // Move to next day
+        current.setDate(current.getDate() + 1);
+      }
+    });
+    
+    countryDays[country] = totalDays;
+  });
   
   // Group documents by country
   const documentsByCountry: Record<string, DocumentEntry[]> = {};
@@ -185,7 +228,7 @@ function fallbackAnalysis(userData: UserData, taxRules: TaxRule[]): AnalysisResu
   }
   
   // Identify countries approaching tax residency
-  const residencyRisks = Object.entries(travelDaysByCountry)
+  const residencyRisks = Object.entries(countryDays)
     .map(([countryCode, days]) => {
       const countryRule = taxRules.find(rule => rule.country_code === countryCode);
       if (!countryRule) return null;

@@ -25,7 +25,7 @@ interface TaxAnalysisResult {
   ai_insights: string;
 }
 
-export default function TaxAdvisorCard() {
+export default function TaxAdvisorCard({ dateRange }: { dateRange?: string }) {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<TaxAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +39,7 @@ export default function TaxAdvisorCard() {
       const response = await fetch('/api/tax-advisor', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ dateRange })
       });
       
       if (!response.ok) throw new Error('Failed to get tax analysis');

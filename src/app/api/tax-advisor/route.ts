@@ -21,21 +21,49 @@ export async function POST(req: NextRequest) {
     
     const userId = token.sub as string;
     
-    // Get current year for filtering
-    const currentYear = new Date().getFullYear();
+    // Extract dateRange from request body
+    const { dateRange = 'current_year' } = await req.json();
+    
+    // Calculate date range
+    const now = new Date();
+    let startDate;
+    let endDate = now;
+
+    switch (dateRange) {
+      case 'last_year':
+        startDate = new Date(now.getFullYear() - 1, 0, 1);
+        endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+        break;
+      case 'rolling_year':
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      case 'current_year':
+      default:
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+    }
     
     // Get user's travel data from database
     const travelData = await prisma.travel.findMany({
       where: {
         user_id: userId,
         OR: [
-          { 
+          // Entries within the date range
+          {
             entry_date: {
-              gte: new Date(`${currentYear - 1}-01-01`),
-            } 
+              gte: startDate,
+              lte: endDate
+            }
           },
-          { 
-            exit_date: null 
+          // Entries that started before but extend into the range
+          {
+            entry_date: {
+              lt: startDate
+            },
+            exit_date: {
+              gte: startDate
+            }
           }
         ]
       },

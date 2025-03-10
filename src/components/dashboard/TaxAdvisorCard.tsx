@@ -13,6 +13,7 @@ interface TaxAnalysisResult {
     threshold: number;
     remaining_days: number;
     risk_level: string;
+    document_status?: string;
   }>;
   recommendations: Array<{
     type: string;
@@ -28,6 +29,7 @@ export default function TaxAdvisorCard() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<TaxAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showFullAnalysis, setShowFullAnalysis] = useState(false);
 
   const runTaxAnalysis = async () => {
     try {
@@ -42,6 +44,7 @@ export default function TaxAdvisorCard() {
       if (!response.ok) throw new Error('Failed to get tax analysis');
       const data = await response.json();
       setResults(data);
+      setShowFullAnalysis(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -65,7 +68,7 @@ export default function TaxAdvisorCard() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Add tax advice disclaimer */}
+        {/* Tax advice disclaimer */}
         <div className="mb-4 p-3 bg-secondary-dark rounded text-sm">
           <p className="font-semibold mb-1">Tax Advice Disclaimer:</p>
           <p>This AI-powered analysis is for informational and planning purposes only. Always consult with a qualified tax professional for advice specific to your situation.</p>
@@ -79,11 +82,11 @@ export default function TaxAdvisorCard() {
         
         {!results && !loading && !error && (
           <div className="text-center p-6">
-            <p className="text-link">Get personalized tax insights based on your travel history</p>
+            <p className="text-link">Get personalized tax insights based on your travel history and documents</p>
           </div>
         )}
         
-        {results && (
+        {results && !showFullAnalysis && (
           <div className="space-y-6">
             {/* Score display */}
             <div>
@@ -129,9 +132,90 @@ export default function TaxAdvisorCard() {
             
             {/* Button to view more details */}
             <div className="text-center">
-              <Button variant="ghost">
+              <Button variant="ghost" onClick={() => setShowFullAnalysis(true)}>
                 View Full Analysis
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Full analysis view */}
+        {results && showFullAnalysis && (
+          <div className="space-y-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowFullAnalysis(false)}
+              className="mb-4"
+            >
+              ← Back to Summary
+            </Button>
+            
+            {/* Residency Risks Section */}
+            <div>
+              <h3 className="font-bold mb-4">Residency Status by Country</h3>
+              <div className="space-y-4">
+                {results.residency_risks.map((risk, index) => (
+                  <Card key={index} className="p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-bold">{risk.country_name}</h4>
+                      <span 
+                        className={`px-2 py-1 text-xs rounded ${
+                          risk.risk_level === 'high' ? 'bg-red-100 text-red-800' : 
+                          risk.risk_level === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-green-100 text-green-800'
+                        }`}
+                      >
+                        {risk.risk_level.toUpperCase()} RISK
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+                      <div>
+                        <span className="text-link">Days Present:</span> {risk.days_present}
+                      </div>
+                      <div>
+                        <span className="text-link">Threshold:</span> {risk.threshold}
+                      </div>
+                    </div>
+                    {risk.document_status && (
+                      <div className="mt-2 text-sm">
+                        <span className="text-link">Document Status:</span> {risk.document_status}
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+            
+            {/* All Recommendations */}
+            <div>
+              <h3 className="font-bold mb-4">All Recommendations</h3>
+              <div className="space-y-4">
+                {results.recommendations.map((rec, index) => (
+                  <Card key={index} className="p-4">
+                    <div className="flex items-center mb-2">
+                      <span 
+                        className={`w-3 h-3 rounded-full mr-2 ${
+                          rec.type === 'warning' ? 'bg-accent' : 
+                          rec.type === 'opportunity' ? 'bg-primary' : 
+                          'bg-link'
+                        }`} 
+                      />
+                      <h4 className="font-bold">{rec.title}</h4>
+                    </div>
+                    <p className="text-text mb-3">{rec.description}</p>
+                    {rec.actions.length > 0 && (
+                      <div className="bg-secondary-dark p-3 rounded">
+                        <p className="font-semibold mb-1">Recommended Actions:</p>
+                        <ul className="list-disc list-inside">
+                          {rec.actions.map((action, i) => (
+                            <li key={i} className="text-sm">{action}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         )}

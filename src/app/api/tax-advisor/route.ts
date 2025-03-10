@@ -52,6 +52,23 @@ export async function POST(req: NextRequest) {
       city: entry.city ?? undefined,
       purpose: entry.purpose ?? undefined,
     }));
+
+    const documents = await prisma.document.findMany({
+      where: {
+        userId: userId,
+        type: { in: ['PASSPORT', 'VISA', 'TOURIST_VISA', 'RESIDENCY_PERMIT'] },
+        status: 'active',
+      },
+    });
+
+    // Format document data
+    const formattedDocuments = documents.map(doc => ({
+      type: doc.type,
+      status: doc.status,
+      country: doc.issuingCountry || '',
+      expiryDate: doc.expiryDate?.toISOString(),
+      issuingCountry: doc.issuingCountry || '',
+    }));
     
     // Get user profile for additional data like citizenship
     const userProfile = await prisma.user.findUnique({
@@ -68,6 +85,7 @@ export async function POST(req: NextRequest) {
       userId,
       citizenship: userProfile?.taxResidency ?? undefined,
       travel_history: formattedTravelData,
+      documents: formattedDocuments,
     };
     
     // Get tax rules from countries user has traveled to

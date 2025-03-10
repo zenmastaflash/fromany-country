@@ -22,9 +22,10 @@ export async function POST(req: NextRequest) {
     const userId = token.sub as string;
     
     // Extract dateRange from request body
-    const { dateRange = 'current_year' } = await req.json();
+    const body = await req.json();
+    const { dateRange = 'current_year' } = body;
     
-    // Calculate date range
+    // Calculate date range using the same logic as in dashboard API
     const now = new Date();
     let startDate;
     let endDate = now;
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
         break;
     }
     
-    // Get user's travel data from database
+    // Get user's travel data from database with correct date range
     const travelData = await prisma.travel.findMany({
       where: {
         user_id: userId,

@@ -31,6 +31,18 @@ export default function TaxAdvisorCard({ dateRange = 'current_year' }: { dateRan
   const [error, setError] = useState<string | null>(null);
   const [showFullAnalysis, setShowFullAnalysis] = useState(false);
 
+  const getDateRangeLabel = () => {
+    switch (dateRange) {
+      case 'last_year':
+        return 'Last Calendar Year';
+      case 'rolling_year':
+        return 'Past 365 Days';
+      case 'current_year':
+      default:
+        return 'Current Year';
+    }
+  };
+
   const runTaxAnalysis = async () => {
     try {
       setLoading(true);
@@ -57,7 +69,10 @@ export default function TaxAdvisorCard({ dateRange = 'current_year' }: { dateRan
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>AI Tax Advisor</span>
+          <div>
+            <span>AI Tax Advisor</span>
+            <span className="text-xs ml-2 text-link">({getDateRangeLabel()})</span>
+          </div>
           <Button 
             variant="primary" 
             onClick={runTaxAnalysis}

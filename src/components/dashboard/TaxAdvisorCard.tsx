@@ -25,7 +25,7 @@ interface TaxAnalysisResult {
   ai_insights: string;
 }
 
-export default function TaxAdvisorCard({ dateRange }: { dateRange?: string }) {
+export default function TaxAdvisorCard({ dateRange = 'current_year' }: { dateRange?: string }) {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<TaxAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +80,15 @@ export default function TaxAdvisorCard({ dateRange }: { dateRange?: string }) {
             <p>{error}</p>
           </div>
         )}
+
+        {/* Loading indicator */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+            <p className="text-text">Analyzing your tax situation...</p>
+            <p className="text-sm text-link mt-2">This may take a minute...</p>
+          </div>
+        )}
         
         {!results && !loading && !error && (
           <div className="text-center p-6">
@@ -87,7 +96,7 @@ export default function TaxAdvisorCard({ dateRange }: { dateRange?: string }) {
           </div>
         )}
         
-        {results && !showFullAnalysis && (
+        {results && !loading && !showFullAnalysis && (
           <div className="space-y-6">
             {/* Score display */}
             <div>

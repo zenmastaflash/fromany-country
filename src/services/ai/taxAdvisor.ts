@@ -1,5 +1,6 @@
 // src/services/ai/taxAdvisor.ts
 import OpenAI from 'openai';
+import { TaxRisk } from '@/lib/tax-utils';
 
 // Initialize OpenAI with API key from environment variables
 const openai = new OpenAI({
@@ -43,6 +44,12 @@ export interface TaxRule {
   tax_treaties?: any;
 }
 
+export interface CalculatedTaxData {
+  taxRisks: TaxRisk[];
+  documentsByCountry: Record<string, DocumentEntry[]>;
+  dateRangeDescription: string;
+}
+
 export interface AnalysisResult {
   residency_risks: Array<{
     country_code: string;
@@ -64,40 +71,53 @@ export interface AnalysisResult {
 }
 
 /**
- * Analyzes user travel data for tax implications using OpenAI's GPT model
+ * Analyzes user tax situation using pre-calculated values from tax-utils
+ * and generates insights using OpenAI's GPT model
  */
 export async function analyzeTaxSituation(
   userData: UserData,
-  taxRules: TaxRule[]
+  taxRules: TaxRule[],
+  calculatedData: CalculatedTaxData
 ): Promise<AnalysisResult> {
   try {
-    // Create a more comprehensive prompt that includes document information
+    // Create a prompt that includes pre-calculated values
     const prompt = `
 You are an expert tax advisor for digital nomads and global travelers. 
-Based on the following user data and tax rules, please analyze the tax implications, risks, and opportunities.
+I'm providing you with pre-calculated tax analysis data. DO NOT recalculate these values.
+Instead, focus on providing insights, recommendations, and explanations based on the given information.
 
-USER TRAVEL HISTORY:
+DATE RANGE: ${calculatedData.dateRangeDescription}
+
+PRE-CALCULATED TAX RISKS (DO NOT RECALCULATE):
+${JSON.stringify(calculatedData.taxRisks, null, 2)}
+
+USER DOCUMENTS BY COUNTRY:
+${JSON.stringify(calculatedData.documentsByCountry, null, 2)}
+
+USER TRAVEL HISTORY (for reference only):
 ${JSON.stringify(userData.travel_history, null, 2)}
 
-USER DOCUMENTS:
-${JSON.stringify(userData.documents || [], null, 2)}
-
-TAX RULES BY COUNTRY:
+TAX RULES BY COUNTRY (for reference only):
 ${JSON.stringify(taxRules, null, 2)}
 
-Important considerations:
-1. RESIDENCY_PERMIT documents indicate the user MUST maintain residency in that country
-2. For countries where the user has a RESIDENCY_PERMIT, being below the threshold is a risk, not exceeding it
-3. For countries with no residency documents, normal tax residency thresholds apply
-4. VISA documents may modify tax obligations or create specific requirements
-5. IMPORTANT: Pay careful attention to document expiry dates and advise on renewal if needed
-6. Also consider if the user has documents from multiple countries and potential conflicts
+CRITICAL INSTRUCTIONS ABOUT RESIDENCY PERMITS:
+* For ANY country where the user has a RESIDENCY_PERMIT or VISA document, the threshold value is a MINIMUM requirement, not a maximum limit.
+* When "documentBased" is true, ALWAYS recommend meeting or exceeding the minimum day requirement, NEVER suggest staying under it.
+* For countries WITHOUT residency documents, recommend staying under thresholds to avoid tax residency.
 
-Please provide the following:
-1. Calculate days present in each country and identify residency risks, taking into account document status
-2. Provide specific recommendations to optimize tax situations based on current documents
-3. Rate the overall tax optimization on a scale of 0-100
-4. Provide concise, actionable insights that consider both travel patterns and document status
+IMPORTANT NOTES ABOUT THE PRE-CALCULATED DATA:
+* The "risk" field indicates the current risk level already calculated correctly.
+* For countries with RESIDENCY_PERMIT documents, the risk is about NOT spending ENOUGH days.
+* For countries without residency documents, the risk is about spending TOO MANY days.
+* The "days" value is the accurate count of days spent in each country.
+* "documentBased" indicates if calculations considered valid residency documents.
+* "daysNeeded" is how many more days are needed (for residency permits) or how many days until threshold is hit.
+
+Based on this pre-calculated data, please provide:
+1. Interpretation of residency risks for each country
+2. Recommendations tailored to each country's situation
+3. An overall tax optimization score (0-100) based on the data
+4. Concise, action-oriented insights for the user
 
 Format your response as a valid JSON with the following structure:
 {
@@ -145,146 +165,89 @@ Format your response as a valid JSON with the following structure:
   } catch (error) {
     console.error('Error in AI tax analysis:', error);
     
-    // Fallback to basic analysis for robustness
-    return fallbackAnalysis(userData, taxRules);
+    // Fallback to basic analysis using pre-calculated data
+    return generateFallbackAnalysis(calculatedData);
   }
 }
 
 /**
- * Enhanced fallback function that considers documents
+ * Generates a basic analysis when OpenAI fails, using pre-calculated data
  */
-function fallbackAnalysis(userData: UserData, taxRules: TaxRule[]): AnalysisResult {
-  // Calculate days present in each country
-  const travelDaysByCountry = userData.travel_history.reduce((acc: Record<string, number>, trip) => {
-    const countryCode = trip.country;
-    const startDate = new Date(trip.entry_date);
-    const endDate = trip.exit_date ? new Date(trip.exit_date) : new Date();
-    const dayCount = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+function generateFallbackAnalysis(calculatedData: CalculatedTaxData): AnalysisResult {
+  const residencyRisks = calculatedData.taxRisks.map(risk => {
+    // Find documents for this country
+    const countryDocs = (calculatedData.documentsByCountry[risk.country] || []);
     
-    acc[countryCode] = (acc[countryCode] || 0) + dayCount;
-    return acc;
-  }, {});
-  
-  // Group documents by country
-  const documentsByCountry: Record<string, DocumentEntry[]> = {};
-  
-  if (userData.documents && userData.documents.length > 0) {
-    userData.documents.forEach(doc => {
-      const country = doc.issuingCountry;
-      if (!documentsByCountry[country]) {
-        documentsByCountry[country] = [];
-      }
-      documentsByCountry[country].push(doc);
-    });
-  }
-  
-  // Identify countries approaching tax residency
-  const residencyRisks = Object.entries(travelDaysByCountry)
-    .map(([countryCode, days]) => {
-      const countryRule = taxRules.find(rule => rule.country_code === countryCode);
-      if (!countryRule) return null;
-      
-      const threshold = countryRule.residency_threshold ?? 183;
-      const remainingDays = threshold - days;
-      
-      // Check if user has documents for this country
-      const countryDocs = documentsByCountry[countryCode] || [];
-      const hasResidencyPermit = countryDocs.some(d => 
-        d.type === 'RESIDENCY_PERMIT' && 
+    // Create document status message
+    let documentStatus = "No valid documents found";
+    if (countryDocs.length > 0) {
+      const validDocs = countryDocs.filter(d => 
         d.status === 'active' && 
         (!d.expiryDate || new Date(d.expiryDate) > new Date())
       );
       
-      // Determine risk level based on documents and days
-      let riskLevel = 'low';
-      if (hasResidencyPermit) {
-        // For residency permits, risk is high if not spending enough time
-        riskLevel = remainingDays > threshold * 0.5 ? 'high' :
-                    remainingDays > threshold * 0.25 ? 'medium' : 'low';
-      } else {
-        // For standard tax residency concerns, risk is high if approaching threshold
-        riskLevel = remainingDays < 30 ? 'high' :
-                    remainingDays < 60 ? 'medium' : 'low';
-      }
-      
-      // Create document status message
-      let documentStatus = "No valid documents found";
-      if (countryDocs.length > 0) {
-        const validDocs = countryDocs.filter(d => 
-          d.status === 'active' && 
-          (!d.expiryDate || new Date(d.expiryDate) > new Date())
-        );
+      if (validDocs.length > 0) {
+        const docTypes = [...new Set(validDocs.map(d => d.type))].join(', ');
+        const earliestExpiry = validDocs
+          .filter(d => d.expiryDate)
+          .sort((a, b) => new Date(a.expiryDate!).getTime() - new Date(b.expiryDate!).getTime())[0];
         
-        if (validDocs.length > 0) {
-          const docTypes = [...new Set(validDocs.map(d => d.type))].join(', ');
-          const earliestExpiry = validDocs
-            .filter(d => d.expiryDate)
-            .sort((a, b) => new Date(a.expiryDate!).getTime() - new Date(b.expiryDate!).getTime())[0];
-          
-          documentStatus = earliestExpiry 
-            ? `Valid ${docTypes} until ${earliestExpiry.expiryDate}` 
-            : `Valid ${docTypes}`;
-        }
+        documentStatus = earliestExpiry 
+          ? `Valid ${docTypes} until ${earliestExpiry.expiryDate}` 
+          : `Valid ${docTypes}`;
       }
-      
-      return {
-        country_code: countryCode,
-        country_name: countryRule.name,
-        days_present: days,
-        threshold: threshold,
-        remaining_days: remainingDays,
-        risk_level: riskLevel,
-        document_status: documentStatus
-      };
-    })
-    .filter((risk): risk is NonNullable<typeof risk> => risk !== null);
+    }
+    
+    // Calculate remaining days appropriately based on residency status
+    let remainingDays = 0;
+    if (risk.documentBased && risk.daysNeeded !== undefined) {
+      remainingDays = risk.daysNeeded;
+    } else {
+      remainingDays = risk.threshold ? risk.threshold - risk.days : 0;
+    }
+    
+    return {
+      country_code: risk.country,
+      country_name: risk.country, // Would be better with full country names
+      days_present: risk.days,
+      threshold: risk.threshold || 183,
+      remaining_days: remainingDays,
+      risk_level: risk.risk,
+      document_status: documentStatus
+    };
+  });
   
-  // Generate recommendations based on documents and travel patterns
+  // Generate recommendations based on risk levels
   const recommendations = [];
   
   // Check for high-risk countries
   const highRiskCountries = residencyRisks.filter(risk => risk.risk_level === 'high');
   if (highRiskCountries.length > 0) {
-    const docsNeeded = highRiskCountries.filter(c => c.document_status === "No valid documents found");
-    const residencyNotMet = highRiskCountries.filter(c => c.document_status.includes("RESIDENCY_PERMIT"));
+    // For residency permit countries (need more days)
+    const residencyPermitCountries = highRiskCountries.filter(c => 
+      calculatedData.taxRisks.find(r => r.country === c.country_code)?.documentBased === true
+    );
     
-    if (docsNeeded.length > 0) {
-      recommendations.push({
-        type: 'warning',
-        title: 'Documentation Needed',
-        description: `You may need residency documentation for: ${docsNeeded.map(c => c.country_name).join(', ')}`,
-        actions: ['Consider applying for appropriate visas or residency permits', 'Consult with a tax professional']
-      });
-    }
-    
-    if (residencyNotMet.length > 0) {
+    if (residencyPermitCountries.length > 0) {
       recommendations.push({
         type: 'warning',
         title: 'Residency Requirements Not Met',
-        description: `You need more days in: ${residencyNotMet.map(c => c.country_name).join(', ')} to maintain residency status`,
-        actions: ['Plan additional time in these countries', 'Check specific residency requirements']
+        description: `You need to spend more days in: ${residencyPermitCountries.map(c => c.country_name).join(', ')} to maintain your residency status`,
+        actions: ['Plan additional time to meet minimum day requirements', 'Consider relocating to these countries sooner']
       });
     }
-  }
-  
-  // Check for expiring documents
-  if (userData.documents) {
-    const now = new Date();
-    const threeMonthsLater = new Date(now);
-    threeMonthsLater.setMonth(now.getMonth() + 3);
     
-    const expiringDocs = userData.documents.filter(doc => 
-      doc.expiryDate && 
-      new Date(doc.expiryDate) > now && 
-      new Date(doc.expiryDate) < threeMonthsLater
+    // For tourist/non-resident countries (too many days)
+    const tooManyDaysCountries = highRiskCountries.filter(c => 
+      !calculatedData.taxRisks.find(r => r.country === c.country_code)?.documentBased
     );
     
-    if (expiringDocs.length > 0) {
+    if (tooManyDaysCountries.length > 0) {
       recommendations.push({
         type: 'warning',
-        title: 'Documents Expiring Soon',
-        description: `You have ${expiringDocs.length} document(s) expiring in the next 3 months`,
-        actions: ['Begin renewal process', 'Check renewal requirements for each country']
+        title: 'Tax Residency Risk',
+        description: `You're approaching tax residency thresholds in: ${tooManyDaysCountries.map(c => c.country_name).join(', ')}`,
+        actions: ['Reduce time in these countries to stay under thresholds', 'Consider obtaining residency permits if long-term stay is desired']
       });
     }
   }
@@ -294,21 +257,25 @@ function fallbackAnalysis(userData: UserData, taxRules: TaxRule[]): AnalysisResu
     recommendations.push({
       type: 'info',
       title: 'No Immediate Tax Concerns',
-      description: 'Based on your current travel patterns and documentation, you don\'t appear to be at risk.',
-      actions: ['Continue to monitor your travel days', 'Keep documents and travel history up to date']
+      description: 'Your current travel patterns align with residency requirements where applicable.',
+      actions: [
+        'Continue meeting minimum days in countries with residency permits',
+        'Stay under thresholds in countries without residency documents',
+        'Keep documents and travel history up to date'
+      ]
     });
   }
   
   // Calculate a tax optimization score
   const highRiskCount = residencyRisks.filter(risk => risk.risk_level === 'high').length;
   const mediumRiskCount = residencyRisks.filter(risk => risk.risk_level === 'medium').length;
-  const documentedCountries = Object.keys(documentsByCountry).length;
   
   let score = 100;
   score -= highRiskCount * 20;
   score -= mediumRiskCount * 10;
   
   // Bonus for having proper documentation
+  const documentedCountries = Object.keys(calculatedData.documentsByCountry).length;
   if (documentedCountries > 0) {
     score += Math.min(documentedCountries * 5, 15);
   }
@@ -319,6 +286,6 @@ function fallbackAnalysis(userData: UserData, taxRules: TaxRule[]): AnalysisResu
     residency_risks: residencyRisks,
     recommendations: recommendations,
     tax_optimization_score: taxOptimizationScore,
-    ai_insights: "This analysis considers both your travel patterns and document status. Keep your documents updated and ensure you meet residency requirements where applicable."
+    ai_insights: "This analysis considers both your residency permit requirements and tourist visa limitations. For countries with residency permits, focus on meeting minimum day requirements. For other countries, stay under thresholds unless you plan to establish residency. Consult a tax professional for personalized advice."
   };
 }

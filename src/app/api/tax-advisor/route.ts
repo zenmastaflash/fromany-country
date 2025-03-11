@@ -2,10 +2,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { prisma } from '@/lib/prisma';
-import { analyzeTaxSituation } from '@/services/ai/taxAdvisor';
-import { TaxRule, UserData } from '@/services/ai/taxAdvisor';
+import { analyzeTaxSituation, TaxRule, UserData, DocumentEntry } from '@/services/ai/taxAdvisor';
+import { calculateTaxResidenceRiskFromTravels, TaxRisk } from '@/lib/tax-utils';
+import { ResidencyStatus } from '@prisma/client';
 
-export const runtime = 'nodejs';  // Or 'edge' depending on your deployment
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
@@ -21,21 +22,54 @@ export async function POST(req: NextRequest) {
     
     const userId = token.sub as string;
     
-    // Get current year for filtering
-    const currentYear = new Date().getFullYear();
+    // Extract dateRange from request body
+    const body = await req.json();
+    const { dateRange = 'current_year' } = body;
     
-    // Get user's travel data from database
+    // Calculate date range using the same logic as in dashboard API
+    const now = new Date();
+    let startDate;
+    let endDate = now;
+    let dateRangeDescription = 'Current Year';
+
+    switch (dateRange) {
+      case 'last_year':
+        startDate = new Date(now.getFullYear() - 1, 0, 1);
+        endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+        dateRangeDescription = 'Last Calendar Year';
+        break;
+      case 'rolling_year':
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        dateRangeDescription = 'Past 365 Days';
+        break;
+      case 'current_year':
+      default:
+        startDate = new Date(now.getFullYear(), 0, 1);
+        dateRangeDescription = 'Current Year';
+        break;
+    }
+    
+    // Get user's travel data from database with correct date range
     const travelData = await prisma.travel.findMany({
       where: {
         user_id: userId,
         OR: [
-          { 
+          // Entries within the date range
+          {
             entry_date: {
-              gte: new Date(`${currentYear - 1}-01-01`),
-            } 
+              gte: startDate,
+              lte: endDate
+            }
           },
-          { 
-            exit_date: null 
+          // Entries that started before but extend into the range
+          {
+            entry_date: {
+              lt: startDate
+            },
+            exit_date: {
+              gte: startDate
+            }
           }
         ]
       },
@@ -44,7 +78,7 @@ export async function POST(req: NextRequest) {
       },
     });
     
-    // Format travel data for analysis.
+    // Format travel data for analysis
     const formattedTravelData = travelData.map(entry => ({
       country: entry.country,
       entry_date: entry.entry_date.toISOString(),
@@ -53,6 +87,7 @@ export async function POST(req: NextRequest) {
       purpose: entry.purpose ?? undefined,
     }));
 
+    // Get documents
     const documents = await prisma.document.findMany({
       where: {
         userId: userId,
@@ -108,8 +143,54 @@ export async function POST(req: NextRequest) {
       tax_treaties: rule.tax_treaties ?? undefined,
     }));
     
-    // Analyze tax situation
-    const analysisResults = await analyzeTaxSituation(userData, formattedTaxRules);
+    // Get user tax status data
+    const userTaxStatuses = await prisma.user_tax_status.findMany({
+      where: {
+        user_id: userId,
+        country_code: {
+          in: countries,
+        },
+      },
+    });
+    
+    // Format to object for easier lookup, ensuring proper types for the tax-utils functions
+    const userTaxStatusMap: { [country: string]: { required_presence?: number | null; residency_status?: ResidencyStatus | null } } = {};
+    userTaxStatuses.forEach(status => {
+      userTaxStatusMap[status.country_code] = {
+        required_presence: status.required_presence,
+        residency_status: status.residency_status,
+      };
+    });
+    
+    // CALCULATE TAX RISKS USING TAX-UTILS FUNCTIONS
+    const taxRisks: TaxRisk[] = calculateTaxResidenceRiskFromTravels(
+      travelData,
+      documents,
+      taxRules,
+      userTaxStatusMap,
+      startDate,
+      endDate
+    );
+    
+    // Group documents by country for AI analysis
+    const documentsByCountry: Record<string, DocumentEntry[]> = {};
+    formattedDocuments.forEach(doc => {
+      const country = doc.issuingCountry;
+      if (!documentsByCountry[country]) {
+        documentsByCountry[country] = [];
+      }
+      documentsByCountry[country].push(doc);
+    });
+    
+    // Create the calculated data package
+    const calculatedData = {
+      taxRisks,
+      documentsByCountry,
+      dateRangeDescription
+    };
+    
+    // Analyze tax situation using the pre-calculated data
+    const analysisResults = await analyzeTaxSituation(userData, formattedTaxRules, calculatedData);
     
     return NextResponse.json(analysisResults);
   } catch (error) {

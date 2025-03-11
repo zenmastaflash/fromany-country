@@ -113,7 +113,7 @@ export default function DashboardPage() {
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
           />
-          <TaxAdvisorCard />
+          <TaxAdvisorCard dateRange={dateRange} />
           <CriticalDatesCard dates={data.criticalDates} />
           <ComplianceAlertsCard alerts={data.complianceAlerts} />
         </div>

@@ -25,38 +25,110 @@ interface TaxAnalysisResult {
   ai_insights: string;
 }
 
-export default function TaxAdvisorCard() {
+export default function TaxAdvisorCard({ dateRange = 'current_year' }: { dateRange?: string }) {
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<TaxAnalysisResult | null>(null);
+  const [results, setResults] = useState<Record<string, TaxAnalysisResult | null>>({
+    current_year: null,
+    last_year: null,
+    rolling_year: null
+  });
   const [error, setError] = useState<string | null>(null);
   const [showFullAnalysis, setShowFullAnalysis] = useState(false);
+  const [analysisInProgress, setAnalysisInProgress] = useState<string[]>([]);
+
+  const getDateRangeLabel = () => {
+    switch (dateRange) {
+      case 'last_year':
+        return 'Last Calendar Year';
+      case 'rolling_year':
+        return 'Past 365 Days';
+      case 'current_year':
+      default:
+        return 'Current Year';
+    }
+  };
 
   const runTaxAnalysis = async () => {
     try {
       setLoading(true);
       setError(null);
       
+      // Start analysis for current date range
+      setAnalysisInProgress([dateRange]);
+      
       const response = await fetch('/api/tax-advisor', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ dateRange })
       });
       
       if (!response.ok) throw new Error('Failed to get tax analysis');
       const data = await response.json();
-      setResults(data);
-      setShowFullAnalysis(false);
+      
+      // Store result for this date range
+      setResults(prev => ({
+        ...prev,
+        [dateRange]: data
+      }));
+      
+      setAnalysisInProgress(prev => prev.filter(r => r !== dateRange));
+      
+      // Once primary analysis is done, start background analysis for other ranges
+      if (dateRange !== 'current_year') {
+        fetchAnalysisForRange('current_year');
+      }
+      if (dateRange !== 'last_year') {
+        fetchAnalysisForRange('last_year');
+      }
+      if (dateRange !== 'rolling_year') {
+        fetchAnalysisForRange('rolling_year');
+      }
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      setAnalysisInProgress([]);
     } finally {
       setLoading(false);
     }
   };
+  
+  const fetchAnalysisForRange = async (range: string) => {
+    if (results[range] !== null || analysisInProgress.includes(range)) return;
+    
+    setAnalysisInProgress(prev => [...prev, range]);
+    
+    try {
+      const response = await fetch('/api/tax-advisor', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ dateRange: range })
+      });
+      
+      if (!response.ok) throw new Error(`Failed to get analysis for ${range}`);
+      const data = await response.json();
+      
+      setResults(prev => ({
+        ...prev,
+        [range]: data
+      }));
+    } catch (error) {
+      console.error(`Error fetching ${range} analysis:`, error);
+    } finally {
+      setAnalysisInProgress(prev => prev.filter(r => r !== range));
+    }
+  };
+
+  // Use result from current date range
+  const currentResult = results[dateRange];
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>AI Tax Advisor</span>
+          <div>
+            <span>AI Tax Advisor</span>
+            <span className="text-xs ml-2 text-link">({getDateRangeLabel()})</span>
+          </div>
           <Button 
             variant="primary" 
             onClick={runTaxAnalysis}
@@ -79,14 +151,23 @@ export default function TaxAdvisorCard() {
             <p>{error}</p>
           </div>
         )}
+
+        {/* Loading indicator */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+            <p className="text-text">Analyzing your tax situation...</p>
+            <p className="text-sm text-link mt-2">This may take a minute...</p>
+          </div>
+        )}
         
-        {!results && !loading && !error && (
+        {!currentResult && !loading && !error && (
           <div className="text-center p-6">
             <p className="text-link">Get personalized tax insights based on your travel history and documents</p>
           </div>
         )}
         
-        {results && !showFullAnalysis && (
+        {currentResult && !loading && !showFullAnalysis && (
           <div className="space-y-6">
             {/* Score display */}
             <div>
@@ -94,38 +175,38 @@ export default function TaxAdvisorCard() {
               <div className="relative h-4 w-full bg-secondary rounded-full overflow-hidden">
                 <div 
                   className={`absolute left-0 top-0 h-full ${
-                    results.tax_optimization_score > 60 ? 'bg-primary' : 
-                    results.tax_optimization_score > 30 ? 'bg-accent' : 
+                    currentResult.tax_optimization_score > 60 ? 'bg-primary' : 
+                    currentResult.tax_optimization_score > 30 ? 'bg-accent' : 
                     'bg-red-500'
                   }`}
-                  style={{ width: `${results.tax_optimization_score}%` }}
+                  style={{ width: `${currentResult.tax_optimization_score}%` }}
                 />
               </div>
-              <p className="mt-2 text-link">{results.tax_optimization_score}/100</p>
+              <p className="mt-2 text-link">{currentResult.tax_optimization_score}/100</p>
             </div>
             
             {/* AI Insights */}
             <div>
               <h3 className="font-bold mb-4">AI Insights</h3>
-              <p className="text-text">{results.ai_insights}</p>
+              <p className="text-text">{currentResult.ai_insights}</p>
             </div>
             
             {/* Top Recommendation (showing just the most important one) */}
-            {results.recommendations.length > 0 && (
+            {currentResult.recommendations.length > 0 && (
               <div>
                 <h3 className="font-bold mb-4">Key Recommendation</h3>
                 <Card className="p-4">
                   <div className="flex items-center mb-2">
                     <span 
                       className={`w-3 h-3 rounded-full mr-2 ${
-                        results.recommendations[0].type === 'warning' ? 'bg-accent' : 
-                        results.recommendations[0].type === 'opportunity' ? 'bg-primary' : 
+                        currentResult.recommendations[0].type === 'warning' ? 'bg-accent' : 
+                        currentResult.recommendations[0].type === 'opportunity' ? 'bg-primary' : 
                         'bg-link'
                       }`} 
                     />
-                    <h4 className="font-bold">{results.recommendations[0].title}</h4>
+                    <h4 className="font-bold">{currentResult.recommendations[0].title}</h4>
                   </div>
-                  <p className="text-text mb-3">{results.recommendations[0].description}</p>
+                  <p className="text-text mb-3">{currentResult.recommendations[0].description}</p>
                 </Card>
               </div>
             )}
@@ -140,7 +221,7 @@ export default function TaxAdvisorCard() {
         )}
 
         {/* Full analysis view */}
-        {results && showFullAnalysis && (
+        {currentResult && showFullAnalysis && (
           <div className="space-y-6">
             <Button 
               variant="ghost" 
@@ -154,7 +235,7 @@ export default function TaxAdvisorCard() {
             <div>
               <h3 className="font-bold mb-4">Residency Status by Country</h3>
               <div className="space-y-4">
-                {results.residency_risks.map((risk, index) => (
+                {currentResult.residency_risks.map((risk, index) => (
                   <Card key={index} className="p-4">
                     <div className="flex justify-between items-center mb-2">
                       <h4 className="font-bold">{risk.country_name}</h4>
@@ -190,7 +271,7 @@ export default function TaxAdvisorCard() {
             <div>
               <h3 className="font-bold mb-4">All Recommendations</h3>
               <div className="space-y-4">
-                {results.recommendations.map((rec, index) => (
+                {currentResult.recommendations.map((rec, index) => (
                   <Card key={index} className="p-4">
                     <div className="flex items-center mb-2">
                       <span 

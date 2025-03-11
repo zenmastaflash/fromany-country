@@ -18,22 +18,31 @@ export async function PATCH(
 
   try {
     const data = await request.json() as TravelUpdateData;
+    
+    // Create an update object with proper typing
+    const updateData: Prisma.TravelUpdateInput = {};
+    
+    // Handle individual fields with proper typing
+    if (data.entry_date) {
+      updateData.entry_date = new Date(data.entry_date as string);
+    }
+    
+    if (data.exit_date !== undefined) {
+      updateData.exit_date = data.exit_date ? new Date(data.exit_date as string) : null;
+    }
+    
+    if (data.country) updateData.country = data.country as string;
+    if (data.city) updateData.city = data.city as string;
+    if (data.purpose) updateData.purpose = data.purpose as string;
+    if (data.visa_type !== undefined) updateData.visa_type = data.visa_type as string | null;
+    if (data.notes !== undefined) updateData.notes = data.notes as string | null;
+    
     const travel = await prisma.travel.update({
       where: { 
         id: params.id,
         user_id: session.user.id  // Ensure user owns this record
       },
-      data: {
-        ...(data.entry_date && { entry_date: new Date(data.entry_date) }),
-        ...(data.exit_date !== undefined && { 
-          exit_date: data.exit_date ? new Date(data.exit_date) : null 
-        }),
-        ...(data.country && { country: data.country }),
-        ...(data.city && { city: data.city }),
-        ...(data.purpose && { purpose: data.purpose }),
-        ...(data.visa_type !== undefined && { visa_type: data.visa_type }),
-        ...(data.notes !== undefined && { notes: data.notes }),
-      },
+      data: updateData
     });
 
     return NextResponse.json(travel);

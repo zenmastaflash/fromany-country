@@ -7,7 +7,7 @@ import type { Prisma } from '@prisma/client';
 
 interface TravelUpdateData extends Partial<Omit<Prisma.TravelUncheckedUpdateInput, 'id' | 'user_id'>> {}
 
-export async function PUT(
+export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
@@ -17,25 +17,22 @@ export async function PUT(
   }
 
   try {
-    const data = await request.json();
+    const data = await request.json() as TravelUpdateData;
     const travel = await prisma.travel.update({
       where: { 
         id: params.id,
         user_id: session.user.id  // Ensure user owns this record
       },
       data: {
-        country: data.country,
-        city: data.city,
-        entry_date: data.entry_date ? {
-          set: new Date(data.entry_date)
-        } : undefined,
-        exit_date: data.exit_date ? {
-          set: new Date(data.exit_date)
-        } : { set: null },
-        purpose: data.purpose,
-        visa_type: data.visa_type,
-        notes: data.notes,
-        status: 'active'
+        ...(data.entry_date && { entry_date: new Date(data.entry_date) }),
+        ...(data.exit_date !== undefined && { 
+          exit_date: data.exit_date ? new Date(data.exit_date) : null 
+        }),
+        ...(data.country && { country: data.country }),
+        ...(data.city && { city: data.city }),
+        ...(data.purpose && { purpose: data.purpose }),
+        ...(data.visa_type !== undefined && { visa_type: data.visa_type }),
+        ...(data.notes !== undefined && { notes: data.notes }),
       },
     });
 

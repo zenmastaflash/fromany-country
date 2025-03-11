@@ -56,21 +56,15 @@
   --color-link: #AFDDE5;
 }
 
-/* Larger resize handles for FullCalendar */
-.fc-event .fc-event-resizer {
-  width: 12px;
-  height: 12px;
-  background-color: white;
-  border: 2px solid #2E2E2E;
-  border-radius: 50%;
-  z-index: 4;
+/* Larger more visible resize handles for FullCalendar */
+.fc-h-event .fc-event-resizer {
+  display: block !important;
+  width: 8px !important;
+  height: 16px !important;
+  border: 2px solid white !important;
+  background: #964734 !important;
+  opacity: 1 !important;
 }
 
-/* Better positioning for start/end handles */
-.fc-direction-ltr .fc-event-resizer-start { left: -6px; }
-.fc-direction-ltr .fc-event-resizer-end { right: -6px; }
-
-/* Add hover effect */
-.fc-event .fc-event-resizer:hover {
-  background-color: #AFDDE5;
-}
+.fc-direction-ltr .fc-h-event .fc-event-resizer-start { left: -4px !important; }
+.fc-direction-ltr .fc-h-event .fc-event-resizer-end { right: -4px !important; }

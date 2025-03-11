@@ -53,6 +53,12 @@ export default function TravelPage() {
     setSelectedTravel(travel);
     setShowEventModal(true);
   };
+  
+  const handleCalendarSelect = (dateInfo: { start: Date; end?: Date }) => {
+    setSelectedDates(dateInfo);
+    setSelectedTravel(null);
+    setShowForm(true);
+  };
 
   const getCurrentLocation = () => {
     const now = new Date();
@@ -117,6 +123,7 @@ export default function TravelPage() {
                   setSelectedDates(undefined);
                   setSelectedTravel(null);
                   fetchTravels();
+                  setCalendarKey(prev => prev + 1); // Force calendar refresh
                 }} 
                 onCancel={() => {
                   setShowForm(false);
@@ -174,10 +181,16 @@ export default function TravelPage() {
           </Card>
         )}
         
-        <TravelCalendar 
-          key={calendarKey}
-          onEdit={handleEventEdit} 
-        />
+        <div className="relative">
+          <TravelCalendar 
+            key={calendarKey}
+            onEdit={handleEventEdit}
+            onSelect={handleCalendarSelect}
+          />
+          <div className="absolute bottom-4 right-4 bg-secondary p-2 rounded-md text-xs opacity-70">
+            <p>Click to add travel • Drag events to move • Drag edges to resize</p>
+          </div>
+        </div>
 
         <Card>
           <CardHeader>

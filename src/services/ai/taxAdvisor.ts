@@ -100,6 +100,11 @@ ${JSON.stringify(userData.travel_history, null, 2)}
 TAX RULES BY COUNTRY (for reference only):
 ${JSON.stringify(taxRules, null, 2)}
 
+CRITICAL INSTRUCTIONS ABOUT RESIDENCY PERMITS:
+* For ANY country where the user has a RESIDENCY_PERMIT or VISA document, the threshold value is a MINIMUM requirement, not a maximum limit.
+* When "documentBased" is true, ALWAYS recommend meeting or exceeding the minimum day requirement, NEVER suggest staying under it.
+* For countries WITHOUT residency documents, recommend staying under thresholds to avoid tax residency.
+
 IMPORTANT NOTES ABOUT THE PRE-CALCULATED DATA:
 * The "risk" field indicates the current risk level already calculated correctly.
 * For countries with RESIDENCY_PERMIT documents, the risk is about NOT spending ENOUGH days.
@@ -220,23 +225,21 @@ function generateFallbackAnalysis(calculatedData: CalculatedTaxData): AnalysisRe
   if (highRiskCountries.length > 0) {
     // For residency permit countries (need more days)
     const residencyPermitCountries = highRiskCountries.filter(c => 
-      c.document_status.includes('RESIDENCY_PERMIT') || 
-      c.document_status.includes('residency permit')
+      calculatedData.taxRisks.find(r => r.country === c.country_code)?.documentBased === true
     );
     
     if (residencyPermitCountries.length > 0) {
       recommendations.push({
         type: 'warning',
         title: 'Residency Requirements Not Met',
-        description: `You need more days in: ${residencyPermitCountries.map(c => c.country_name).join(', ')} to maintain residency status`,
-        actions: ['Plan additional time in these countries', 'Check specific residency requirements']
+        description: `You need to spend more days in: ${residencyPermitCountries.map(c => c.country_name).join(', ')} to maintain your residency status`,
+        actions: ['Plan additional time to meet minimum day requirements', 'Consider relocating to these countries sooner']
       });
     }
     
     // For tourist/non-resident countries (too many days)
     const tooManyDaysCountries = highRiskCountries.filter(c => 
-      !c.document_status.includes('RESIDENCY_PERMIT') && 
-      !c.document_status.includes('residency permit')
+      !calculatedData.taxRisks.find(r => r.country === c.country_code)?.documentBased
     );
     
     if (tooManyDaysCountries.length > 0) {
@@ -244,7 +247,7 @@ function generateFallbackAnalysis(calculatedData: CalculatedTaxData): AnalysisRe
         type: 'warning',
         title: 'Tax Residency Risk',
         description: `You're approaching tax residency thresholds in: ${tooManyDaysCountries.map(c => c.country_name).join(', ')}`,
-        actions: ['Consider reducing time in these countries', 'Consult with a tax professional']
+        actions: ['Reduce time in these countries to stay under thresholds', 'Consider obtaining residency permits if long-term stay is desired']
       });
     }
   }
@@ -254,8 +257,12 @@ function generateFallbackAnalysis(calculatedData: CalculatedTaxData): AnalysisRe
     recommendations.push({
       type: 'info',
       title: 'No Immediate Tax Concerns',
-      description: 'Based on your current travel patterns and documentation, you don\'t appear to be at risk.',
-      actions: ['Continue to monitor your travel days', 'Keep documents and travel history up to date']
+      description: 'Your current travel patterns align with residency requirements where applicable.',
+      actions: [
+        'Continue meeting minimum days in countries with residency permits',
+        'Stay under thresholds in countries without residency documents',
+        'Keep documents and travel history up to date'
+      ]
     });
   }
   
@@ -279,6 +286,6 @@ function generateFallbackAnalysis(calculatedData: CalculatedTaxData): AnalysisRe
     residency_risks: residencyRisks,
     recommendations: recommendations,
     tax_optimization_score: taxOptimizationScore,
-    ai_insights: "This analysis is based on your travel patterns and document status. The calculations reflect your current tax situation across countries. For personalized advice, consult a tax professional."
+    ai_insights: "This analysis considers both your residency permit requirements and tourist visa limitations. For countries with residency permits, focus on meeting minimum day requirements. For other countries, stay under thresholds unless you plan to establish residency. Consult a tax professional for personalized advice."
   };
 }

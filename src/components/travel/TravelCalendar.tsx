@@ -11,6 +11,7 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
 import { Travel } from '@prisma/client';
+import '@/app/globals.css';
 
 interface ExtendedProps {
   country: string;

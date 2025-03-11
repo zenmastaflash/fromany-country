@@ -4,6 +4,7 @@ import { getToken } from 'next-auth/jwt';
 import { prisma } from '@/lib/prisma';
 import { analyzeTaxSituation, TaxRule, UserData, DocumentEntry } from '@/services/ai/taxAdvisor';
 import { calculateTaxResidenceRiskFromTravels, TaxRisk } from '@/lib/tax-utils';
+import { ResidencyStatus } from '@prisma/client';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -152,8 +153,8 @@ export async function POST(req: NextRequest) {
       },
     });
     
-    // Format to object for easier lookup
-    const userTaxStatusMap: { [country: string]: { required_presence?: number | null; residency_status?: string | null } } = {};
+    // Format to object for easier lookup, ensuring proper types for the tax-utils functions
+    const userTaxStatusMap: { [country: string]: { required_presence?: number | null; residency_status?: ResidencyStatus | null } } = {};
     userTaxStatuses.forEach(status => {
       userTaxStatusMap[status.country_code] = {
         required_presence: status.required_presence,

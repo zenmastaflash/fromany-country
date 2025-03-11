@@ -56,14 +56,18 @@
   --color-link: #AFDDE5;
 }
 
-/* Larger more visible resize handles for FullCalendar */
+/* Larger resize handles for FullCalendar */
 .fc-h-event .fc-event-resizer {
   display: block !important;
   width: 8px !important;
   height: 16px !important;
-  border: 2px solid white !important;
-  background: #964734 !important;
-  opacity: 1 !important;
+  background: white !important;
+  opacity: 0.8 !important;
+  border: 1px solid #333 !important;
+}
+
+.fc-h-event .fc-event-resizer:hover {
+  background: #AFDDE5 !important;
 }
 
 .fc-direction-ltr .fc-h-event .fc-event-resizer-start { left: -4px !important; }

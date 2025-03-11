@@ -26,9 +26,10 @@ type CalendarEvent = EventInput & {
 interface Props {
   onDelete?: (id: string) => Promise<void>;
   onEdit?: (travel: Travel) => void;
+  onSelect?: (selectInfo: { start: Date; end?: Date }) => void;
 }
 
-export default function TravelCalendar({ onDelete, onEdit }: Props) {
+export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
@@ -57,7 +58,6 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         }
       }));
       
-      console.log('Calendar events:', calendarEvents); // Debug
       setEvents(calendarEvents);
     } catch (error) {
       console.error('Error fetching travel data:', error);
@@ -77,7 +77,18 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    console.log('Selected dates:', selectInfo.startStr, selectInfo.endStr);
+    // Create a one-day buffer to ensure the end date is inclusive
+    const endDate = selectInfo.end ? new Date(selectInfo.end) : undefined;
+    if (endDate) {
+      // Subtract one day from the end date since FullCalendar's end date is exclusive
+      endDate.setDate(endDate.getDate() - 1);
+    }
+    
+    // Notify parent component of selection
+    onSelect?.({
+      start: selectInfo.start,
+      end: endDate
+    });
   };
 
   const handleEventClick = (info: any) => {
@@ -100,19 +111,56 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
 
   const handleEventDrop = async (info: any) => {
     try {
+      // For drag start/end, we need the actual event dates
+      const newStart = new Date(info.event.start);
+      let newEnd = null;
+      
+      if (info.event.end) {
+        newEnd = new Date(info.event.end);
+        // Subtract one day because FullCalendar uses exclusive end dates
+        newEnd.setDate(newEnd.getDate() - 1);
+      }
+      
       const response = await fetch(`/api/travel/${info.event.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          // Keep ISO format for Prisma
-          entry_date: info.event.start.toISOString(),
-          exit_date: info.event.end?.toISOString() ?? null  // Convert undefined back to null for Prisma
+          entry_date: newStart.toISOString(),
+          exit_date: newEnd?.toISOString() ?? null
         })
       });
+      
       if (!response.ok) throw new Error('Failed to update travel');
       fetchTravelData();
     } catch (error) {
       console.error('Error updating travel:', error);
+      info.revert();
+    }
+  };
+  
+  const handleEventResize = async (info: any) => {
+    try {
+      // For resize, we're only changing the end date
+      let newEnd = null;
+      
+      if (info.event.end) {
+        newEnd = new Date(info.event.end);
+        // Subtract one day because FullCalendar uses exclusive end dates
+        newEnd.setDate(newEnd.getDate() - 1);
+      }
+      
+      const response = await fetch(`/api/travel/${info.event.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          exit_date: newEnd?.toISOString() ?? null
+        })
+      });
+      
+      if (!response.ok) throw new Error('Failed to update travel end date');
+      fetchTravelData();
+    } catch (error) {
+      console.error('Error updating travel end date:', error);
       info.revert();
     }
   };
@@ -131,6 +179,7 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         eventClick={handleEventClick}
         editable={true}
         eventDrop={handleEventDrop}
+        eventResize={handleEventResize}
         height="100%"
         headerToolbar={{
           left: 'prev,next today',

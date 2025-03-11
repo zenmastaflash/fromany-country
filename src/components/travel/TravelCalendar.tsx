@@ -141,7 +141,7 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
   
   const handleEventResize = async (info: any) => {
     try {
-      const newStart = new Date(info.event.start);
+      // For resize, we're only changing the end date
       let newEnd = null;
       
       if (info.event.end) {
@@ -154,15 +154,14 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          entry_date: newStart.toISOString(),
           exit_date: newEnd?.toISOString() ?? null
         })
       });
       
-      if (!response.ok) throw new Error('Failed to update travel dates');
+      if (!response.ok) throw new Error('Failed to update travel end date');
       fetchTravelData();
     } catch (error) {
-      console.error('Error updating travel dates:', error);
+      console.error('Error updating travel end date:', error);
       info.revert();
     }
   };

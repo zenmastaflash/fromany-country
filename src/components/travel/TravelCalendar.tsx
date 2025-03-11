@@ -1,4 +1,4 @@
-// src/components/travel/TravelCalendar.tsx
+// src/components/travel/TravelCalendar.tsx - FINAL CORRECTED VERSION
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,7 +11,6 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
 import { Travel } from '@prisma/client';
-import '@/app/globals.css';
 
 interface ExtendedProps {
   country: string;
@@ -46,9 +45,8 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
-        // Keep ISO format from Prisma
         start: travel.entry_date,
-        end: travel.exit_date ?? undefined,  // Use nullish coalescing to convert null to undefined
+        end: travel.exit_date ?? undefined,
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
         extendedProps: {
@@ -67,25 +65,22 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
 
   const getPurposeColor = (purpose: string): string => {
     const colors = {
-      home_base: '#024950',    // secondary
-      tourism: '#964734',      // accent
-      business: '#0FA4AF',     // primary
-      remote_work: '#AFDDE5',  // link
-      relocation: '#2E2E2E',   // background
-      default: '#0FA4AF'       // primary
+      home_base: '#024950',
+      tourism: '#964734',
+      business: '#0FA4AF',
+      remote_work: '#AFDDE5',
+      relocation: '#2E2E2E',
+      default: '#0FA4AF'
     };
     return colors[purpose as keyof typeof colors] || colors.default;
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    // Create a one-day buffer to ensure the end date is inclusive
     const endDate = selectInfo.end ? new Date(selectInfo.end) : undefined;
     if (endDate) {
-      // Subtract one day from the end date since FullCalendar's end date is exclusive
       endDate.setDate(endDate.getDate() - 1);
     }
     
-    // Notify parent component of selection
     onSelect?.({
       start: selectInfo.start,
       end: endDate
@@ -101,24 +96,22 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
       exit_date: info.event.end ? new Date(info.event.end) : null,
       purpose: info.event.extendedProps.purpose,
       notes: info.event.extendedProps.notes || null,
-      user_id: '',   // Will be handled by backend
-      status: null,  
+      user_id: '',
+      status: null,
       visa_type: null,
-      created_at: new Date(), // Will be handled by backend
-      updated_at: new Date()  // Will be handled by backend
+      created_at: new Date(),
+      updated_at: new Date()
     };
     onEdit?.(travel);
   };
 
   const handleEventDrop = async (info: any) => {
     try {
-      // For drag start/end, we need the actual event dates
       const newStart = new Date(info.event.start);
       let newEnd = null;
       
       if (info.event.end) {
         newEnd = new Date(info.event.end);
-        // Subtract one day because FullCalendar uses exclusive end dates
         newEnd.setDate(newEnd.getDate() - 1);
       }
       
@@ -141,12 +134,10 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
   
   const handleEventResize = async (info: any) => {
     try {
-      const newStart = new Date(info.event.start);
       let newEnd = null;
       
       if (info.event.end) {
         newEnd = new Date(info.event.end);
-        // Subtract one day because FullCalendar uses exclusive end dates
         newEnd.setDate(newEnd.getDate() - 1);
       }
       
@@ -154,15 +145,14 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          entry_date: newStart.toISOString(),
           exit_date: newEnd?.toISOString() ?? null
         })
       });
       
-      if (!response.ok) throw new Error('Failed to update travel dates');
+      if (!response.ok) throw new Error('Failed to update travel end date');
       fetchTravelData();
     } catch (error) {
-      console.error('Error updating travel dates:', error);
+      console.error('Error updating travel end date:', error);
       info.revert();
     }
   };
@@ -179,9 +169,8 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         events={events}
         select={handleDateSelect}
         eventClick={handleEventClick}
-        eventStartEditable={true}
+        editable={true}
         eventDurationEditable={true}
-        eventResizableFromStart={true}
         eventDrop={handleEventDrop}
         eventResize={handleEventResize}
         height="100%"

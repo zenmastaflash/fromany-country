@@ -56,24 +56,21 @@
   --color-link: #AFDDE5;
 }
 
-/* Larger resize handles for FullCalendar 6.1 */
+/* Larger resize handles for FullCalendar */
 .fc-event .fc-event-resizer {
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 4px;
-  background: #fff;
-  border-color: inherit;
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border: 2px solid #2E2E2E;
+  border-radius: 50%;
   z-index: 4;
 }
 
-/* Horizontal specific positioning */
-.fc-direction-ltr .fc-event-resizer-start { left: -4px; }
-.fc-direction-ltr .fc-event-resizer-end { right: -4px; }
+/* Better positioning for start/end handles */
+.fc-direction-ltr .fc-event-resizer-start { left: -6px; }
+.fc-direction-ltr .fc-event-resizer-end { right: -6px; }
 
-/* Better pointer cursor */
-.fc-event-resizable {
-  cursor: pointer;
+/* Add hover effect */
+.fc-event .fc-event-resizer:hover {
+  background-color: #AFDDE5;
 }

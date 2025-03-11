@@ -1,101 +1,130 @@
-import { getServerSession } from 'next-auth/next';
-import { config as authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
-import { getCurrentLocation } from '@/lib/travel-utils';
-import { calculateTaxResidenceRiskFromTravels } from '@/lib/tax-utils';
-import { generateComplianceAlerts } from '@/lib/dashboard-utils';
+'use client';
+
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import TaxLiabilityCard from '@/components/dashboard/TaxLiabilityCard';
 import CriticalDatesCard from '@/components/dashboard/CriticalDatesCard';
 import ComplianceAlertsCard from '@/components/dashboard/ComplianceAlertsCard';
-import { Travel, Document, ResidencyStatus } from '@prisma/client';
-import type { TaxRisk } from '@/lib/tax-utils';
+import TermsDrawer from '@/components/TermsDrawer';
+import TaxAdvisorCard from '@/components/dashboard/TaxAdvisorCard';
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect('/api/auth/signin');
-  }
-
-  // Fetch travel data
-  const travels = await prisma.travel.findMany({
-    where: { user_id: session.user.id },
-    orderBy: { entry_date: 'desc' }
-  });
-
-  // TODO: Fetch document data for critical dates
-  const documents = await prisma.document.findMany({
-    where: { userId: session.user.id }
-  });
-
-  // Use our utils to get dashboard data
-  let currentLocation = getCurrentLocation(travels);
-  let taxRisks: TaxRisk[] = await calculateTaxResidenceRiskFromTravels(travels, documents, session.user.id);
-  let complianceAlerts = await generateComplianceAlerts(travels, documents, session.user.id);
-
-  // Format data for components
-  const formattedLocation = currentLocation ? {
-    country: currentLocation.country,
-    entryDate: currentLocation.entry_date.toISOString(),
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-  } : null;
-
-  const countryStatuses = taxRisks.map(risk => ({
-    country: risk.country,
-    daysPresent: risk.days,
-    threshold: 183,
-    lastEntry: travels.find(t => t.country === risk.country)?.entry_date.toISOString() || '',
-    residencyStatus: risk.status,
-    documentBased: risk.documentBased
-  }));
-
-  // Generate critical dates from travel and documents
-  const criticalDates = [
-    // Document expiry dates
-    ...documents
-      .filter(doc => doc.expiryDate)
-      .map(doc => ({
-        type: doc.type.toLowerCase() as 'visa' | 'document',
-        title: `${doc.title || 'Document'} Expiration`,
-        date: doc.expiryDate!.toISOString(),
-        description: doc.title || 'Document expiring',
-        urgency: getUrgencyFromDate(doc.expiryDate!)
-      })),
-    // Add tax filing deadlines if needed
-  ];
-
-  return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-text">Dashboard</h1>
-          <p className="text-link mt-2">Welcome back, {session.user?.name}</p>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TaxLiabilityCard 
-          currentLocation={formattedLocation || { 
-            country: 'Not Set',
-            entryDate: new Date().toISOString(),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-          }}
-          countryStatuses={countryStatuses}
-        />
-        <CriticalDatesCard dates={criticalDates} />
-        <div className="lg:col-span-2">
-          <ComplianceAlertsCard alerts={complianceAlerts} />
-        </div>
-      </div>
-    </main>
-  );
+// Move the component that uses useSearchParams into a separate component
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const showTerms = searchParams.get('showTerms') === 'true';
+  
+  // Pass the value to parent component
+  useEffect(() => {
+    if (showTerms) {
+      window.sessionStorage.setItem('showTerms', 'true');
+    }
+  }, [showTerms]);
+  
+  return null;
 }
 
-// Helper function for document urgency
-function getUrgencyFromDate(date: Date): 'high' | 'medium' | 'low' {
-  const daysUntil = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-  if (daysUntil <= 30) return 'high';
-  if (daysUntil <= 90) return 'medium';
-  return 'low';
+export default function DashboardPage() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState('current_year');
+  
+  // Terms drawer state using sessionStorage instead
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [isAcceptingTerms, setIsAcceptingTerms] = useState(false);
+
+  useEffect(() => {
+    // Check sessionStorage for terms flag
+    const showTerms = window.sessionStorage.getItem('showTerms') === 'true';
+    if (showTerms) {
+      setTermsOpen(true);
+      window.sessionStorage.removeItem('showTerms');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardData(dateRange);
+  }, [dateRange]);
+
+  const fetchDashboardData = async (range: string) => {
+    try {
+      const response = await fetch(`/api/dashboard?dateRange=${range}`);
+      if (!response.ok) throw new Error('Failed to fetch dashboard data');
+      const dashboardData = await response.json();
+      setData(dashboardData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleAcceptTerms = async () => {
+    setIsAcceptingTerms(true);
+    
+    try {
+      const response = await fetch('/api/auth/accept-terms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        setTermsOpen(false);
+        // Clear session first then refresh to get fresh session with updated terms
+        await fetch('/api/auth/session', { method: 'DELETE' });
+        window.location.href = '/dashboard';
+      } else {
+        throw new Error('Failed to accept terms');
+      }
+    } catch (error) {
+      console.error('Terms acceptance error:', error);
+    }
+    setIsAcceptingTerms(false);
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!data) return null;
+
+  return (
+    <>
+      {/* Suspense boundary for useSearchParams */}
+      <Suspense fallback={null}>
+        <DashboardContent />
+      </Suspense>
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-text">Dashboard</h1>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TaxLiabilityCard 
+            currentLocation={data.currentLocation || { 
+              country: 'Not Set',
+              entryDate: new Date().toISOString(),
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }}
+            countryStatuses={data.countryStatuses}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
+          <TaxAdvisorCard dateRange={dateRange} />
+          <CriticalDatesCard dates={data.criticalDates} />
+          <ComplianceAlertsCard alerts={data.complianceAlerts} />
+        </div>
+      </main>
+      
+      <TermsDrawer 
+        isOpen={termsOpen}
+        onClose={() => setTermsOpen(false)}
+        onAccept={handleAcceptTerms}
+        isAccepting={isAcceptingTerms}
+      />
+    </>
+  );
 }

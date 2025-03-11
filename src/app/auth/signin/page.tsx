@@ -1,17 +1,108 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Input } from '@/components/ui/input';
+import TermsDrawer from '@/components/TermsDrawer';
+
+type AuthMode = 'signin' | 'signup';
 
 export default function SignIn() {
+  const router = useRouter();
+  const [mode, setMode] = useState<AuthMode>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [displayName, setDisplayName] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [isAcceptingTerms, setIsAcceptingTerms] = useState(false);
+
+  const validatePassword = (password: string) => {
+    const requirements = {
+      minLength: password.length >= 8,
+      hasUpper: /[A-Z]/.test(password),
+      hasLower: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+
+    const errors = [];
+    if (!requirements.minLength) errors.push("At least 8 characters");
+    if (!requirements.hasUpper) errors.push("One uppercase letter");
+    if (!requirements.hasLower) errors.push("One lowercase letter");
+    if (!requirements.hasNumber) errors.push("One number");
+    if (!requirements.hasSpecial) errors.push("One special character");
+
+    return {
+      isValid: Object.values(requirements).every(Boolean),
+      errors
+    };
+  };
+
   const handleGoogleSignIn = async (e: React.MouseEvent) => {
     e.preventDefault();
     try {
       await signIn('google', {
-        callbackUrl: '/auth/terms',
+        callbackUrl: '/dashboard',
       });
     } catch (error) {
       console.error('Sign in error:', error);
+    }
+  };
+
+  const handleAcceptTerms = () => {
+    setTermsAccepted(true);
+    setShowTerms(false);
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    
+    if (mode === 'signup') {
+      if (!termsAccepted) {
+        setError('Please accept the terms and conditions');
+        return;
+      }
+
+      const validation = validatePassword(password);
+      if (!validation.isValid) {
+        setPasswordErrors(validation.errors);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, displayName })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error);
+          return;
+        }
+      } catch (err) {
+        setError('Failed to create account');
+        return;
+      }
+    }
+
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false
+    });
+
+    if (result?.error) {
+      setError(result.error);
+    } else {
+      router.push('/dashboard');
     }
   };
 
@@ -24,11 +115,90 @@ export default function SignIn() {
               Welcome to fromany.country
             </CardTitle>
             <p className="text-center text-sm text-link mt-2">
-              Your global life, simplified. Sign in to manage your travels, documents, and more.
+              Your global life, simplified. {mode === 'signin' ? 'Sign in' : 'Sign up'} to manage your travels, documents, and more.
             </p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              <form onSubmit={handleEmailAuth} className="space-y-3">
+                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                {mode === 'signup' && (
+                  <>
+                    <Input
+                      type="text"
+                      placeholder="Display Name"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                    />
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="terms"
+                        checked={termsAccepted}
+                        onChange={(e) => setTermsAccepted(e.target.checked)}
+                        className="rounded border-gray-300"
+                      />
+                      <label htmlFor="terms" className="text-sm">
+                        I accept the <button 
+                          type="button"
+                          onClick={() => setShowTerms(true)}
+                          className="text-primary underline hover:text-accent"
+                        >
+                          terms and conditions
+                        </button>
+                      </label>
+                    </div>
+                  </>
+                )}
+                <div>
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (mode === 'signup') {
+                        const validation = validatePassword(e.target.value);
+                        setPasswordErrors(validation.errors);
+                      }
+                    }}
+                    required
+                  />
+                  {mode === 'signup' && passwordErrors.length > 0 && (
+                    <div className="mt-2 text-sm text-red-500">
+                      <p>Password must contain:</p>
+                      <ul className="list-disc pl-5">
+                        {passwordErrors.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  className="w-full rounded-lg bg-primary p-3 text-text hover:bg-accent transition-colors duration-200"
+                >
+                  {mode === 'signin' ? 'Sign In' : 'Sign Up'} with Email
+                </button>
+              </form>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-background text-muted-foreground">Or</span>
+                </div>
+              </div>
+
               <button
                 onClick={handleGoogleSignIn}
                 className="flex w-full items-center justify-center gap-3 rounded-lg bg-primary p-3 text-text hover:bg-accent transition-colors duration-200"
@@ -57,10 +227,26 @@ export default function SignIn() {
                 </svg>
                 Continue with Google
               </button>
+              
+              <p className="text-center text-sm text-muted-foreground">
+                {mode === 'signin' ? "Don't have an account? " : "Already have an account? "}
+                <button
+                  onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+                  className="text-primary hover:underline"
+                >
+                  {mode === 'signin' ? 'Sign up' : 'Sign in'}
+                </button>
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
+      <TermsDrawer 
+        isOpen={showTerms}
+        onClose={() => setShowTerms(false)}
+        onAccept={handleAcceptTerms}
+        isAccepting={isAcceptingTerms}
+      />
     </main>
   );
 }

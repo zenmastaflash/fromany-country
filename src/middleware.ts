@@ -2,30 +2,35 @@
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
-import { prisma } from '@/lib/prisma'
+import type { NextRequest } from "next/server"
 
 export default withAuth(
   async function middleware(req) {
     const token = await getToken({ req })
     
-    if (token?.email) {
-      try {
-        const user = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: { terms_accepted_at: true }
-        })
-        
-        if (!user?.terms_accepted_at && !req.nextUrl.pathname.startsWith('/auth/')) {
-          return NextResponse.redirect(new URL('/auth/terms', req.url))
-        }
-      } catch (error) {
-        console.error('Error checking terms:', error)
-        // On error, allow access rather than potentially blocking valid users
-        return NextResponse.next()
-      }
+    if (!token?.email) {
+      return NextResponse.redirect(new URL('/auth/signin', req.url))
     }
+
+    // Terms version check without database call
+    const terms_accepted_at = token.terms_accepted_at
+    const terms_version = token.terms_version
     
-    return NextResponse.next()
+    const needsTerms = !terms_accepted_at || terms_version !== 1 // Current version
+    
+    // Check if the current URL already has showTerms parameter
+    if (needsTerms && !req.nextUrl.searchParams.has('showTerms')) {
+      return NextResponse.redirect(new URL(`/dashboard?showTerms=true`, req.url))
+    }
+
+    const requestHeaders = new Headers(req.headers)
+    requestHeaders.set('x-user-email', token.email)
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
   },
   {
     callbacks: {

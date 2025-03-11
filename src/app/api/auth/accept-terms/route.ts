@@ -14,15 +14,14 @@ export async function POST() {
   try {
     await prisma.user.update({
       where: { email: session.user.email },
-      data: { terms_accepted_at: new Date() }
+      data: { 
+        terms_accepted_at: new Date(),
+        terms_version: 1 // Current version
+      }
     });
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error accepting terms:', error);
-    return NextResponse.json(
-      { error: 'Failed to accept terms' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to accept terms' }, { status: 500 });
   }
 }

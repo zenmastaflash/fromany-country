@@ -51,10 +51,19 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Core Features
 
+- **Authentication**
+  - ✅ Google Auth
+  - ✅ Sign up flow
+  - ✅ terms acceptance
+  - password reset
+
 - **Dashboard**
   - ✅ Shows tax liability
   - ✅ Critical dates (currently only document expiration, but looking to add important filing dates as well)
   - ✅ Compliance Alerts
+  - ✅ AI integration
+  - AI session caching - will be implemented later, when im sure that i can do this and maintain user privacy
+  - ✅ Travel pattern recognition - will help to determine if tax optimization is improving or worsening over time
 
 - **Document Management**
   - ✅ Upload & storage using Supabase and AWS S3 
@@ -65,8 +74,8 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Version control
 
 - **Document Intelligence**
-  - OCR integration
-  - Automatic data extraction
+  - ✅ OCR integration
+  - ✅ Automatic data extraction
   - Smart categorization
   - Authenticity validation
 
@@ -74,7 +83,7 @@ While dark mode offers these benefits, it's important to note that it may not be
   - ✅ Calendar integration
   - Flight data API connection
   - ✅ Day-by-day location tracking
-  - Tax day calculations
+  - ✅ Tax day calculations
   - Visa requirement warnings
   - Entry/exit tracking
   - Travel Planning - plan ahead to reduce tax liability
@@ -103,7 +112,7 @@ While dark mode offers these benefits, it's important to note that it may not be
   - Other tools
  
 - **Misc Features**
-  - Natural Languag Input
+  - Natural Language Input
   - i18n Internationalization
   - Tax Residency Simulator
   - Geoarbitrage Calculator
@@ -111,13 +120,37 @@ While dark mode offers these benefits, it's important to note that it may not be
 
 ### Current Works
 
-- Connect Dashboard to Documents and Travel databses for accurate data representationand logic
-- Build out country-based tax laws, important dates, etc
+Dependency Updates:
 
-### Recent Fixes
+Update AWS SDK packages to the latest versions (before they enter maintenance mode)
 
-- fixed auth issue that prevented signup (caused different issue, however
+CI/CD Implementation:
 
+Create a GitHub Actions workflow for automated testing and deployment
+Add linting and TypeScript type checking to the CI pipeline
+Configure automated deployment to Vercel on successful builds
+
+
+Feature Implementation Priority:
+
+AI Dashboard Integration
+Focus on completing country tax rules database (issue #110)
+Enhance OCR functionality (issue #75)
+Add the capability to export calendar data to Excel/Sheets (issue #72)
+
+
+Code Improvements:
+
+Implement better error handling, especially for OCR processing
+Add more comprehensive unit and integration tests
+Enhance documentation for developers
+
+### Recent Fixes/Features
+#### Fixed
+- 
+
+#### Features
+- AI Tax Advisor - not quite working properly, but will continue to iterate
 
 ## Quick Start
 

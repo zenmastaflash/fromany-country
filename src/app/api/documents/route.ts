@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authConfig } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {

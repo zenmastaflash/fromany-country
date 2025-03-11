@@ -1,0 +1,151 @@
+// src/app/api/tax-advisor/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import { prisma } from '@/lib/prisma';
+import { analyzeTaxSituation } from '@/services/ai/taxAdvisor';
+import { TaxRule, UserData } from '@/services/ai/taxAdvisor';
+
+export const runtime = 'nodejs';  // Or 'edge' depending on your deployment
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+export const maxDuration = 60;  // In seconds
+
+export async function POST(req: NextRequest) {
+  try {
+    // Authenticate the request
+    const token = await getToken({ req });
+    if (!token?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    const userId = token.sub as string;
+    
+    // Extract dateRange from request body
+    const body = await req.json();
+    const { dateRange = 'current_year' } = body;
+    
+    // Calculate date range using the same logic as in dashboard API
+    const now = new Date();
+    let startDate;
+    let endDate = now;
+
+    switch (dateRange) {
+      case 'last_year':
+        startDate = new Date(now.getFullYear() - 1, 0, 1);
+        endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+        break;
+      case 'rolling_year':
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      case 'current_year':
+      default:
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+    }
+    
+    // Get user's travel data from database with correct date range
+    const travelData = await prisma.travel.findMany({
+      where: {
+        user_id: userId,
+        OR: [
+          // Entries within the date range
+          {
+            entry_date: {
+              gte: startDate,
+              lte: endDate
+            }
+          },
+          // Entries that started before but extend into the range
+          {
+            entry_date: {
+              lt: startDate
+            },
+            exit_date: {
+              gte: startDate
+            }
+          }
+        ]
+      },
+      orderBy: {
+        entry_date: 'asc',
+      },
+    });
+    
+    // Format travel data for analysis.
+    const formattedTravelData = travelData.map(entry => ({
+      country: entry.country,
+      entry_date: entry.entry_date.toISOString(),
+      exit_date: entry.exit_date ? entry.exit_date.toISOString() : null,
+      city: entry.city ?? undefined,
+      purpose: entry.purpose ?? undefined,
+    }));
+
+    const documents = await prisma.document.findMany({
+      where: {
+        userId: userId,
+        type: { in: ['PASSPORT', 'VISA', 'TOURIST_VISA', 'RESIDENCY_PERMIT'] },
+        status: 'active',
+      },
+    });
+
+    // Format document data
+    const formattedDocuments = documents.map(doc => ({
+      type: doc.type,
+      status: doc.status,
+      country: doc.issuingCountry || '',
+      expiryDate: doc.expiryDate?.toISOString(),
+      issuingCountry: doc.issuingCountry || '',
+    }));
+    
+    // Get user profile for additional data like citizenship
+    const userProfile = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        taxResidency: true,
+      },
+    });
+    
+    // Create user data object
+    const userData: UserData = {
+      userId,
+      citizenship: userProfile?.taxResidency ?? undefined,
+      travel_history: formattedTravelData,
+      documents: formattedDocuments,
+    };
+    
+    // Get tax rules from countries user has traveled to
+    const countries = travelData.map(entry => entry.country);
+    const taxRules = await prisma.country_tax_rules.findMany({
+      where: {
+        country_code: {
+          in: countries,
+        },
+      },
+    });
+    
+    // Format tax rules
+    const formattedTaxRules: TaxRule[] = taxRules.map(rule => ({
+      country_code: rule.country_code,
+      name: rule.name,
+      residency_threshold: rule.residency_threshold,
+      special_rules: rule.special_rules,
+      tax_year_start: rule.tax_year_start ?? undefined,
+      tax_treaties: rule.tax_treaties ?? undefined,
+    }));
+    
+    // Analyze tax situation
+    const analysisResults = await analyzeTaxSituation(userData, formattedTaxRules);
+    
+    return NextResponse.json(analysisResults);
+  } catch (error) {
+    console.error('Error in tax-advisor API:', error);
+    return NextResponse.json(
+      { error: 'Failed to process tax analysis' },
+      { status: 500 }
+    );
+  }
+}

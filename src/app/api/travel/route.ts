@@ -8,12 +8,12 @@ import type { Prisma } from '@prisma/client';
 type TravelCreateInput = Omit<Prisma.TravelCreateInput, 'user'>;
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authConfig);
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    const session = await getServerSession(authConfig);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const data = await request.json() as TravelCreateInput;
     const travel = await prisma.travel.create({
       data: {
@@ -24,18 +24,18 @@ export async function POST(request: Request) {
 
     return NextResponse.json(travel);
   } catch (error) {
-    console.error('Error creating travel:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    console.error('Error in POST /api/travel:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authConfig);
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    const session = await getServerSession(authConfig);
+    if (!session?.user?.email) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
     const travels = await prisma.travel.findMany({
       where: { user_id: session.user.id },
       orderBy: { entry_date: 'desc' },
@@ -43,7 +43,18 @@ export async function GET(request: Request) {
 
     return NextResponse.json(travels);
   } catch (error) {
-    console.error('Error fetching travel:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    console.error('Error in GET /api/travel:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
+}
+
+export async function OPTIONS(request: Request) {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '3600',
+    },
+  });
 }

@@ -2,6 +2,11 @@
 const nextConfig = {
   experimental: {
     // Remove serverActions as it's now default
+  },
+  logging: {
+    fetches: {
+      fullUrl: true
+    }
   }
 }
 

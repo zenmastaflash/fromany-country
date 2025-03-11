@@ -178,6 +178,7 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         select={handleDateSelect}
         eventClick={handleEventClick}
         editable={true}
+        eventDurationEditable={true}
         eventDrop={handleEventDrop}
         eventResize={handleEventResize}
         height="100%"

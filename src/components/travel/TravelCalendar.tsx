@@ -227,6 +227,8 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         eventDrop={handleEventDrop}
         eventResize={handleEventResize}
         height="100%"
+        slotDuration="00:30:00"
+        snapDuration="00:30:00"
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
@@ -238,6 +240,46 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
               content: info.event.extendedProps.notes,
               theme: 'light',
               placement: 'top',
+            });
+          }
+
+          const eventEl = info.el as HTMLElement;
+
+          if (info.view.type === 'dayGridMonth') {
+            const leftHandle = document.createElement('div');
+            leftHandle.className = 'custom-resize-handle left-handle';
+            leftHandle.style.cssText = `
+              position: absolute;
+              left: 0;
+              top: 0;
+              bottom: 0;
+              width: 6px;
+              cursor: w-resize;
+              background-color: rgba(255, 255, 255, 0.3);
+            `;
+            eventEl.appendChild(leftHandle);
+
+            const rightHandle = document.createElement('div');
+            rightHandle.className = 'custom-resize-handle right-handle';
+            rightHandle.style.cssText = `
+              position: absolute;
+              right: 0;
+              top: 0;
+              bottom: 0;
+              width: 6px;
+              cursor: e-resize;
+              background-color: rgba(255, 255, 255, 0.3);
+            `;
+            eventEl.appendChild(rightHandle);
+
+            eventEl.addEventListener('mouseover', () => {
+              leftHandle.style.backgroundColor = 'rgba(255, 255, 255, 0.6)';
+              rightHandle.style.backgroundColor = 'rgba(255, 255, 255, 0.6)';
+            });
+
+            eventEl.addEventListener('mouseout', () => {
+              leftHandle.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+              rightHandle.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
             });
           }
         }}

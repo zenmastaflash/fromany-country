@@ -1,4 +1,4 @@
-// src/components/travel/TravelCalendar.tsx
+// src/components/travel/TravelCalendar.tsx - FINAL CORRECTED VERSION
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -113,33 +113,26 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
       
       // Get the new start and end dates after drag
       const newStart = new Date(info.event.start);
-      let newEnd = null;
+      let newEnd = info.event.end ? new Date(info.event.end) : null;
       
       // Calculate the difference in days between old and new start dates
-      const daysDifference = Math.floor((newStart.getTime() - originalStart.getTime()) / (1000 * 60 * 60 * 24));
+      const daysDifference = Math.round(
+        (newStart.getTime() - originalStart.getTime()) / (1000 * 60 * 60 * 24)
+      );
       
       // If there was an original end date, apply the same day difference
-      if (info.event.end) {
-        newEnd = new Date(info.event.end);
-        // FullCalendar uses exclusive end dates - subtract one day
-        newEnd.setDate(newEnd.getDate() - 1);
-      } else if (originalEnd) {
-        // Calculate new end date based on the day difference
+      if (originalEnd && daysDifference !== 0) {
         newEnd = new Date(originalEnd);
         newEnd.setDate(newEnd.getDate() + daysDifference);
       }
-
-      // Validate that newEnd is not before newStart
-      if (newEnd && newEnd < newStart) {
-        throw new Error('End date cannot be before start date');
-      }
-
-      // If start and end dates are the same, add one day to end date
-      if (newEnd && 
-          newEnd.getFullYear() === newStart.getFullYear() &&
-          newEnd.getMonth() === newStart.getMonth() &&
-          newEnd.getDate() === newStart.getDate()) {
-        newEnd.setDate(newEnd.getDate() + 1);
+      
+      // Ensure end date is after start date (at least next day)
+      if (newEnd) {
+        // If dates would be the same or end before start after the drag
+        if (newEnd <= newStart) {
+          newEnd = new Date(newStart);
+          newEnd.setDate(newEnd.getDate() + 1);
+        }
       }
       
       console.log('Updating travel after drag:', {
@@ -161,9 +154,9 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
+        const errorText = await response.json();
         console.error('Server response:', errorText);
-        throw new Error(`Failed to update travel: ${errorText}`);
+        throw new Error(`Failed to update travel: ${JSON.stringify(errorText)}`);
       }
       
       // Refresh data after successful update
@@ -176,26 +169,22 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
   
   const handleEventResize = async (info: any) => {
     try {
-      const newStart = new Date(info.event.start);
+      const originalStart = new Date(info.event.start);
       const newEnd = new Date(info.event.end);
-      // FullCalendar uses exclusive end dates, so subtract one day for the actual end date
+      
+      // FullCalendar uses exclusive end dates, subtract one day for display
       newEnd.setDate(newEnd.getDate() - 1);
-
-      // Validate that newEnd is not before newStart
-      if (newEnd < newStart) {
-        throw new Error('End date cannot be before start date');
-      }
-
-      // If start and end dates are the same, add one day to end date
-      if (newEnd.getFullYear() === newStart.getFullYear() &&
-          newEnd.getMonth() === newStart.getMonth() &&
-          newEnd.getDate() === newStart.getDate()) {
-        newEnd.setDate(newEnd.getDate() + 1);
+      
+      // Ensure the end date is after the start date
+      if (newEnd <= originalStart) {
+        console.warn('Invalid resize: End date must be after start date');
+        info.revert();
+        return;
       }
       
       console.log('Resizing travel:', {
         id: info.event.id,
-        oldEnd: info.oldEvent.end ? new Date(info.oldEvent.end).toISOString() : null,
+        originalStart: originalStart.toISOString(),
         newEnd: newEnd.toISOString()
       });
       
@@ -208,9 +197,9 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
+        const errorText = await response.json();
         console.error('Server response:', errorText);
-        throw new Error(`Failed to update travel end date: ${errorText}`);
+        throw new Error(`Failed to update travel end date: ${JSON.stringify(errorText)}`);
       }
       
       // Reload calendar data after successful update

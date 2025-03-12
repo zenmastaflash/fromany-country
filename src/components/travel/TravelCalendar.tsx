@@ -1,4 +1,4 @@
-// src/components/travel/TravelCalendar.tsx
+// src/components/travel/TravelCalendar.tsx - FINAL CORRECTED VERSION
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,9 +26,10 @@ type CalendarEvent = EventInput & {
 interface Props {
   onDelete?: (id: string) => Promise<void>;
   onEdit?: (travel: Travel) => void;
+  onSelect?: (selectInfo: { start: Date; end?: Date }) => void;
 }
 
-export default function TravelCalendar({ onDelete, onEdit }: Props) {
+export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
@@ -44,9 +45,8 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       const calendarEvents = data.map(travel => ({
         id: travel.id,
         title: `${travel.city}, ${travel.country}`,
-        // Keep ISO format from Prisma
         start: travel.entry_date,
-        end: travel.exit_date ?? undefined,  // Use nullish coalescing to convert null to undefined
+        end: travel.exit_date ?? undefined,
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
         extendedProps: {
@@ -57,7 +57,6 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         }
       }));
       
-      console.log('Calendar events:', calendarEvents); // Debug
       setEvents(calendarEvents);
     } catch (error) {
       console.error('Error fetching travel data:', error);
@@ -66,18 +65,26 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
 
   const getPurposeColor = (purpose: string): string => {
     const colors = {
-      home_base: '#024950',    // secondary
-      tourism: '#964734',      // accent
-      business: '#0FA4AF',     // primary
-      remote_work: '#AFDDE5',  // link
-      relocation: '#2E2E2E',   // background
-      default: '#0FA4AF'       // primary
+      home_base: '#024950',
+      tourism: '#964734',
+      business: '#0FA4AF',
+      remote_work: '#AFDDE5',
+      relocation: '#2E2E2E',
+      default: '#0FA4AF'
     };
     return colors[purpose as keyof typeof colors] || colors.default;
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    console.log('Selected dates:', selectInfo.startStr, selectInfo.endStr);
+    const endDate = selectInfo.end ? new Date(selectInfo.end) : undefined;
+    if (endDate) {
+      endDate.setDate(endDate.getDate() - 1);
+    }
+    
+    onSelect?.({
+      start: selectInfo.start,
+      end: endDate
+    });
   };
 
   const handleEventClick = (info: any) => {
@@ -89,30 +96,116 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
       exit_date: info.event.end ? new Date(info.event.end) : null,
       purpose: info.event.extendedProps.purpose,
       notes: info.event.extendedProps.notes || null,
-      user_id: '',   // Will be handled by backend
-      status: null,  
+      user_id: '',
+      status: null,
       visa_type: null,
-      created_at: new Date(), // Will be handled by backend
-      updated_at: new Date()  // Will be handled by backend
+      created_at: new Date(),
+      updated_at: new Date()
     };
     onEdit?.(travel);
   };
 
   const handleEventDrop = async (info: any) => {
     try {
+      // Get the original start and end dates
+      const originalStart = new Date(info.oldEvent.start);
+      const originalEnd = info.oldEvent.end ? new Date(info.oldEvent.end) : null;
+      
+      // Get the new start and end dates after drag
+      const newStart = new Date(info.event.start);
+      let newEnd = info.event.end ? new Date(info.event.end) : null;
+      
+      // Calculate the difference in days between old and new start dates
+      const daysDifference = Math.round(
+        (newStart.getTime() - originalStart.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      
+      // If there was an original end date, apply the same day difference
+      if (originalEnd && daysDifference !== 0) {
+        newEnd = new Date(originalEnd);
+        newEnd.setDate(newEnd.getDate() + daysDifference);
+      }
+      
+      // Ensure end date is after start date (at least next day)
+      if (newEnd) {
+        // If dates would be the same or end before start after the drag
+        if (newEnd <= newStart) {
+          newEnd = new Date(newStart);
+          newEnd.setDate(newEnd.getDate() + 1);
+        }
+      }
+      
+      console.log('Updating travel after drag:', {
+        id: info.event.id,
+        originalStart: originalStart.toISOString(),
+        originalEnd: originalEnd?.toISOString() ?? null,
+        newStart: newStart.toISOString(),
+        newEnd: newEnd?.toISOString() ?? null,
+        daysDifference
+      });
+      
       const response = await fetch(`/api/travel/${info.event.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          // Keep ISO format for Prisma
-          entry_date: info.event.start.toISOString(),
-          exit_date: info.event.end?.toISOString() ?? null  // Convert undefined back to null for Prisma
+          entry_date: newStart.toISOString(),
+          exit_date: newEnd?.toISOString() ?? null
         })
       });
-      if (!response.ok) throw new Error('Failed to update travel');
-      fetchTravelData();
+      
+      if (!response.ok) {
+        const errorText = await response.json();
+        console.error('Server response:', errorText);
+        throw new Error(`Failed to update travel: ${JSON.stringify(errorText)}`);
+      }
+      
+      // Refresh data after successful update
+      await fetchTravelData();
     } catch (error) {
-      console.error('Error updating travel:', error);
+      console.error('Error updating travel after drag:', error);
+      info.revert();
+    }
+  };
+  
+  const handleEventResize = async (info: any) => {
+    try {
+      const originalStart = new Date(info.event.start);
+      const newEnd = new Date(info.event.end);
+      
+      // FullCalendar uses exclusive end dates, subtract one day for display
+      newEnd.setDate(newEnd.getDate() - 1);
+      
+      // Ensure the end date is after the start date
+      if (newEnd <= originalStart) {
+        console.warn('Invalid resize: End date must be after start date');
+        info.revert();
+        return;
+      }
+      
+      console.log('Resizing travel:', {
+        id: info.event.id,
+        originalStart: originalStart.toISOString(),
+        newEnd: newEnd.toISOString()
+      });
+      
+      const response = await fetch(`/api/travel/${info.event.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          exit_date: newEnd.toISOString()
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.json();
+        console.error('Server response:', errorText);
+        throw new Error(`Failed to update travel end date: ${JSON.stringify(errorText)}`);
+      }
+      
+      // Reload calendar data after successful update
+      await fetchTravelData();
+    } catch (error) {
+      console.error('Error updating travel end date during resize:', error);
       info.revert();
     }
   };
@@ -130,7 +223,9 @@ export default function TravelCalendar({ onDelete, onEdit }: Props) {
         select={handleDateSelect}
         eventClick={handleEventClick}
         editable={true}
+        eventDurationEditable={true}
         eventDrop={handleEventDrop}
+        eventResize={handleEventResize}
         height="100%"
         headerToolbar={{
           left: 'prev,next today',

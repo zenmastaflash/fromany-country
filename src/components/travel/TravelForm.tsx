@@ -98,7 +98,7 @@ export default function TravelForm({
         ? `/api/travel/${editTravel.id}` 
         : '/api/travel';
       
-      const method = editTravel ? 'PUT' : 'POST';
+      const method = editTravel ? 'PATCH' : 'POST';
       
       const response = await fetch(url, {
         method,

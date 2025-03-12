@@ -1,4 +1,4 @@
-// src/components/travel/TravelCalendar.tsx - FINAL CORRECTED VERSION
+// src/components/travel/TravelCalendar.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -128,6 +128,19 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         newEnd = new Date(originalEnd);
         newEnd.setDate(newEnd.getDate() + daysDifference);
       }
+
+      // Validate that newEnd is not before newStart
+      if (newEnd && newEnd < newStart) {
+        throw new Error('End date cannot be before start date');
+      }
+
+      // If start and end dates are the same, add one day to end date
+      if (newEnd && 
+          newEnd.getFullYear() === newStart.getFullYear() &&
+          newEnd.getMonth() === newStart.getMonth() &&
+          newEnd.getDate() === newStart.getDate()) {
+        newEnd.setDate(newEnd.getDate() + 1);
+      }
       
       console.log('Updating travel after drag:', {
         id: info.event.id,
@@ -163,9 +176,22 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
   
   const handleEventResize = async (info: any) => {
     try {
+      const newStart = new Date(info.event.start);
       const newEnd = new Date(info.event.end);
       // FullCalendar uses exclusive end dates, so subtract one day for the actual end date
       newEnd.setDate(newEnd.getDate() - 1);
+
+      // Validate that newEnd is not before newStart
+      if (newEnd < newStart) {
+        throw new Error('End date cannot be before start date');
+      }
+
+      // If start and end dates are the same, add one day to end date
+      if (newEnd.getFullYear() === newStart.getFullYear() &&
+          newEnd.getMonth() === newStart.getMonth() &&
+          newEnd.getDate() === newStart.getDate()) {
+        newEnd.setDate(newEnd.getDate() + 1);
+      }
       
       console.log('Resizing travel:', {
         id: info.event.id,

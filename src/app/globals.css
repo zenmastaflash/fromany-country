@@ -56,19 +56,49 @@
   --color-link: #AFDDE5;
 }
 
-/* Larger resize handles for FullCalendar */
-.fc-h-event .fc-event-resizer {
-  display: block !important;
-  width: 8px !important;
-  height: 16px !important;
-  background: white !important;
-  opacity: 0.8 !important;
-  border: 1px solid #333 !important;
+/* Make resize handles clearly visible */
+.fc-event-main {
+  position: relative;
 }
 
+/* Right resize handle (end date) */
+.fc-h-event .fc-event-resizer-end {
+  width: 10px !important;
+  height: 100% !important;
+  right: -5px !important;
+  top: 0 !important;
+  background-color: white !important;
+  opacity: 0.7 !important;
+  cursor: e-resize !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* Left resize handle (start date) */
+.fc-h-event .fc-event-resizer-start {
+  width: 10px !important;
+  height: 100% !important;
+  left: -5px !important;
+  top: 0 !important;
+  background-color: white !important;
+  opacity: 0.7 !important;
+  cursor: w-resize !important;
+  border-radius: 4px 0 0 4px !important;
+}
+
+/* Hover effect for resize handles */
 .fc-h-event .fc-event-resizer:hover {
-  background: #AFDDE5 !important;
+  opacity: 1 !important;
+  background-color: #AFDDE5 !important;
 }
 
-.fc-direction-ltr .fc-h-event .fc-event-resizer-start { left: -4px !important; }
-.fc-direction-ltr .fc-h-event .fc-event-resizer-end { right: -4px !important; }
+/* Make events look more interactive */
+.fc-h-event {
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  margin: 1px 0 !important;
+}
+
+.fc-h-event:hover {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5) !important;
+}

@@ -138,8 +138,14 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
       
       if (info.event.end) {
         newEnd = new Date(info.event.end);
+        // Subtract one day for proper end date handling
         newEnd.setDate(newEnd.getDate() - 1);
       }
+      
+      console.log('Resizing travel:', {
+        id: info.event.id,
+        newEnd: newEnd?.toISOString() ?? null
+      });
       
       const response = await fetch(`/api/travel/${info.event.id}`, {
         method: 'PATCH',
@@ -149,8 +155,13 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         })
       });
       
-      if (!response.ok) throw new Error('Failed to update travel end date');
-      fetchTravelData();
+      if (!response.ok) {
+        console.error('Server response:', await response.text());
+        throw new Error('Failed to update travel end date');
+      }
+      
+      // Refresh calendar data after successful update
+      await fetchTravelData();
     } catch (error) {
       console.error('Error updating travel end date:', error);
       info.revert();

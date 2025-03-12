@@ -15,17 +15,44 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json() as TravelCreateInput;
-    const travel = await prisma.travel.create({
-      data: {
-        user_id: session.user.id,
-        ...data
-      },
-    });
-
-    return NextResponse.json(travel);
+    
+    // Validate dates
+    const entryDate = new Date(data.entry_date);
+    const exitDate = data.exit_date ? new Date(data.exit_date) : null;
+    
+    // Check if exit_date is before or same as entry_date
+    if (exitDate && exitDate <= entryDate) {
+      return NextResponse.json(
+        { error: "Exit date must be after entry date" },
+        { status: 400 }
+      );
+    }
+    
+    try {
+      const travel = await prisma.travel.create({
+        data: {
+          user_id: session.user.id,
+          ...data
+        },
+      });
+      
+      return NextResponse.json(travel);
+    } catch (prismaError: any) {
+      console.error('Prisma error:', prismaError);
+      
+      // Check for constraint violation
+      if (prismaError.message?.includes('valid_dates')) {
+        return NextResponse.json(
+          { error: "Exit date must be after entry date" },
+          { status: 400 }
+        );
+      }
+      
+      throw prismaError;
+    }
   } catch (error) {
     console.error('Error in POST /api/travel:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }
 

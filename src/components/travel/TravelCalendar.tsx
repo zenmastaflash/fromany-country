@@ -107,13 +107,36 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
 
   const handleEventDrop = async (info: any) => {
     try {
+      // Get the original start and end dates
+      const originalStart = new Date(info.oldEvent.start);
+      const originalEnd = info.oldEvent.end ? new Date(info.oldEvent.end) : null;
+      
+      // Get the new start and end dates after drag
       const newStart = new Date(info.event.start);
       let newEnd = null;
       
+      // Calculate the difference in days between old and new start dates
+      const daysDifference = Math.floor((newStart.getTime() - originalStart.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // If there was an original end date, apply the same day difference
       if (info.event.end) {
         newEnd = new Date(info.event.end);
+        // FullCalendar uses exclusive end dates - subtract one day
         newEnd.setDate(newEnd.getDate() - 1);
+      } else if (originalEnd) {
+        // Calculate new end date based on the day difference
+        newEnd = new Date(originalEnd);
+        newEnd.setDate(newEnd.getDate() + daysDifference);
       }
+      
+      console.log('Updating travel after drag:', {
+        id: info.event.id,
+        originalStart: originalStart.toISOString(),
+        originalEnd: originalEnd?.toISOString() ?? null,
+        newStart: newStart.toISOString(),
+        newEnd: newEnd?.toISOString() ?? null,
+        daysDifference
+      });
       
       const response = await fetch(`/api/travel/${info.event.id}`, {
         method: 'PATCH',
@@ -124,46 +147,50 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         })
       });
       
-      if (!response.ok) throw new Error('Failed to update travel');
-      fetchTravelData();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(`Failed to update travel: ${errorText}`);
+      }
+      
+      // Refresh data after successful update
+      await fetchTravelData();
     } catch (error) {
-      console.error('Error updating travel:', error);
+      console.error('Error updating travel after drag:', error);
       info.revert();
     }
   };
   
   const handleEventResize = async (info: any) => {
     try {
-      let newEnd = null;
-      
-      if (info.event.end) {
-        newEnd = new Date(info.event.end);
-        // Subtract one day for proper end date handling
-        newEnd.setDate(newEnd.getDate() - 1);
-      }
+      const newEnd = new Date(info.event.end);
+      // FullCalendar uses exclusive end dates, so subtract one day for the actual end date
+      newEnd.setDate(newEnd.getDate() - 1);
       
       console.log('Resizing travel:', {
         id: info.event.id,
-        newEnd: newEnd?.toISOString() ?? null
+        oldEnd: info.oldEvent.end ? new Date(info.oldEvent.end).toISOString() : null,
+        newEnd: newEnd.toISOString()
       });
       
       const response = await fetch(`/api/travel/${info.event.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          exit_date: newEnd?.toISOString() ?? null
+          exit_date: newEnd.toISOString()
         })
       });
       
       if (!response.ok) {
-        console.error('Server response:', await response.text());
-        throw new Error('Failed to update travel end date');
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(`Failed to update travel end date: ${errorText}`);
       }
       
-      // Refresh calendar data after successful update
+      // Reload calendar data after successful update
       await fetchTravelData();
     } catch (error) {
-      console.error('Error updating travel end date:', error);
+      console.error('Error updating travel end date during resize:', error);
       info.revert();
     }
   };

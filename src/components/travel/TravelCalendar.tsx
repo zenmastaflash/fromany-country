@@ -99,12 +99,33 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
   };
 
   const handleEventClick = (info: any) => {
+    // Get the start date
+    const startDate = new Date(info.event.start);
+    
+    // Get the end date - for all-day events, the end date is exclusive
+    // (i.e., the end date is the day after the last day of the event)
+    let endDate = null;
+    if (info.event.end) {
+      endDate = new Date(info.event.end);
+      // Subtract one day to get the actual last day of the event
+      endDate.setDate(endDate.getDate() - 1);
+    }
+    
+    console.log('Event clicked:', {
+      id: info.event.id,
+      title: info.event.title,
+      startDisplay: startDate.toLocaleDateString(),
+      endDisplay: endDate?.toLocaleDateString(),
+      eventStart: info.event.start,
+      eventEnd: info.event.end
+    });
+    
     const travel: Travel = {
       id: info.event.id,
       country: info.event.extendedProps.country,
       city: info.event.extendedProps.city,
-      entry_date: new Date(info.event.start),
-      exit_date: info.event.end ? new Date(info.event.end) : null,
+      entry_date: startDate,
+      exit_date: endDate,
       purpose: info.event.extendedProps.purpose,
       notes: info.event.extendedProps.notes || null,
       user_id: '',
@@ -113,6 +134,7 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
       created_at: new Date(),
       updated_at: new Date()
     };
+    
     onEdit?.(travel);
   };
 
@@ -180,43 +202,74 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
   
   const handleEventResize = async (info: any) => {
     try {
-      const originalStart = new Date(info.event.start);
-      const newEnd = new Date(info.event.end);
+      // Determine if this was a start resize or end resize
+      const oldStart = new Date(info.oldEvent.start);
+      const newStart = new Date(info.event.start);
+      const oldEnd = info.oldEvent.end ? new Date(info.oldEvent.end) : null;
+      const newEnd = info.event.end ? new Date(info.event.end) : null;
       
-      // FullCalendar uses exclusive end dates, subtract one day for display
-      newEnd.setDate(newEnd.getDate() - 1);
+      // Check which date has changed (start or end)
+      const startChanged = oldStart.getTime() !== newStart.getTime();
+      const endChanged = (oldEnd?.getTime() || 0) !== (newEnd?.getTime() || 0);
       
-      // Ensure the end date is after the start date
-      if (newEnd <= originalStart) {
+      // Process end date for display vs storage
+      let adjustedEndDate = null;
+      if (newEnd) {
+        adjustedEndDate = new Date(newEnd);
+        // FullCalendar uses exclusive end dates, subtract one day for storage
+        adjustedEndDate.setDate(adjustedEndDate.getDate() - 1);
+      }
+      
+      console.log('Resizing travel:', {
+        id: info.event.id,
+        startChanged,
+        endChanged,
+        oldStart: oldStart.toISOString(),
+        newStart: newStart.toISOString(),
+        oldEnd: oldEnd?.toISOString(),
+        newEnd: newEnd?.toISOString(),
+        adjustedEndDate: adjustedEndDate?.toISOString()
+      });
+      
+      // Prepare update data based on what changed
+      const updateData: any = {};
+      
+      if (startChanged) {
+        updateData.entry_date = newStart.toISOString();
+      }
+      
+      if (endChanged && adjustedEndDate) {
+        updateData.exit_date = adjustedEndDate.toISOString();
+      }
+      
+      // If nothing changed, exit early
+      if (Object.keys(updateData).length === 0) {
+        return;
+      }
+      
+      // Ensure dates are valid (end date after start date)
+      if (adjustedEndDate && adjustedEndDate <= newStart) {
         console.warn('Invalid resize: End date must be after start date');
         info.revert();
         return;
       }
       
-      console.log('Resizing travel:', {
-        id: info.event.id,
-        originalStart: originalStart.toISOString(),
-        newEnd: newEnd.toISOString()
-      });
-      
       const response = await fetch(`/api/travel/${info.event.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          exit_date: newEnd.toISOString()
-        })
+        body: JSON.stringify(updateData)
       });
       
       if (!response.ok) {
         const errorText = await response.json();
         console.error('Server response:', errorText);
-        throw new Error(`Failed to update travel end date: ${JSON.stringify(errorText)}`);
+        throw new Error(`Failed to update travel: ${JSON.stringify(errorText)}`);
       }
       
       // Reload calendar data after successful update
       await fetchTravelData();
     } catch (error) {
-      console.error('Error updating travel end date during resize:', error);
+      console.error('Error updating travel during resize:', error);
       info.revert();
     }
   };

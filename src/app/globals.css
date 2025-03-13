@@ -91,14 +91,17 @@
   background-color: #AFDDE5 !important;
 }
 
-/* Make events look more interactive */
+/* Make events have a visible outline at all times */
 .fc-h-event {
-  border: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important; /* Add permanent light border */
   border-radius: 4px !important;
   cursor: pointer !important;
   margin: 1px 0 !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) !important; /* Subtle shadow for depth */
 }
 
+/* Enhanced hover effect */
 .fc-h-event:hover {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
 }

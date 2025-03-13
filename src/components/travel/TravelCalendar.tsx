@@ -49,6 +49,7 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         end: travel.exit_date ?? undefined,
         backgroundColor: getPurposeColor(travel.purpose),
         textColor: '#fcfbdc',
+        allDay: true, // Explicitly mark as all-day events
         extendedProps: {
           country: travel.country,
           city: travel.city,
@@ -229,6 +230,17 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
         eventDrop={handleEventDrop}
         eventResize={handleEventResize}
         height="100%"
+        allDaySlot={true}
+        slotEventOverlap={false}
+        fixedWeekCount={false}
+        views={{
+          dayGrid: {
+            eventResizableFromStart: true
+          },
+          timeGrid: {
+            eventResizableFromStart: true
+          }
+        }}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',

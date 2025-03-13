@@ -42,21 +42,31 @@ export default function TravelCalendar({ onDelete, onEdit, onSelect }: Props) {
       if (!response.ok) throw new Error('Failed to fetch travel data');
       
       const data: Travel[] = await response.json();
-      const calendarEvents = data.map(travel => ({
-        id: travel.id,
-        title: `${travel.city}, ${travel.country}`,
-        start: travel.entry_date,
-        end: travel.exit_date ?? undefined,
-        backgroundColor: getPurposeColor(travel.purpose),
-        textColor: '#fcfbdc',
-        allDay: true, // Explicitly mark as all-day events
-        extendedProps: {
-          country: travel.country,
-          city: travel.city,
-          purpose: travel.purpose,
-          notes: travel.notes
+      const calendarEvents = data.map(travel => {
+        // Prepare end date for FullCalendar's exclusive end date model
+        let endDate = travel.exit_date ? new Date(travel.exit_date) : undefined;
+        if (endDate) {
+          // Add one day to the end date for proper display
+          endDate = new Date(endDate);
+          endDate.setDate(endDate.getDate() + 1);
         }
-      }));
+        
+        return {
+          id: travel.id,
+          title: `${travel.city}, ${travel.country}`,
+          start: travel.entry_date,
+          end: endDate,
+          backgroundColor: getPurposeColor(travel.purpose),
+          textColor: '#fcfbdc',
+          allDay: true,
+          extendedProps: {
+            country: travel.country,
+            city: travel.city,
+            purpose: travel.purpose,
+            notes: travel.notes
+          }
+        };
+      });
       
       setEvents(calendarEvents);
     } catch (error) {

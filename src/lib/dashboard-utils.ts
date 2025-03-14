@@ -41,9 +41,11 @@ export function generateComplianceAlerts(
   // Process current travels
   travels.forEach(travel => {
     if (!travel.exit_date || travel.exit_date > now) {
-      // Check if there's a valid visa document for this stay
-      const visaDoc = documents.find(doc => 
-        (doc.type === DocumentType.VISA || doc.type === DocumentType.TOURIST_VISA) &&
+      // Check if there's a valid visa or residency permit document for this stay
+      const validDoc = documents.find(doc => 
+        (doc.type === DocumentType.VISA || 
+         doc.type === DocumentType.TOURIST_VISA || 
+         doc.type === DocumentType.RESIDENCY_PERMIT) &&
         doc.issuingCountry === travel.country &&
         doc.status === 'active' &&
         (!doc.expiryDate || doc.expiryDate > now)
@@ -53,7 +55,7 @@ export function generateComplianceAlerts(
       const daysInCountry = Math.ceil((now.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
 
       // Alert if no visa and approaching 90 days
-      if (!visaDoc && daysInCountry >= 60) {
+      if (!validDoc && daysInCountry >= 60) {
         alerts.push({
           type: 'visa',
           title: 'Visa-Free Stay Limit Approaching',
